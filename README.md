@@ -28,4 +28,4 @@ Este projeto foi desenvolvido como requisito prático para a disciplina de **Int
 
 1. **Clone o repositório:**
    ```bash
-   git clone [https://github.com/SEU-USUARIO/GameVault.git](https://github.com/SEU-USUARIO/GameVault.git)
+   git clone https://github.com/Francisco1Luna/GameVault.git
