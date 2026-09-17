@@ -18,7 +18,6 @@ Este projeto foi desenvolvido como requisito prático para a disciplina de **Int
 ## 🛠️ Tecnologias Utilizadas
 
 - **Linguagem:** Java
-- **IDE:** IntelliJ IDEA
 - **Controle de Versão:** Git & GitHub
 - **Integração:** Consumo de API REST pública de catálogo de jogos
 
@@ -28,4 +27,4 @@ Este projeto foi desenvolvido como requisito prático para a disciplina de **Int
 
 1. **Clone o repositório:**
    ```bash
-   git clone https://github.com/Francisco1Luna/GameVault.git
+   git clone [https://github.com/Francisco1Luna/GameVault.git](https://github.com/Francisco1Luna/GameVault.git)
