@@ -1,101 +1,93 @@
 package model;
+
 import java.time.LocalDate;
+
 import ENUMS.StatusAluguel;
 
 public class Aluguel {
+
   private Long id;
+  private Cliente cliente;
   private Jogo jogo;
   private Plataforma plataforma;
   private LocalDate dataInicio;
-  private StatusAluguel statusAluguel;
-  private LocalDate dataDevolucaoEfetiva;
   private LocalDate dataDevolucaoPrevista;
-  private Cliente cliente;
+  private LocalDate dataDevolucaoEfetiva;
+  private StatusAluguel status;
 
-  public Aluguel(Long id, Jogo jogo, Plataforma plataforma, LocalDate dataInicio, StatusAluguel statusAluguel,
-      LocalDate dataDevolucaoEfetiva, LocalDate dataDevolucaoPrevista, Cliente cliente) {
+  public Aluguel(Long id, Cliente cliente, Jogo jogo, Plataforma plataforma, LocalDate dataInicio,
+      LocalDate dataDevolucaoPrevista, LocalDate dataDevolucaoEfetiva, StatusAluguel status) {
     this.id = id;
+    this.cliente = cliente;
     this.jogo = jogo;
     this.plataforma = plataforma;
     this.dataInicio = dataInicio;
-    this.statusAluguel = statusAluguel;
-    this.dataDevolucaoEfetiva = dataDevolucaoEfetiva;
     this.dataDevolucaoPrevista = dataDevolucaoPrevista;
-    this.cliente = cliente;
+    this.dataDevolucaoEfetiva = dataDevolucaoEfetiva;
+    this.status = status;
   }
 
   public Long getId() {
     return id;
   }
 
-  public Jogo getJogo() {
-    return jogo;
-  }
-
-  public Plataforma getPlataforma() {
-    return plataforma;
-  }
-
-  public LocalDate getDataInicio() {
-    return dataInicio;
-  }
-
-  public StatusAluguel getStatusAluguel() {
-    return statusAluguel;
-  }
-
-  public LocalDate getDataDevolucaoEfetiva() {
-    return dataDevolucaoEfetiva;
-  }
-
-  public LocalDate getDataDevolucaoPrevista() {
-    return dataDevolucaoPrevista;
+  public void setId(Long id) {
+    this.id = id;
   }
 
   public Cliente getCliente() {
     return cliente;
   }
 
-  public int getDiasAtraso() {
-    if (dataDevolucaoEfetiva != null && dataDevolucaoPrevista != null) {
-      return (int) java.time.temporal.ChronoUnit.DAYS.between(dataDevolucaoPrevista, dataDevolucaoEfetiva);
-    }
-    return 0;
+  public void setCliente(Cliente cliente) {
+    this.cliente = cliente;
   }
 
-  public void setId(Long id) {
-    this.id = id;
+  public Jogo getJogo() {
+    return jogo;
   }
 
   public void setJogo(Jogo jogo) {
     this.jogo = jogo;
   }
 
+  public Plataforma getPlataforma() {
+    return plataforma;
+  }
+
   public void setPlataforma(Plataforma plataforma) {
     this.plataforma = plataforma;
+  }
+
+  public LocalDate getDataInicio() {
+    return dataInicio;
   }
 
   public void setDataInicio(LocalDate dataInicio) {
     this.dataInicio = dataInicio;
   }
 
-  public void setStatusAluguel(StatusAluguel statusAluguel) {
-    this.statusAluguel = statusAluguel;
-  }
-
-  public void setDataDevolucaoEfetiva(LocalDate dataDevolucaoEfetiva) {
-    this.dataDevolucaoEfetiva = dataDevolucaoEfetiva;
+  public LocalDate getDataDevolucaoPrevista() {
+    return dataDevolucaoPrevista;
   }
 
   public void setDataDevolucaoPrevista(LocalDate dataDevolucaoPrevista) {
     this.dataDevolucaoPrevista = dataDevolucaoPrevista;
   }
 
-  public void setCliente(Cliente cliente) {
-    this.cliente = cliente;
+  public LocalDate getDataDevolucaoEfetiva() {
+    return dataDevolucaoEfetiva;
   }
 
+  public void setDataDevolucaoEfetiva(LocalDate dataDevolucaoEfetiva) {
+    this.dataDevolucaoEfetiva = dataDevolucaoEfetiva;
+  }
 
+  public StatusAluguel getStatus() {
+    return status;
+  }
 
-
+  public void setStatus(StatusAluguel status) {
+    this.status = status;
+  }
 }

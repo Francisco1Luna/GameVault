@@ -11,18 +11,9 @@ public class ClienteAssinante extends Cliente {
 
   public ClienteAssinante(Long id, String nome, String cpf, LocalDate dataNascimento, String email, String telefone,
       double percentualDesconto, LocalDate dataAdesao) {
-    super(id, nome, cpf, dataNascimento, email, telefone);
+    super(id, nome, cpf, dataNascimento, email, telefone, LIMITE_ALUGUEL_SIMULTANEO);
     this.percentualDesconto = percentualDesconto;
     this.dataAdesao = dataAdesao;
-  }
-  
-  public int getLimiteAluguelSimultaneo() {
-    return LIMITE_ALUGUEL_SIMULTANEO;
-  }
-
-  @Override
-  public double aplicarDesconto(double valorBruto) {
-    return valorBruto * (1 - percentualDesconto);
   }
 
   public double getPercentualDesconto() {
@@ -35,5 +26,9 @@ public class ClienteAssinante extends Cliente {
 
   public LocalDate getDataAdesao() {
     return dataAdesao;
+  }
+
+  public void setDataAdesao(LocalDate dataAdesao) {
+    this.dataAdesao = dataAdesao;
   }
 }

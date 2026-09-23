@@ -1,9 +1,10 @@
 package model;
 
 public class Plataforma {
-  Long id;
-  String nome;
-  String fabricante;
+
+  private Long id;
+  private String nome;
+  private String fabricante;
 
   public Plataforma(Long id, String nome, String fabricante) {
     this.id = id;
@@ -15,20 +16,20 @@ public class Plataforma {
     return id;
   }
 
-  public String getNome() {
-    return nome;
-  }
-
-  public String getFabricante() {
-    return fabricante;
-  }
-
   public void setId(Long id) {
     this.id = id;
   }
 
+  public String getNome() {
+    return nome;
+  }
+
   public void setNome(String nome) {
     this.nome = nome;
+  }
+
+  public String getFabricante() {
+    return fabricante;
   }
 
   public void setFabricante(String fabricante) {

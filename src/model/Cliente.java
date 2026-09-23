@@ -1,7 +1,6 @@
 package model;
 
 import java.time.LocalDate;
-import java.time.Period;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -13,57 +12,19 @@ public abstract class Cliente {
   private LocalDate dataNascimento;
   private String email;
   private String telefone;
+  private int limiteAluguelSimultaneo;
   private List<Aluguel> alugueisAtivos = new ArrayList<>();
   private List<Penalidade> penalidades = new ArrayList<>();
 
-  public Cliente(Long id, String nome, String cpf, LocalDate dataNascimento, String email, String telefone) {
+  public Cliente(Long id, String nome, String cpf, LocalDate dataNascimento, String email, String telefone,
+      int limiteAluguelSimultaneo) {
     this.id = id;
     this.nome = nome;
     this.cpf = cpf;
     this.dataNascimento = dataNascimento;
     this.email = email;
     this.telefone = telefone;
-  }
-
-  // Cada subclasse (ClientePadrao, ClienteAssinante) define seu próprio limite
-  // de aluguéis simultâneos e sua própria regra de desconto em vendas.
-  public abstract int getLimiteAluguelSimultaneo();
-
-  public abstract double aplicarDesconto(double valorBruto);
-
-  public int getIdade() {
-    return Period.between(dataNascimento, LocalDate.now()).getYears();
-  }
-
-  
-  public double getDebitoAcumulado() {
-    double total = 0.0;
-    for (Penalidade penalidade : penalidades) {
-      if (!penalidade.isPaga()) {
-        total += penalidade.getValor();
-      }
-    }
-    return total;
-  }
-
-  public boolean temPenalidadePendente() {
-    return getDebitoAcumulado() > 0;
-  }
-
-  public boolean podeAlugar() {
-    return alugueisAtivos.size() < getLimiteAluguelSimultaneo();
-  }
-
-  public void adicionarAluguelAtivo(Aluguel aluguel) {
-    alugueisAtivos.add(aluguel);
-  }
-
-  public void removerAluguelAtivo(Aluguel aluguel) {
-    alugueisAtivos.remove(aluguel);
-  }
-
-  public void adicionarPenalidade(Penalidade penalidade) {
-    penalidades.add(penalidade);
+    this.limiteAluguelSimultaneo = limiteAluguelSimultaneo;
   }
 
   public Long getId() {
@@ -114,16 +75,27 @@ public abstract class Cliente {
     this.telefone = telefone;
   }
 
-  /**
-   * Retorna a lista de aluguéis ativos do cliente.
-   * @return Lista de aluguéis ativos.
-   */
-  
+  public int getLimiteAluguelSimultaneo() {
+    return limiteAluguelSimultaneo;
+  }
+
+  public void setLimiteAluguelSimultaneo(int limiteAluguelSimultaneo) {
+    this.limiteAluguelSimultaneo = limiteAluguelSimultaneo;
+  }
+
   public List<Aluguel> getAlugueisAtivos() {
     return alugueisAtivos;
   }
 
+  public void setAlugueisAtivos(List<Aluguel> alugueisAtivos) {
+    this.alugueisAtivos = alugueisAtivos;
+  }
+
   public List<Penalidade> getPenalidades() {
     return penalidades;
+  }
+
+  public void setPenalidades(List<Penalidade> penalidades) {
+    this.penalidades = penalidades;
   }
 }
