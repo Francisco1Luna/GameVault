@@ -7,6 +7,9 @@
 * Francisco Luna de Moraes - francisco.luna@ufrpe.br
 * Matheus José Mendonça de Lima Vasconcelos - matheus.mendonca@ufrpe.br
 
+## Diagrama de Classes UML
+![Diagrama UML](diagramaUml.png)
+
 ## Descrição
 
 Sistema para gestão de uma locadora/loja de jogos eletrônicos, controlando catálogo de jogos, plataformas suportadas, clientes e operações de locação e venda. O sistema deve respeitar classificação indicativa dos jogos em relação à idade dos clientes e controlar limites de locações simultâneas conforme o plano do cliente.
