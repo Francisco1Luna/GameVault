@@ -1,6 +1,7 @@
 package br.ufrpe.gamevault.negocio.beans;
 
 import java.time.LocalDate;
+import java.time.Period;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -97,5 +98,10 @@ public abstract class Cliente {
 
   public void setPenalidades(List<Penalidade> penalidades) {
     this.penalidades = penalidades;
+  }
+
+  public int getIdade(){
+    LocalDate dataAtual = LocalDate.now();
+    return Period.between(dataNascimento, dataAtual).getYears();
   }
 }
