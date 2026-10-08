@@ -53,13 +53,13 @@ public class FinanceiroService {
       }
       fim = dataReferencia;
     }
-    return Math.max(0, ChronoUnit.DAYS.between(aluguel.getDataDevolucaoPrevista(), fim));
+    return Math.max(0, ChronoUnit.DAYS.between(aluguel.getDataDevolucaoPrevista(), fim)); // pega o valor dos dias
   }
 
   /** Multa = dias de atraso x multa diária, arredondada para centavos. */
   public double calcularMulta(Aluguel aluguel, LocalDate dataReferencia) {
-    double valor = calcularDiasDeAtraso(aluguel, dataReferencia) * multaDiaria;
-    return Math.round(valor * 100.0) / 100.0;
+    double valor = calcularDiasDeAtraso(aluguel, dataReferencia) * multaDiaria; //chama a funcao calcularDiaDeAtraso e multiplica pela multa
+    return Math.round(valor * 100.0) / 100.0; //arredonda pra 2 casas decimais
   }
 
   /**
@@ -82,7 +82,7 @@ public class FinanceiroService {
     repositorioPenalidades.salvar(penalidade);
     Cliente cliente = aluguel.getCliente();
     if (cliente != null && cliente.getPenalidades() != null) {
-      cliente.getPenalidades().add(penalidade);
+      cliente.getPenalidades().add(penalidade); //adiciona a penalidade ao cliente
     }
     return Optional.of(penalidade);
   }
@@ -115,13 +115,13 @@ public class FinanceiroService {
   }
 
   //apoio
-
+  // o cliente nao pode ser nulo
   private static void exigirCliente(Cliente cliente) {
     if (cliente == null) {
       throw new IllegalArgumentException("O cliente é obrigatório.");
     }
   }
-
+  //o aluguel nao pode ser nulo
   private static void exigirAluguelComPrazo(Aluguel aluguel) {
     if (aluguel == null) {
       throw new IllegalArgumentException("O aluguel é obrigatório.");
