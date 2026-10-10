@@ -1,0 +1,28 @@
+# Compilação e Build
+.build/
+out/
+bin/
+*.class
+
+# Configurações do IntelliJ IDEA
+.idea/
+*.iml
+
+# Configurações do Eclipse
+.classpath
+.project
+.settings/
+
+# Configurações do NetBeans
+nbproject/private/
+build/
+nbbuild/
+dist/
+
+# Ficheiros do Sistema Operativo
+.DS_Store
+Thumbs.db
+
+# Logs e Ficheiros Temporários
+*.log
+*.tmp
