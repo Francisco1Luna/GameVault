@@ -14,8 +14,7 @@ public abstract class Cliente {
   private String email;
   private String telefone;
   private int limiteAluguelSimultaneo;
-  private List<Aluguel> alugueisAtivos = new ArrayList<>();
-  private List<Penalidade> penalidades = new ArrayList<>();
+  private List<Aluguel> alugueis = new ArrayList<>();
 
   public Cliente(Long id, String nome, String cpf, LocalDate dataNascimento, String email, String telefone,
       int limiteAluguelSimultaneo) {
@@ -84,20 +83,12 @@ public abstract class Cliente {
     this.limiteAluguelSimultaneo = limiteAluguelSimultaneo;
   }
 
-  public List<Aluguel> getAlugueisAtivos() {
-    return alugueisAtivos;
+  public List<Aluguel> getAlugueis() {
+    return alugueis;
   }
 
-  public void setAlugueisAtivos(List<Aluguel> alugueisAtivos) {
-    this.alugueisAtivos = alugueisAtivos;
-  }
-
-  public List<Penalidade> getPenalidades() {
-    return penalidades;
-  }
-
-  public void setPenalidades(List<Penalidade> penalidades) {
-    this.penalidades = penalidades;
+  public void setAlugueis(List<Aluguel> alugueis) {
+    this.alugueis = alugueis;
   }
 
   public int getIdade(){
