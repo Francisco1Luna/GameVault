@@ -81,7 +81,10 @@ public class FinanceiroService {
     Penalidade penalidade = new Penalidade(null, aluguel, valor, aluguel.getDataDevolucaoEfetiva(), false, null);
     repositorioPenalidades.salvar(penalidade);
     Cliente cliente = aluguel.getCliente();
-    if (cliente != null && cliente.getPenalidades() != null) {
+    if (cliente != null) {
+      if (cliente.getPenalidades() == null) {
+        cliente.setPenalidades(new ArrayList<>());
+      }
       cliente.getPenalidades().add(penalidade);
     }
     return Optional.of(penalidade);
