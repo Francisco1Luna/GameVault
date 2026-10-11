@@ -6,7 +6,7 @@ import java.util.Map;
 
 import dados.IRepositorioJogos;
 import model.Jogo;
-import model.enums.Plataforma;
+import model.Plataforma;
 
 /**
  * REQ06 - controlar exemplares/licenças disponíveis por jogo e plataforma.

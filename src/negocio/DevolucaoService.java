@@ -2,9 +2,8 @@ package negocio;
 
 import java.time.LocalDate;
 
-import dados.RepositorioPenalidadesLista;
+import dados.IRepositorioAlugueis;
 import model.Aluguel;
-import model.Cliente;
 import model.enums.StatusAluguel;
 import negocio.excecoes.ValidacaoException;
 
@@ -14,20 +13,26 @@ import negocio.excecoes.ValidacaoException;
 public class DevolucaoService {
 
   private final EstoqueService estoqueService;
+  private final IRepositorioAlugueis repositorioAlugueis;
   private final FinanceiroService financeiroService;
 
-  public DevolucaoService(EstoqueService estoqueService) {
-    this(estoqueService, new FinanceiroService(new RepositorioPenalidadesLista()));
+  public DevolucaoService(EstoqueService estoqueService, IRepositorioAlugueis repositorioAlugueis) {
+    this(estoqueService, repositorioAlugueis, new FinanceiroService());
   }
 
-  public DevolucaoService(EstoqueService estoqueService, FinanceiroService financeiroService) {
+  public DevolucaoService(EstoqueService estoqueService, IRepositorioAlugueis repositorioAlugueis,
+      FinanceiroService financeiroService) {
     if (estoqueService == null) {
       throw new IllegalArgumentException("O serviço de estoque é obrigatório.");
+    }
+    if (repositorioAlugueis == null) {
+      throw new IllegalArgumentException("O repositório de aluguéis é obrigatório.");
     }
     if (financeiroService == null) {
       throw new IllegalArgumentException("O serviço financeiro é obrigatório.");
     }
     this.estoqueService = estoqueService;
+    this.repositorioAlugueis = repositorioAlugueis;
     this.financeiroService = financeiroService;
   }
 
@@ -43,6 +48,9 @@ public class DevolucaoService {
         || aluguel.getDataDevolucaoEfetiva() != null) {
       throw new ValidacaoException("A locação já foi finalizada.");
     }
+    if (aluguel.getId() == null || repositorioAlugueis.buscarPorId(aluguel.getId()).isEmpty()) {
+      throw new IllegalArgumentException("O aluguel não está cadastrado.");
+    }
 
     long diasDeAtraso = financeiroService.calcularDiasDeAtraso(aluguel, dataDevolucao);
     estoqueService.adicionarExemplares(aluguel.getJogo(), aluguel.getPlataforma(), 1);
@@ -51,10 +59,6 @@ public class DevolucaoService {
     if (diasDeAtraso > 0) {
       financeiroService.registrarMulta(aluguel);
     }
-
-    Cliente cliente = aluguel.getCliente();
-    if (cliente != null && cliente.getAlugueisAtivos() != null) {
-      cliente.getAlugueisAtivos().remove(aluguel);
-    }
+    repositorioAlugueis.atualizar(aluguel);
   }
 }

@@ -11,9 +11,11 @@ import java.util.List;
 public class ValidadorMulta implements IValidadorLocacao {
     @Override
     public void validar(Cliente cliente, Jogo jogo, List<Aluguel> alugueisAtivos) throws ValidacaoException {
-        if (cliente.getPenalidades() != null) {
-            for (Penalidade penalidade : cliente.getPenalidades()) {
-                if (!penalidade.isPaga()) {
+        // cliente -> aluguéis -> penalidade de cada aluguel
+        if (cliente.getAlugueis() != null) {
+            for (Aluguel aluguel : cliente.getAlugueis()) {
+                Penalidade penalidade = aluguel.getPenalidade();
+                if (penalidade != null && !penalidade.isPaga()) {
                     throw new ValidacaoException("Locação bloqueada: cliente possui multa pendente.");
                 }
             }

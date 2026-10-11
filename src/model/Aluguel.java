@@ -2,7 +2,6 @@ package model;
 
 import java.time.LocalDate;
 
-import model.enums.Plataforma;
 import model.enums.StatusAluguel;
 
 public class Aluguel {
@@ -15,6 +14,7 @@ public class Aluguel {
   private LocalDate dataDevolucaoPrevista;
   private LocalDate dataDevolucaoEfetiva;
   private StatusAluguel status;
+  private Penalidade penalidade;
 
   public Aluguel(Long id, Cliente cliente, Jogo jogo, Plataforma plataforma, LocalDate dataInicio,
       LocalDate dataDevolucaoPrevista, LocalDate dataDevolucaoEfetiva, StatusAluguel status) {
@@ -90,5 +90,13 @@ public class Aluguel {
 
   public void setStatus(StatusAluguel status) {
     this.status = status;
+  }
+
+  public Penalidade getPenalidade() {
+    return penalidade;
+  }
+
+  public void setPenalidade(Penalidade penalidade) {
+    this.penalidade = penalidade;
   }
 }

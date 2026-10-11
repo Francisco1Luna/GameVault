@@ -19,6 +19,11 @@ public class RepositorioJogosLista implements IRepositorioJogos {
     }
     if (jogo.getId() == null) {
       jogo.setId(proximoId++);
+    } else {
+      if (buscarPorId(jogo.getId()).isPresent()) {
+        throw new IllegalArgumentException("Já existe jogo com o id " + jogo.getId() + ".");
+      }
+      proximoId = Math.max(proximoId, jogo.getId() + 1); // evita gerar depois um id já usado
     }
     jogos.add(jogo);
     return jogo;

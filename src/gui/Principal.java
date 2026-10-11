@@ -3,7 +3,7 @@ package gui;
 import dados.RepositorioJogosLista;
 import negocio.EstoqueService;
 import model.Jogo;
-import model.enums.Plataforma;
+import model.Plataforma;
 
 import java.util.ArrayList;
 import java.util.Arrays;

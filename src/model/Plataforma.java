@@ -1,6 +1,4 @@
-package model.enums;
-
-import java.util.Objects;
+package model;
 
 public class Plataforma {
 
@@ -38,6 +36,10 @@ public class Plataforma {
     this.fabricante = fabricante;
   }
 
+  /**
+   * Duas plataformas são iguais quando são o mesmo objeto ou quando têm o mesmo id. Plataforma sem
+   * id só é igual a si mesma, e o hashCode segue a mesma regra, então equals e hashCode combinam.
+   */
   @Override
   public boolean equals(Object obj) {
     if (this == obj) {
@@ -47,17 +49,11 @@ public class Plataforma {
       return false;
     }
     Plataforma other = (Plataforma) obj;
-    if (id != null && other.id != null) {
-      return id.equals(other.id);
-    }
-    return Objects.equals(nome, other.nome) && Objects.equals(fabricante, other.fabricante);
+    return id != null && id.equals(other.id);
   }
 
   @Override
   public int hashCode() {
-    if (id != null) {
-      return Objects.hashCode(id);
-    }
-    return Objects.hash(nome, fabricante);
+    return id != null ? id.hashCode() : System.identityHashCode(this);
   }
 }

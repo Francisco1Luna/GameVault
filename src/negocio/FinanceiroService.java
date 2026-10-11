@@ -6,7 +6,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-import dados.IRepositorioPenalidades;
 import model.Aluguel;
 import model.Cliente;
 import model.Penalidade;
@@ -20,21 +19,16 @@ public class FinanceiroService {
   //Valor cobrado por dia de atraso quando nenhuma taxa é informada.
   public static final double MULTA_DIARIA_PADRAO = 5.00;
 
-  private final IRepositorioPenalidades repositorioPenalidades;
   private final double multaDiaria;
 
-  public FinanceiroService(IRepositorioPenalidades repositorioPenalidades) {
-    this(repositorioPenalidades, MULTA_DIARIA_PADRAO);
+  public FinanceiroService() {
+    this(MULTA_DIARIA_PADRAO);
   }
 
-  public FinanceiroService(IRepositorioPenalidades repositorioPenalidades, double multaDiaria) {
-    if (repositorioPenalidades == null) {
-      throw new IllegalArgumentException("O repositório de penalidades é obrigatório.");
-    }
+  public FinanceiroService(double multaDiaria) {
     if (multaDiaria < 0) {
       throw new IllegalArgumentException("A multa diária não pode ser negativa.");
     }
-    this.repositorioPenalidades = repositorioPenalidades;
     this.multaDiaria = multaDiaria;
   }
 
@@ -71,34 +65,31 @@ public class FinanceiroService {
     if (aluguel.getDataDevolucaoEfetiva() == null) {
       throw new IllegalStateException("A multa só pode ser registrada depois da devolução.");
     }
-    if (aluguel.getId() != null && repositorioPenalidades.buscarPorAluguel(aluguel.getId()).isPresent()) {
+    if (aluguel.getPenalidade() != null) {
       throw new IllegalStateException("Já existe multa registrada para este aluguel.");
     }
     double valor = calcularMulta(aluguel, null);
     if (valor <= 0) {
       return Optional.empty();
     }
-    Penalidade penalidade = new Penalidade(null, aluguel, valor, aluguel.getDataDevolucaoEfetiva(), false, null);
-    repositorioPenalidades.salvar(penalidade);
-    Cliente cliente = aluguel.getCliente();
-    if (cliente != null) {
-      if (cliente.getPenalidades() == null) {
-        cliente.setPenalidades(new ArrayList<>());
-      }
-      cliente.getPenalidades().add(penalidade);
-    }
+    // a penalidade é 1:1 com o aluguel, então reaproveita o id dele
+    Penalidade penalidade = new Penalidade(aluguel.getId(), aluguel, valor, aluguel.getDataDevolucaoEfetiva(), false, null);
+    aluguel.setPenalidade(penalidade); // a penalidade fica no aluguel, não no cliente
     return Optional.of(penalidade);
   }
 
   //  REQ13
 
-  /** Multas ainda não pagas do cliente. */
+  /** Multas ainda não pagas do cliente: percorre os aluguéis dele e pega a penalidade de cada um. */
   public List<Penalidade> consultarPendencias(Cliente cliente) {
     exigirCliente(cliente);
     List<Penalidade> pendentes = new ArrayList<>();
-    for (Penalidade p : repositorioPenalidades.listarPorCliente(cliente)) {
-      if (!p.isPaga()) {
-        pendentes.add(p);
+    if (cliente.getAlugueis() != null) {
+      for (Aluguel aluguel : cliente.getAlugueis()) {
+        Penalidade p = aluguel == null ? null : aluguel.getPenalidade();
+        if (p != null && !p.isPaga()) {
+          pendentes.add(p);
+        }
       }
     }
     return pendentes;
