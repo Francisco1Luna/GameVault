@@ -4,21 +4,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-import model.Cliente;
 import model.Venda;
 
-/** Repositório em memória: guarda as vendas em uma lista e gera os ids. */
+/** Repositório em memória: guarda as vendas em uma lista. */
 public class RepositorioVendasLista implements IRepositorioVendas {
-
-  // Singleton: uma única instância em memória, compartilhada por todos os services.
-  private static final RepositorioVendasLista INSTANCIA = new RepositorioVendasLista();
-
-  public static RepositorioVendasLista getInstance() {
-    return INSTANCIA;
-  }
-
-  private RepositorioVendasLista() {
-  }
 
   private final List<Venda> vendas = new ArrayList<>();
   private long proximoId = 1;
@@ -34,10 +23,24 @@ public class RepositorioVendasLista implements IRepositorioVendas {
       if (buscarPorId(venda.getId()).isPresent()) {
         throw new IllegalArgumentException("Já existe venda com o id " + venda.getId() + ".");
       }
-      proximoId = Math.max(proximoId, venda.getId() + 1); // evita gerar depois um id já usado
+      proximoId = Math.max(proximoId, venda.getId() + 1);
     }
     vendas.add(venda);
     return venda;
+  }
+
+  @Override
+  public synchronized void atualizar(Venda venda) {
+    if (venda == null || venda.getId() == null) {
+      throw new IllegalArgumentException("Só é possível atualizar uma venda já cadastrada.");
+    }
+    for (int i = 0; i < vendas.size(); i++) {
+      if (vendas.get(i).getId().equals(venda.getId())) {
+        vendas.set(i, venda);
+        return;
+      }
+    }
+    throw new IllegalArgumentException("Venda não encontrada: id " + venda.getId() + ".");
   }
 
   @Override
@@ -51,25 +54,7 @@ public class RepositorioVendasLista implements IRepositorioVendas {
   }
 
   @Override
-  public synchronized List<Venda> listarPorCliente(Cliente cliente) {
-    List<Venda> resultado = new ArrayList<>();
-    for (Venda venda : vendas) {
-      if (mesmoCliente(venda.getCliente(), cliente)) {
-        resultado.add(venda);
-      }
-    }
-    return resultado;
-  }
-
-  @Override
   public synchronized List<Venda> listar() {
     return new ArrayList<>(vendas);
-  }
-
-  private static boolean mesmoCliente(Cliente a, Cliente b) {
-    if (a == b) {
-      return a != null;
-    }
-    return a != null && b != null && a.getId() != null && a.getId().equals(b.getId());
   }
 }
