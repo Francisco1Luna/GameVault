@@ -15,6 +15,7 @@ public class ValidadorMestre implements IValidadorLocacao{
         this.validadores = new ArrayList<>();
 
         this.validadores.add(new ValidadorIdade());
+        this.validadores.add(new ValidadorPreco());
         this.validadores.add(new ValidadorMulta());
         this.validadores.add(new ValidadorLimiteLocacoesAtivas());
         this.validadores.add(new ValidadorEstoque());

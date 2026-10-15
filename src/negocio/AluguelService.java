@@ -20,25 +20,35 @@ public class AluguelService {
 
   private final EstoqueService estoqueService;
   private final IRepositorioAlugueis repositorioAlugueis;
+  private final FinanceiroService financeiroService;
   private final ValidadorMestre validadorMestre;
 
   public AluguelService(EstoqueService estoqueService, IRepositorioAlugueis repositorioAlugueis) {
-    this(estoqueService, repositorioAlugueis, new ValidadorMestre());
+    this(estoqueService, repositorioAlugueis, new FinanceiroService(), new ValidadorMestre());
   }
 
   public AluguelService(EstoqueService estoqueService, IRepositorioAlugueis repositorioAlugueis,
       ValidadorMestre validadorMestre) {
+    this(estoqueService, repositorioAlugueis, new FinanceiroService(), validadorMestre);
+  }
+
+  public AluguelService(EstoqueService estoqueService, IRepositorioAlugueis repositorioAlugueis,
+      FinanceiroService financeiroService, ValidadorMestre validadorMestre) {
     if (estoqueService == null) {
       throw new IllegalArgumentException("O serviço de estoque é obrigatório.");
     }
     if (repositorioAlugueis == null) {
       throw new IllegalArgumentException("O repositório de aluguéis é obrigatório.");
     }
+    if (financeiroService == null) {
+      throw new IllegalArgumentException("O serviço financeiro é obrigatório.");
+    }
     if (validadorMestre == null) {
       throw new IllegalArgumentException("O validador mestre é obrigatório.");
     }
     this.estoqueService = estoqueService;
     this.repositorioAlugueis = repositorioAlugueis;
+    this.financeiroService = financeiroService;
     this.validadorMestre = validadorMestre;
   }
 
@@ -57,9 +67,13 @@ public class AluguelService {
       throw new ValidacaoException("Licença indisponível para a plataforma selecionada.");
     }
 
+    // calcula antes de mexer no estoque: se falhar, nada foi alterado
+    double valorLocacao = financeiroService.calcularValorLocacao(jogo, dataInicio, dataDevolucaoPrevista);
+
     estoqueService.removerExemplares(jogo, plataforma, 1);
     Aluguel aluguel = new Aluguel(null, cliente, jogo, plataforma, dataInicio,
         dataDevolucaoPrevista, null, StatusAluguel.ATIVO);
+    aluguel.setValorLocacao(valorLocacao); // valor congelado no momento da locação
     try {
       repositorioAlugueis.salvar(aluguel); // o repositório gera o id
     } catch (RuntimeException e) {
