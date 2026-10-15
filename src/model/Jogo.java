@@ -15,6 +15,7 @@ public class Jogo {
   private String genero;
   private String publicadora;
   private Double preco;
+  private Double precoLocacaoDiaria;
   private List<Plataforma> plataformas;
   private Map<Plataforma, Integer> estoquePorPlataforma = new HashMap<>();
   private String urlThumbnail;
@@ -22,8 +23,8 @@ public class Jogo {
   private boolean dadoDesatualizado;
 
   public Jogo(Long id, String titulo, ClassificacaoIndicativa classificacaoIndicativa, String desenvolvedora,
-      String genero, String publicadora, Double preco, List<Plataforma> plataformas,
-      Map<Plataforma, Integer> estoquePorPlataforma, String urlThumbnail, String urlReferencia) {
+      String genero, String publicadora, Double preco, Double precoLocacaoDiaria,
+      List<Plataforma> plataformas, Map<Plataforma, Integer> estoquePorPlataforma, String urlThumbnail, String urlReferencia) {
     this.id = id;
     this.titulo = titulo;
     this.classificacaoIndicativa = classificacaoIndicativa;
@@ -31,6 +32,7 @@ public class Jogo {
     this.genero = genero;
     this.publicadora = publicadora;
     this.preco = preco;
+    this.precoLocacaoDiaria = precoLocacaoDiaria;
     this.plataformas = plataformas;
     this.estoquePorPlataforma = estoquePorPlataforma;
     this.urlThumbnail = urlThumbnail;
@@ -92,6 +94,14 @@ public class Jogo {
 
   public void setPreco(Double preco) {
     this.preco = preco;
+  }
+
+  public Double getPrecoLocacaoDiaria() {
+    return precoLocacaoDiaria;
+  }
+
+  public void setPrecoLocacaoDiaria(Double precoLocacaoDiaria) {
+    this.precoLocacaoDiaria = precoLocacaoDiaria;
   }
 
   public List<Plataforma> getPlataformas() {

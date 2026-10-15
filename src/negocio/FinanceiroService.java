@@ -8,6 +8,7 @@ import java.util.Optional;
 
 import model.Aluguel;
 import model.Cliente;
+import model.Jogo;
 import model.Penalidade;
 
 /**
@@ -30,6 +31,27 @@ public class FinanceiroService {
       throw new IllegalArgumentException("A multa diária não pode ser negativa.");
     }
     this.multaDiaria = multaDiaria;
+  }
+
+  // Valor da locação
+
+  /**
+   * Valor da locação = dias entre a retirada e o prazo de devolução (mínimo 1) x diária do jogo,
+   * arredondado para centavos. O resultado é gravado no Aluguel e não muda se o preço mudar depois.
+   */
+  public double calcularValorLocacao(Jogo jogo, LocalDate dataInicio, LocalDate prazoDevolucao) {
+    if (jogo == null) {
+      throw new IllegalArgumentException("O jogo é obrigatório.");
+    }
+    if (jogo.getPrecoLocacaoDiaria() == null || jogo.getPrecoLocacaoDiaria() <= 0) {
+      throw new IllegalArgumentException("O jogo não possui preço de locação diário válido.");
+    }
+    if (dataInicio == null || prazoDevolucao == null) {
+      throw new IllegalArgumentException("A data de retirada e o prazo de devolução são obrigatórios.");
+    }
+    long dias = Math.max(1, ChronoUnit.DAYS.between(dataInicio, prazoDevolucao));
+    double valor = dias * jogo.getPrecoLocacaoDiaria();
+    return Math.round(valor * 100.0) / 100.0;
   }
 
   // REQ12

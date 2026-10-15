@@ -15,7 +15,7 @@ public class Principal {
     RepositorioJogosLista repo = new RepositorioJogosLista();
     Plataforma p1 = new Plataforma(1L, "PC", "MS");
     Plataforma p2 = new Plataforma(1L, "PC", "MS");
-    Jogo jogo = new Jogo(1L, "T", null, null, null, null, null, new ArrayList<>(Arrays.asList(p1)), new HashMap<>(), null, null);
+    Jogo jogo = new Jogo(1L, "T", null, null, null, null, null, null, new ArrayList<>(Arrays.asList(p1)), new HashMap<>(), null, null);
     repo.salvar(jogo);
     EstoqueService svc = new EstoqueService(repo);
     try {

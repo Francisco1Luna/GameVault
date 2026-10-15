@@ -15,6 +15,7 @@ public class Aluguel {
   private LocalDate dataDevolucaoEfetiva;
   private StatusAluguel status;
   private Penalidade penalidade;
+  private Double valorLocacao;
 
   public Aluguel(Long id, Cliente cliente, Jogo jogo, Plataforma plataforma, LocalDate dataInicio,
       LocalDate dataDevolucaoPrevista, LocalDate dataDevolucaoEfetiva, StatusAluguel status) {
@@ -98,5 +99,13 @@ public class Aluguel {
 
   public void setPenalidade(Penalidade penalidade) {
     this.penalidade = penalidade;
+  }
+
+  public Double getValorLocacao() {
+    return valorLocacao;
+  }
+
+  public void setValorLocacao(Double valorLocacao) {
+    this.valorLocacao = valorLocacao;
   }
 }
