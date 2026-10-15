@@ -11,6 +11,9 @@ public interface IRepositorioPlataformas {
 
     void atualizar(Plataforma plataforma);
 
+
+    boolean remover(Long id);
+
     Optional<Plataforma> buscarPorId(Long id);
 
     List<Plataforma> listar();

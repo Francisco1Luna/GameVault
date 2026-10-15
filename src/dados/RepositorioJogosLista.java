@@ -44,6 +44,17 @@ public class RepositorioJogosLista implements IRepositorioJogos {
   }
 
   @Override
+  public synchronized boolean remover(Long id) {
+    for (int i = 0; i < jogos.size(); i++) {
+      if (jogos.get(i).getId() != null && jogos.get(i).getId().equals(id)) {
+        jogos.remove(i);
+        return true;
+      }
+    }
+    return false;
+  }
+
+  @Override
   public synchronized Optional<Jogo> buscarPorId(Long id) {
     for (Jogo jogo : jogos) {
       if (jogo.getId() != null && jogo.getId().equals(id)) {

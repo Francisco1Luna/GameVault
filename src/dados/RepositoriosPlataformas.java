@@ -40,6 +40,17 @@ public class RepositoriosPlataformas implements IRepositorioPlataformas {
     }
 
     @Override
+    public synchronized boolean remover(Long id) {
+        for (int i = 0; i < plataformas.size(); i++) {
+            if (plataformas.get(i).getId() != null && plataformas.get(i).getId().equals(id)) {
+                plataformas.remove(i);
+                return true;
+            }
+        }
+        return false;
+    }
+
+    @Override
     public synchronized Optional<Plataforma> buscarPorId(Long id) {
         if (id == null) {
             return Optional.empty();

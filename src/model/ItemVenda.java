@@ -3,11 +3,13 @@ package model;
 public class ItemVenda {
 
   private Jogo jogo;
+  private Plataforma plataforma;
   private Integer quantidade;
   private Double precoUnitario;
 
-  public ItemVenda(Jogo jogo, Integer quantidade, Double precoUnitario) {
+  public ItemVenda(Jogo jogo, Plataforma plataforma, Integer quantidade, Double precoUnitario) {
     this.jogo = jogo;
+    this.plataforma = plataforma;
     this.quantidade = quantidade;
     this.precoUnitario = precoUnitario;
   }
@@ -18,6 +20,14 @@ public class ItemVenda {
 
   public void setJogo(Jogo jogo) {
     this.jogo = jogo;
+  }
+
+  public Plataforma getPlataforma() {
+    return plataforma;
+  }
+
+  public void setPlataforma(Plataforma plataforma) {
+    this.plataforma = plataforma;
   }
 
   public Integer getQuantidade() {
