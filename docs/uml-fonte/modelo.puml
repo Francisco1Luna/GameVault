@@ -1,0 +1,150 @@
+@startuml
+skinparam classAttributeIconSize 0
+skinparam dpi 150
+skinparam shadowing false
+skinparam ArrowColor #181818
+skinparam ArrowFontSize 11
+skinparam PackageBorderColor #000000
+skinparam PackageBackgroundColor #FFFFFF
+skinparam NoteBackgroundColor #FFFFFF
+skinparam NoteBorderColor #181818
+skinparam class {
+  BackgroundColor #F1F1F1
+  BorderColor #181818
+}
+skinparam enum {
+  BackgroundColor #F1F1F1
+  BorderColor #181818
+}
+skinparam abstract {
+  BackgroundColor #F1F1F1
+  BorderColor #181818
+}
+skinparam interface {
+  BackgroundColor #F1F1F1
+  BorderColor #181818
+}
+title GameVault - Diagrama de Classes (camada model)
+
+package model {
+
+  abstract class Cliente {
+    -id: Long
+    -nome: String
+    -cpf: String
+    -dataNascimento: LocalDate
+    -email: String
+    -telefone: String
+    -limiteAluguelSimultaneo: int
+    -alugueis: List<Aluguel>
+    +getIdade(): int
+  }
+
+  class ClientePadrao {
+    {static} -LIMITE_ALUGUEL_SIMULTANEO: int = 1
+  }
+
+  class ClienteAssinante {
+    -percentualDesconto: double
+    -dataAdesao: LocalDate
+    {static} -LIMITE_ALUGUEL_SIMULTANEO: int = 3
+  }
+
+  class Aluguel {
+    -id: Long
+    -dataInicio: LocalDate
+    -dataDevolucaoPrevista: LocalDate
+    -dataDevolucaoEfetiva: LocalDate
+    -valorLocacao: Double
+  }
+
+  class Penalidade {
+    -id: Long
+    -valor: Double
+    -dataGeracao: LocalDate
+    -paga: boolean
+    -dataPagamento: LocalDate
+  }
+
+  class Jogo {
+    -id: Long
+    -titulo: String
+    -desenvolvedora: String
+    -genero: String
+    -publicadora: String
+    -preco: Double  <<preço de venda>>
+    -precoLocacaoDiaria: Double
+    -plataformas: List<Plataforma>
+    -estoquePorPlataforma: Map<Plataforma, Integer>
+    -urlThumbnail: String
+    -urlReferencia: String
+    -dadoDesatualizado: boolean
+    -classificacaoIndicativa: ClassificacaoIndicativa
+  }
+
+  class Plataforma {
+    -id: Long
+    -nome: String
+    -fabricante: String
+    +equals(obj: Object): boolean
+    +hashCode(): int
+  }
+
+  class Venda {
+    -id: Long
+    -dataVenda: LocalDate
+    -itens: List<ItemVenda>
+    -valorTotal: Double
+  }
+
+  class ItemVenda {
+    -quantidade: Integer
+    -precoUnitario: Double
+  }
+
+  package enums {
+    enum ClassificacaoIndicativa {
+      LIVRE
+      DEZ_ANOS
+      DOZE_ANOS
+      QUATORZE_ANOS
+      DEZESSEIS_ANOS
+      DEZOITO_ANOS
+    }
+    enum StatusAluguel {
+      ATIVO
+      DEVOLVIDO
+      ATRASADO
+    }
+  }
+}
+
+Cliente <|-- ClientePadrao
+Cliente <|-- ClienteAssinante
+
+Cliente "1" <--> "0..*" Aluguel : possui >
+Aluguel "*" --> "1" Jogo : referente a >
+Aluguel "*" --> "1" Plataforma : formato >
+Aluguel "1" *-- "0..1" Penalidade : multa por atraso >
+Aluguel "*" --> "1" StatusAluguel : status >
+
+Jogo "1" o-- "1..*" Plataforma : disponível em >
+Jogo "*" --> "1" ClassificacaoIndicativa : classificado como >
+
+Venda "*" --> "1" Cliente : realizada por >
+Venda "1" *-- "1..*" ItemVenda : contém >
+ItemVenda "*" --> "1" Jogo : vende >
+ItemVenda "*" --> "1" Plataforma : na plataforma >
+
+note bottom of Jogo
+  preco = preço de venda
+  precoLocacaoDiaria = diária de locação
+  estoquePorPlataforma = exemplares disponíveis agora
+end note
+
+note bottom of Penalidade
+  A penalidade pertence ao Aluguel (não ao Cliente) e guarda
+  de volta o aluguelOrigem. As pendências do cliente saem de
+  cliente.alugueis -> aluguel.penalidade.
+end note
+@enduml
