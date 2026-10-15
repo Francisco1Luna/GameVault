@@ -1,0 +1,73 @@
+@startuml
+skinparam classAttributeIconSize 0
+skinparam dpi 150
+skinparam shadowing false
+skinparam ArrowColor #181818
+skinparam ArrowFontSize 11
+skinparam PackageBorderColor #000000
+skinparam PackageBackgroundColor #FFFFFF
+skinparam NoteBackgroundColor #FFFFFF
+skinparam NoteBorderColor #181818
+skinparam class {
+  BackgroundColor #F1F1F1
+  BorderColor #181818
+}
+skinparam enum {
+  BackgroundColor #F1F1F1
+  BorderColor #181818
+}
+skinparam abstract {
+  BackgroundColor #F1F1F1
+  BorderColor #181818
+}
+skinparam interface {
+  BackgroundColor #F1F1F1
+  BorderColor #181818
+}
+title GameVault - Validação de locação (negocio.validacao)
+
+package negocio {
+  class AluguelService {
+    +realizarLocacao(Cliente, Jogo, Plataforma, LocalDate, LocalDate): Aluguel
+  }
+  package negocio.validacao {
+    interface IValidadorLocacao {
+      +validar(cliente: Cliente, jogo: Jogo, alugueisAtivos: List<Aluguel>) throws ValidacaoException
+    }
+    class ValidadorMestre {
+      -validadores: List<IValidadorLocacao>
+      +validar(Cliente, Jogo, List<Aluguel>)
+    }
+    class ValidadorIdade <<REQ17 classificação x idade>>
+    class ValidadorPreco <<exige diária de locação > 0>>
+    class ValidadorMulta <<REQ19 multa pendente>>
+    class ValidadorLimiteLocacoesAtivas <<REQ18 limite do cliente>>
+    class ValidadorEstoque <<REQ20 exemplar disponível>>
+  }
+  package negocio.excecoes {
+    class ValidacaoException {
+      +ValidacaoException(mensagem: String)
+    }
+  }
+}
+
+AluguelService --> ValidadorMestre : usa
+IValidadorLocacao <|.. ValidadorMestre
+IValidadorLocacao <|.. ValidadorIdade
+IValidadorLocacao <|.. ValidadorPreco
+IValidadorLocacao <|.. ValidadorMulta
+IValidadorLocacao <|.. ValidadorLimiteLocacoesAtivas
+IValidadorLocacao <|.. ValidadorEstoque
+ValidadorMestre o-- "5" IValidadorLocacao : executa em ordem >
+IValidadorLocacao ..> ValidacaoException : lança
+Exception <|-- ValidacaoException
+
+note right of ValidadorMestre
+  Ordem da cadeia:
+  1. ValidadorIdade
+  2. ValidadorPreco
+  3. ValidadorMulta
+  4. ValidadorLimiteLocacoesAtivas
+  5. ValidadorEstoque
+end note
+@enduml

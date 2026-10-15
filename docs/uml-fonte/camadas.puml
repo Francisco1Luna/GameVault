@@ -1,0 +1,183 @@
+@startuml
+skinparam classAttributeIconSize 0
+skinparam dpi 140
+skinparam nodesep 25
+skinparam ranksep 55
+skinparam shadowing false
+skinparam ArrowColor #181818
+skinparam ArrowFontSize 11
+skinparam PackageBorderColor #000000
+skinparam PackageBackgroundColor #FFFFFF
+skinparam NoteBackgroundColor #FFFFFF
+skinparam NoteBorderColor #181818
+skinparam class {
+  BackgroundColor #F1F1F1
+  BorderColor #181818
+}
+skinparam enum {
+  BackgroundColor #F1F1F1
+  BorderColor #181818
+}
+skinparam abstract {
+  BackgroundColor #F1F1F1
+  BorderColor #181818
+}
+skinparam interface {
+  BackgroundColor #F1F1F1
+  BorderColor #181818
+}
+title GameVault - Arquitetura em camadas (negocio e dados)
+
+package dados {
+  interface IRepositorioPlataformas {
+    +salvar(Plataforma): Plataforma
+    +atualizar(Plataforma)
+    +remover(Long): boolean
+    +buscarPorId(Long): Optional<Plataforma>
+    +listar(): List<Plataforma>
+  }
+  interface IRepositorioJogos {
+    +salvar(Jogo): Jogo
+    +atualizar(Jogo)
+    +remover(Long): boolean
+    +buscarPorId(Long): Optional<Jogo>
+    +listar(): List<Jogo>
+  }
+  interface IRepositorioClientes {
+    +salvar(Cliente): Cliente
+    +atualizar(Cliente)
+    +remover(Long): boolean
+    +buscarPorId(Long): Optional<Cliente>
+    +buscarPorCpf(String): Optional<Cliente>
+    +listar(): List<Cliente>
+  }
+  interface IRepositorioAlugueis {
+    +salvar(Aluguel): Aluguel
+    +atualizar(Aluguel)
+    +buscarPorId(Long): Optional<Aluguel>
+    +listarPorCliente(Cliente): List<Aluguel>
+    +listar(): List<Aluguel>
+  }
+  interface IRepositorioVendas {
+    +salvar(Venda): Venda
+    +buscarPorId(Long): Optional<Venda>
+    +listarPorCliente(Cliente): List<Venda>
+    +listar(): List<Venda>
+  }
+  class RepositoriosPlataformas {
+    -plataformas: List<Plataforma>
+    -proximoId: long
+  }
+  class RepositorioJogosLista {
+    -jogos: List<Jogo>
+    -proximoId: long
+  }
+  class RepositorioClientesLista {
+    -clientes: List<Cliente>
+    -proximoId: long
+  }
+  class RepositorioAlugueisLista {
+    -alugueis: List<Aluguel>
+    -proximoId: long
+  }
+  class RepositorioVendasLista {
+    -vendas: List<Venda>
+    -proximoId: long
+  }
+}
+
+package negocio {
+  class PlataformaService {
+    +cadastrar(Plataforma): Plataforma
+    +atualizar(Plataforma)
+    +remover(Long): boolean
+    +buscarPorId(Long): Optional<Plataforma>
+    +listar(): List<Plataforma>
+  }
+  class JogoService {
+    +salvar(Jogo): Jogo
+    +atualizar(Jogo)
+    +remover(Long): boolean
+    +buscarPorId(Long): Optional<Jogo>
+    +buscarPorTitulo(String): List<Jogo>
+    +listarPorGenero(String): List<Jogo>
+    +listarPorPlataforma(Long): List<Jogo>
+    +listar(): List<Jogo>
+  }
+  class ClienteService {
+    +salvar(Cliente): Cliente
+    +atualizar(Cliente)
+    +remover(Long): boolean
+    +buscarPorId(Long): Optional<Cliente>
+    +buscarPorCpf(String): Optional<Cliente>
+    +listar(): List<Cliente>
+  }
+  class EstoqueService {
+    +definirEstoque(Jogo, Plataforma, int)
+    +adicionarExemplares(Jogo, Plataforma, int): int
+    +removerExemplares(Jogo, Plataforma, int): int
+    +consultarQuantidade(Jogo, Plataforma): int
+    +estaDisponivel(Jogo, Plataforma): boolean
+    +consultarDisponibilidade(Jogo): Map<Plataforma, Integer>
+    +possuiAlgumaDisponibilidade(Jogo): boolean
+  }
+  class FinanceiroService {
+    {static} +MULTA_DIARIA_PADRAO: double = 5.00
+    -multaDiaria: double
+    +calcularValorLocacao(Jogo, LocalDate, LocalDate): double
+    +calcularPrecoVenda(Jogo, Cliente): double
+    +calcularDiasDeAtraso(Aluguel, LocalDate): long
+    +calcularMulta(Aluguel, LocalDate): double
+    +registrarMulta(Aluguel): Optional<Penalidade>
+    +consultarPendencias(Cliente): List<Penalidade>
+    +calcularTotalPendente(Cliente): double
+    +possuiPendencias(Cliente): boolean
+  }
+  class AluguelService {
+    +realizarLocacao(Cliente, Jogo, Plataforma, LocalDate, LocalDate): Aluguel
+  }
+  class DevolucaoService {
+    +devolver(Aluguel, LocalDate)
+  }
+  class VendaService {
+    +registrarVenda(Cliente, List<ItemVenda>, LocalDate): Venda
+    +buscarPorId(Long): Optional<Venda>
+    +listarPorCliente(Cliente): List<Venda>
+    +listar(): List<Venda>
+  }
+
+}
+
+' realizações (repositórios)
+IRepositorioPlataformas <|.. RepositoriosPlataformas
+IRepositorioJogos <|.. RepositorioJogosLista
+IRepositorioClientes <|.. RepositorioClientesLista
+IRepositorioAlugueis <|.. RepositorioAlugueisLista
+IRepositorioVendas <|.. RepositorioVendasLista
+
+' services -> repositórios e outros services
+PlataformaService --> IRepositorioPlataformas
+PlataformaService --> IRepositorioJogos
+JogoService --> IRepositorioJogos
+JogoService --> IRepositorioAlugueis
+ClienteService --> IRepositorioClientes
+ClienteService --> FinanceiroService
+EstoqueService --> IRepositorioJogos
+AluguelService --> EstoqueService
+AluguelService --> IRepositorioAlugueis
+AluguelService --> FinanceiroService
+DevolucaoService --> EstoqueService
+DevolucaoService --> IRepositorioAlugueis
+DevolucaoService --> FinanceiroService
+VendaService --> EstoqueService
+VendaService --> IRepositorioVendas
+VendaService --> FinanceiroService
+
+AluguelService ..> "ValidadorMestre" : valida (ver diagrama de validação)
+note bottom of IRepositorioPlataformas
+  Cada RepositorioXLista implementa as operações
+  da sua interface com uma lista em memória
+  (synchronized, ids gerados no próprio repositório).
+end note
+
+@enduml
