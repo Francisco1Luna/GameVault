@@ -8,12 +8,14 @@ import java.util.Optional;
 
 import model.Aluguel;
 import model.Cliente;
+import model.ClienteAssinante;
 import model.Jogo;
 import model.Penalidade;
 
 /**
  * REQ12 - calcular multa por atraso na devolução, proporcional aos dias de atraso.
  * REQ13 - consultar pendências financeiras de um cliente (multas não pagas).
+ * REQ11 - preço de venda com desconto automático para assinantes.
  */
 public class FinanceiroService {
 
@@ -52,6 +54,32 @@ public class FinanceiroService {
     long dias = Math.max(1, ChronoUnit.DAYS.between(dataInicio, prazoDevolucao));
     double valor = dias * jogo.getPrecoLocacaoDiaria();
     return Math.round(valor * 100.0) / 100.0;
+  }
+
+  // REQ11
+
+  /**
+   * Preço unitário de venda: o preço do jogo, com o desconto do plano se o cliente for assinante.
+   * O percentual do assinante é lido como porcentagem (10 = 10%) e deve estar entre 0 e 100.
+   * Arredondado para centavos.
+   */
+  public double calcularPrecoVenda(Jogo jogo, Cliente cliente) {
+    if (jogo == null) {
+      throw new IllegalArgumentException("O jogo é obrigatório.");
+    }
+    exigirCliente(cliente);
+    if (jogo.getPreco() == null || jogo.getPreco() <= 0) {
+      throw new IllegalArgumentException("O jogo não possui preço de venda válido: " + jogo.getTitulo());
+    }
+    double preco = jogo.getPreco();
+    if (cliente instanceof ClienteAssinante) {
+      double percentual = ((ClienteAssinante) cliente).getPercentualDesconto();
+      if (percentual < 0 || percentual > 100) {
+        throw new IllegalArgumentException("Percentual de desconto inválido para o assinante: " + percentual);
+      }
+      preco = preco * (1 - percentual / 100.0);
+    }
+    return Math.round(preco * 100.0) / 100.0;
   }
 
   // REQ12

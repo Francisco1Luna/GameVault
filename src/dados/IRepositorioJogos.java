@@ -11,6 +11,9 @@ public interface IRepositorioJogos {
 
   void atualizar(Jogo jogo);
 
+
+  boolean remover(Long id);
+
   Optional<Jogo> buscarPorId(Long id);
 
   List<Jogo> listar();
