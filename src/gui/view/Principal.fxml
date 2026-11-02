@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.VBox?>
+
+
+<AnchorPane prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/26" xmlns:fx="http://javafx.com/fxml/1" fx:controller="gui.PrincipalController">
+   <children>
+      <BorderPane fx:id="painelPrincipal" prefHeight="400.0" prefWidth="600.0">
+         <left>
+            <VBox prefHeight="200.0" prefWidth="100.0" BorderPane.alignment="CENTER">
+               <children>
+                  <Button mnemonicParsing="false" onAction="#abrirPlataformas" prefHeight="25.0" prefWidth="101.0" text="Plataformas" />
+                  <Button mnemonicParsing="false" onAction="#abrirJogos" prefHeight="25.0" prefWidth="102.0" text="Jogos" />
+               </children>
+            </VBox>
+         </left>
+      </BorderPane>
+   </children>
+</AnchorPane>

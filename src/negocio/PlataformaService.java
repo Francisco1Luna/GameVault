@@ -31,6 +31,9 @@ public class PlataformaService {
         if (plataforma.getNome() == null || plataforma.getNome().trim().isEmpty()) {
             throw new IllegalArgumentException("O nome da plataforma é obrigatório.");
         }
+        if (plataforma.getFabricante() == null || plataforma.getFabricante().trim().isEmpty()) { //poderia substituir por um metodo privado mas ficaria mais "complexo"
+            throw new IllegalArgumentException("O Fabricante da plataforma é obrigatório.");
+        }
         return repositorioPlataformas.salvar(plataforma);
     }
 
@@ -40,6 +43,9 @@ public class PlataformaService {
         }
         if (plataforma.getNome() == null || plataforma.getNome().trim().isEmpty()) {
            throw new IllegalArgumentException("O nome da plataforma não pode ser vazio");
+        }
+        if (plataforma.getFabricante() == null || plataforma.getFabricante().trim().isEmpty()) { //poderia substituir por um metodo privado mas ficaria mais "complexo"
+            throw new IllegalArgumentException("O Fabricante da plataforma é obrigatório.");
         }
         repositorioPlataformas.atualizar(plataforma);
     }
