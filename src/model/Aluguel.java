@@ -1,7 +1,6 @@
 package model;
 
 import java.time.LocalDate;
-import javafx.application.Application;
 import model.enums.StatusAluguel;
 
 public class Aluguel {

@@ -1,0 +1,40 @@
+plugins {
+    id 'application'
+    id 'org.openjfx.javafxplugin' version '0.1.0'
+}
+
+group = 'br.ufrpe.gamevault'
+version = '1.0-SNAPSHOT'
+
+repositories {
+    mavenCentral()
+}
+
+
+javafx {
+    version = '21.0.5'
+    modules = ['javafx.controls', 'javafx.fxml']
+}
+
+// O código-fonte fica direto em src/ (pacotes dados, gui, model, negocio), sem src/main/java.
+sourceSets {
+    main {
+        java {
+            srcDirs = ['src']
+        }
+        resources {
+            srcDirs = ['src']
+            include '**/*.fxml', '**/*.css', '**/*.png'
+        }
+    }
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = 'UTF-8'
+    options.release = 17   // compila para Java 17 com qualquer JDK >= 17
+}
+
+// Rodar a interface: ./gradlew run
+application {
+    mainClass = 'gui.Launcher'
+}

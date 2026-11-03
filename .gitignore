@@ -26,3 +26,7 @@ Thumbs.db
 # Logs e Ficheiros Temporários
 *.log
 *.tmp
+
+# Maven e Gradle
+target/
+.gradle/

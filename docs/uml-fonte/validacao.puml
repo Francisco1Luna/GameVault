@@ -27,8 +27,11 @@ skinparam interface {
 title GameVault - Validação de locação (negocio.validacao)
 
 package negocio {
-  class AluguelService {
-    +realizarLocacao(Cliente, Jogo, Plataforma, LocalDate, LocalDate): Aluguel
+  class AluguelService <<Singleton>> {
+    {static} -INSTANCIA: AluguelService
+    -AluguelService()
+    {static} +getInstance(): AluguelService
+    +realizarLocacao(Jogo, Plataforma, LocalDate, LocalDate): Aluguel
   }
   package negocio.validacao {
     interface IValidadorLocacao {

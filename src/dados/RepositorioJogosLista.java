@@ -9,6 +9,16 @@ import model.Jogo;
 /** Repositório em memória: guarda os jogos em uma lista. */
 public class RepositorioJogosLista implements IRepositorioJogos {
 
+  // Singleton: uma única instância em memória, compartilhada por todos os services.
+  private static final RepositorioJogosLista INSTANCIA = new RepositorioJogosLista();
+
+  public static RepositorioJogosLista getInstance() {
+    return INSTANCIA;
+  }
+
+  private RepositorioJogosLista() {
+  }
+
   private final List<Jogo> jogos = new ArrayList<>();
   private long proximoId = 1;
 

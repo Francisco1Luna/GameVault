@@ -1,5 +1,6 @@
 package negocio;
 
+import dados.RepositorioAlugueisLista;
 import java.time.LocalDate;
 
 import dados.IRepositorioAlugueis;
@@ -12,15 +13,20 @@ import negocio.excecoes.ValidacaoException;
  */
 public class DevolucaoService {
 
+  // Singleton: uma única instância em memória; use DevolucaoService.getInstance().
+  private static final DevolucaoService INSTANCIA = new DevolucaoService(
+    EstoqueService.getInstance(), RepositorioAlugueisLista.getInstance(),
+    FinanceiroService.getInstance());
+
+  public static DevolucaoService getInstance() {
+    return INSTANCIA;
+  }
+
   private final EstoqueService estoqueService;
   private final IRepositorioAlugueis repositorioAlugueis;
   private final FinanceiroService financeiroService;
 
-  public DevolucaoService(EstoqueService estoqueService, IRepositorioAlugueis repositorioAlugueis) {
-    this(estoqueService, repositorioAlugueis, new FinanceiroService());
-  }
-
-  public DevolucaoService(EstoqueService estoqueService, IRepositorioAlugueis repositorioAlugueis,
+  private DevolucaoService(EstoqueService estoqueService, IRepositorioAlugueis repositorioAlugueis,
       FinanceiroService financeiroService) {
     if (estoqueService == null) {
       throw new IllegalArgumentException("O serviço de estoque é obrigatório.");

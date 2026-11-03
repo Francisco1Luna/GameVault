@@ -7,6 +7,16 @@ import model.Plataforma;
 
 public class RepositoriosPlataformas implements IRepositorioPlataformas {
 
+    // Singleton: uma única instância em memória, compartilhada por todos os services.
+    private static final RepositoriosPlataformas INSTANCIA = new RepositoriosPlataformas();
+
+    public static RepositoriosPlataformas getInstance() {
+        return INSTANCIA;
+    }
+
+    private RepositoriosPlataformas() {
+    }
+
     private final List<Plataforma> plataformas = new ArrayList<>();
     private long proximoId = 1;
 

@@ -1,5 +1,7 @@
 package negocio;
 
+import dados.RepositorioAlugueisLista;
+import dados.RepositorioJogosLista;
 import dados.IRepositorioAlugueis;
 import dados.IRepositorioJogos;
 import model.Aluguel;
@@ -14,10 +16,18 @@ import java.util.Optional;
 
 public class JogoService {
 
+    // Singleton: uma única instância em memória; use JogoService.getInstance().
+    private static final JogoService INSTANCIA = new JogoService(
+        RepositorioJogosLista.getInstance(), RepositorioAlugueisLista.getInstance());
+
+    public static JogoService getInstance() {
+        return INSTANCIA;
+    }
+
     private final IRepositorioJogos repositorioJogos;
     private final IRepositorioAlugueis repositorioAlugueis;
 
-    public JogoService(IRepositorioJogos repositorioJogos, IRepositorioAlugueis repositorioAlugueis) {
+    private JogoService(IRepositorioJogos repositorioJogos, IRepositorioAlugueis repositorioAlugueis) {
         if (repositorioJogos == null) {
             throw new IllegalArgumentException("O repositorio de jogo não pode ser nulo.");
         }

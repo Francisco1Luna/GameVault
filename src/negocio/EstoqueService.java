@@ -1,5 +1,6 @@
 package negocio;
 
+import dados.RepositorioJogosLista;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -17,9 +18,17 @@ import model.Plataforma;
  */
 public class EstoqueService {
 
+  // Singleton: uma única instância em memória; use EstoqueService.getInstance().
+  private static final EstoqueService INSTANCIA = new EstoqueService(
+    RepositorioJogosLista.getInstance());
+
+  public static EstoqueService getInstance() {
+    return INSTANCIA;
+  }
+
   private final IRepositorioJogos repositorioJogos;
 
-  public EstoqueService(IRepositorioJogos repositorioJogos) {
+  private EstoqueService(IRepositorioJogos repositorioJogos) {
     if (repositorioJogos == null) {
       throw new IllegalArgumentException("O repositório de jogos é obrigatório.");
     }

@@ -1,5 +1,6 @@
 package negocio;
 
+import dados.RepositorioAlugueisLista;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -18,22 +19,23 @@ import negocio.validacao.ValidadorMestre;
  */
 public class AluguelService {
 
+  // Singleton: uma única instância em memória; use AluguelService.getInstance().
+  private static final AluguelService INSTANCIA = new AluguelService(
+    EstoqueService.getInstance(), RepositorioAlugueisLista.getInstance(),
+    FinanceiroService.getInstance(), new ValidadorMestre(), AuthService.getInstance());
+
+  public static AluguelService getInstance() {
+    return INSTANCIA;
+  }
+
   private final EstoqueService estoqueService;
   private final IRepositorioAlugueis repositorioAlugueis;
   private final FinanceiroService financeiroService;
   private final ValidadorMestre validadorMestre;
+  private final AuthService authService;
 
-  public AluguelService(EstoqueService estoqueService, IRepositorioAlugueis repositorioAlugueis) {
-    this(estoqueService, repositorioAlugueis, new FinanceiroService(), new ValidadorMestre());
-  }
-
-  public AluguelService(EstoqueService estoqueService, IRepositorioAlugueis repositorioAlugueis,
-      ValidadorMestre validadorMestre) {
-    this(estoqueService, repositorioAlugueis, new FinanceiroService(), validadorMestre);
-  }
-
-  public AluguelService(EstoqueService estoqueService, IRepositorioAlugueis repositorioAlugueis,
-      FinanceiroService financeiroService, ValidadorMestre validadorMestre) {
+  private AluguelService(EstoqueService estoqueService, IRepositorioAlugueis repositorioAlugueis,
+      FinanceiroService financeiroService, ValidadorMestre validadorMestre, AuthService authService) {
     if (estoqueService == null) {
       throw new IllegalArgumentException("O serviço de estoque é obrigatório.");
     }
@@ -49,11 +51,20 @@ public class AluguelService {
     this.estoqueService = estoqueService;
     this.repositorioAlugueis = repositorioAlugueis;
     this.financeiroService = financeiroService;
+    if (authService == null) {
+      throw new IllegalArgumentException("O serviço de autenticação é obrigatório.");
+    }
     this.validadorMestre = validadorMestre;
+    this.authService = authService;
   }
 
-  public synchronized Aluguel realizarLocacao(Cliente cliente, Jogo jogo, Plataforma plataforma,
+  /**
+   * Realiza a locação para o usuário atual (quem fez login no AuthService): o tipo dele define
+   * o limite de locações simultâneas. Sem login, a locação é recusada (IllegalStateException).
+   */
+  public synchronized Aluguel realizarLocacao(Jogo jogo, Plataforma plataforma,
       LocalDate dataInicio, LocalDate dataDevolucaoPrevista) throws ValidacaoException {
+    Cliente cliente = authService.exigirUsuarioAtual();
     exigirDadosLocacao(cliente, jogo, plataforma, dataInicio, dataDevolucaoPrevista);
 
     List<Aluguel> alugueis = cliente.getAlugueis();
