@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.Spinner?>
+<?import javafx.scene.control.Tab?>
+<?import javafx.scene.control.TabPane?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+
+<TabPane tabClosingPolicy="UNAVAILABLE" xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml/1" fx:controller="gui.LojaController">
+   <tabs>
+      <Tab text="Loja">
+         <content>
+            <BorderPane>
+               <top>
+                  <HBox alignment="CENTER_LEFT" spacing="10.0" BorderPane.alignment="CENTER">
+                     <padding>
+                        <Insets bottom="8.0" left="10.0" right="10.0" top="8.0" />
+                     </padding>
+                     <children>
+                        <Label fx:id="rotuloConta" maxWidth="Infinity" text="Conta" HBox.hgrow="ALWAYS" />
+                        <Button mnemonicParsing="false" onAction="#aoAtualizar" text="Atualizar" />
+                     </children>
+                  </HBox>
+               </top>
+               <center>
+                  <TableView fx:id="tabelaCatalogo">
+                     <columns>
+                        <TableColumn fx:id="colJogo" prefWidth="170.0" text="Jogo" />
+                        <TableColumn fx:id="colPlataforma" prefWidth="100.0" text="Plataforma" />
+                        <TableColumn fx:id="colPreco" prefWidth="170.0" text="Seu preço (compra)" />
+                        <TableColumn fx:id="colDiaria" prefWidth="90.0" text="Locação/dia" />
+                        <TableColumn fx:id="colEstoque" prefWidth="70.0" text="Estoque" />
+                     </columns>
+                  </TableView>
+               </center>
+               <bottom>
+                  <VBox spacing="8.0" BorderPane.alignment="CENTER">
+                     <padding>
+                        <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+                     </padding>
+                     <children>
+                        <HBox alignment="CENTER_LEFT" spacing="8.0">
+                           <children>
+                              <Label text="Quantidade:" />
+                              <Spinner fx:id="spinnerQuantidade" editable="true" prefWidth="80.0" />
+                              <Button fx:id="botaoComprar" mnemonicParsing="false" onAction="#aoComprar" text="Comprar" />
+                              <Label fx:id="rotuloTotalCompra" text="Total da compra: -" />
+                           </children>
+                        </HBox>
+                        <HBox alignment="CENTER_LEFT" spacing="8.0">
+                           <children>
+                              <Label text="Dias de locação:" />
+                              <Spinner fx:id="spinnerDias" editable="true" prefWidth="80.0" />
+                              <Button fx:id="botaoAlugar" mnemonicParsing="false" onAction="#aoAlugar" text="Alugar" />
+                              <Label fx:id="rotuloTotalLocacao" text="Total da locação: -" />
+                           </children>
+                        </HBox>
+                     </children>
+                  </VBox>
+               </bottom>
+            </BorderPane>
+         </content>
+      </Tab>
+      <Tab text="Minhas compras">
+         <content>
+            <TableView fx:id="tabelaCompras">
+               <columns>
+                  <TableColumn fx:id="colCompraData" prefWidth="90.0" text="Data" />
+                  <TableColumn fx:id="colCompraItens" prefWidth="330.0" text="Itens" />
+                  <TableColumn fx:id="colCompraTotal" prefWidth="100.0" text="Total" />
+               </columns>
+            </TableView>
+         </content>
+      </Tab>
+      <Tab text="Minhas locações">
+         <content>
+            <BorderPane>
+               <center>
+                  <TableView fx:id="tabelaLocacoes">
+                     <columns>
+                        <TableColumn fx:id="colLocJogo" prefWidth="130.0" text="Jogo" />
+                        <TableColumn fx:id="colLocPlataforma" prefWidth="90.0" text="Plataforma" />
+                        <TableColumn fx:id="colLocInicio" prefWidth="85.0" text="Retirada" />
+                        <TableColumn fx:id="colLocPrazo" prefWidth="85.0" text="Devolver até" />
+                        <TableColumn fx:id="colLocStatus" prefWidth="80.0" text="Status" />
+                        <TableColumn fx:id="colLocValor" prefWidth="75.0" text="Valor" />
+                        <TableColumn fx:id="colLocMulta" prefWidth="75.0" text="Multa" />
+                     </columns>
+                  </TableView>
+               </center>
+               <bottom>
+                  <HBox spacing="8.0" BorderPane.alignment="CENTER">
+                     <padding>
+                        <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+                     </padding>
+                     <children>
+                        <Button fx:id="botaoDevolver" mnemonicParsing="false" onAction="#aoDevolver" text="Devolver selecionada" />
+                     </children>
+                  </HBox>
+               </bottom>
+            </BorderPane>
+         </content>
+      </Tab>
+   </tabs>
+</TabPane>

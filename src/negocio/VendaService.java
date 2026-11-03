@@ -14,6 +14,8 @@ import model.Venda;
 /**
  * REQ10 - registrar venda de jogo (a venda é composta por itens: jogo, plataforma, quantidade, preço).
  * REQ11 - desconto automático para assinantes (calculado pelo FinanceiroService).
+ * A venda é sempre feita pelo usuário atual (quem fez login no AuthService): é o tipo dele
+ * (Padrão ou Assinante) que define o desconto. Sem login, a venda é recusada.
  * REQ22 - toda venda precisa ter ao menos um item antes de ser confirmada.
  */
 public class VendaService {
@@ -21,7 +23,7 @@ public class VendaService {
   // Singleton: uma única instância em memória; use VendaService.getInstance().
   private static final VendaService INSTANCIA = new VendaService(
     EstoqueService.getInstance(), RepositorioVendasLista.getInstance(),
-    FinanceiroService.getInstance());
+    FinanceiroService.getInstance(), AuthService.getInstance());
 
   public static VendaService getInstance() {
     return INSTANCIA;
@@ -30,9 +32,10 @@ public class VendaService {
   private final EstoqueService estoqueService;
   private final IRepositorioVendas repositorioVendas;
   private final FinanceiroService financeiroService;
+  private final AuthService authService;
 
   private VendaService(EstoqueService estoqueService, IRepositorioVendas repositorioVendas,
-      FinanceiroService financeiroService) {
+      FinanceiroService financeiroService, AuthService authService) {
     if (estoqueService == null) {
       throw new IllegalArgumentException("O serviço de estoque é obrigatório.");
     }
@@ -44,19 +47,21 @@ public class VendaService {
     }
     this.estoqueService = estoqueService;
     this.repositorioVendas = repositorioVendas;
+    if (authService == null) {
+      throw new IllegalArgumentException("O serviço de autenticação é obrigatório.");
+    }
     this.financeiroService = financeiroService;
+    this.authService = authService;
   }
 
   /**
-   * Confirma a venda. De cada item do pedido só são lidos jogo, plataforma e quantidade: o preço
+   * Confirma a venda para o usuário atual. De cada item do pedido só são lidos jogo, plataforma e quantidade: o preço
    * unitário informado é ignorado, porque quem calcula (com o desconto do assinante) é o serviço.
    * O preço gravado em cada item da venda é o que foi cobrado e não muda se o jogo mudar de preço.
    * Se algum item não tiver estoque, ou se o salvamento falhar, o estoque já baixado volta.
    */
-  public synchronized Venda registrarVenda(Cliente cliente, List<ItemVenda> pedido, LocalDate dataVenda) {
-    if (cliente == null) {
-      throw new IllegalArgumentException("O cliente é obrigatório.");
-    }
+  public synchronized Venda registrarVenda(List<ItemVenda> pedido, LocalDate dataVenda) {
+    Cliente cliente = authService.exigirUsuarioAtual(); // IllegalStateException se ninguém fez login
     if (dataVenda == null) {
       throw new IllegalArgumentException("A data da venda é obrigatória.");
     }
@@ -106,6 +111,11 @@ public class VendaService {
       return Optional.empty();
     }
     return repositorioVendas.buscarPorId(id);
+  }
+
+  /** Compras do usuário atual. */
+  public List<Venda> listarDoUsuarioAtual() {
+    return repositorioVendas.listarPorCliente(authService.exigirUsuarioAtual());
   }
 
   public List<Venda> listarPorCliente(Cliente cliente) {

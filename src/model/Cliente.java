@@ -15,6 +15,7 @@ public abstract class Cliente {
   private String telefone;
   private int limiteAluguelSimultaneo;
   private List<Aluguel> alugueis = new ArrayList<>();
+  private String senhaHash; // hash da senha de login (gerado pelo AuthService)
 
   public Cliente(Long id, String nome, String cpf, LocalDate dataNascimento, String email, String telefone,
       int limiteAluguelSimultaneo) {
@@ -89,6 +90,14 @@ public abstract class Cliente {
 
   public void setAlugueis(List<Aluguel> alugueis) {
     this.alugueis = alugueis;
+  }
+
+  public String getSenhaHash() {
+    return senhaHash;
+  }
+
+  public void setSenhaHash(String senhaHash) {
+    this.senhaHash = senhaHash;
   }
 
   public int getIdade(){

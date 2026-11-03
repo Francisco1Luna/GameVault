@@ -149,6 +149,20 @@ package negocio {
     +consultarDisponibilidade(Jogo): Map<Plataforma, Integer>
     +possuiAlgumaDisponibilidade(Jogo): boolean
   }
+  class AuthService <<Singleton>> {
+    {static} +PERCENTUAL_DESCONTO_ASSINANTE: double = 10.0
+    {static} -INSTANCIA: AuthService
+    -idUsuarioAtual: Long
+    -AuthService()
+    {static} +getInstance(): AuthService
+    +cadastrar(nome, cpf, dataNascimento, email, telefone, senha, assinante): Cliente
+    +login(cpf: String, senha: String): Cliente
+    +logout()
+    +getUsuarioAtual(): Optional<Cliente>
+    +exigirUsuarioAtual(): Cliente
+    +estaLogado(): boolean
+    +usuarioAtualEhAssinante(): boolean
+  }
   class FinanceiroService <<Singleton>> {
     {static} -INSTANCIA: FinanceiroService
     -FinanceiroService()
@@ -168,7 +182,7 @@ package negocio {
     {static} -INSTANCIA: AluguelService
     -AluguelService()
     {static} +getInstance(): AluguelService
-    +realizarLocacao(Cliente, Jogo, Plataforma, LocalDate, LocalDate): Aluguel
+    +realizarLocacao(Jogo, Plataforma, LocalDate, LocalDate): Aluguel
   }
   class DevolucaoService <<Singleton>> {
     {static} -INSTANCIA: DevolucaoService
@@ -180,8 +194,9 @@ package negocio {
     {static} -INSTANCIA: VendaService
     -VendaService()
     {static} +getInstance(): VendaService
-    +registrarVenda(Cliente, List<ItemVenda>, LocalDate): Venda
+    +registrarVenda(List<ItemVenda>, LocalDate): Venda
     +buscarPorId(Long): Optional<Venda>
+    +listarDoUsuarioAtual(): List<Venda>
     +listarPorCliente(Cliente): List<Venda>
     +listar(): List<Venda>
   }
@@ -202,16 +217,19 @@ JogoService --> IRepositorioJogos
 JogoService --> IRepositorioAlugueis
 ClienteService --> IRepositorioClientes
 ClienteService --> FinanceiroService
+AuthService --> ClienteService
 EstoqueService --> IRepositorioJogos
 AluguelService --> EstoqueService
 AluguelService --> IRepositorioAlugueis
 AluguelService --> FinanceiroService
+AluguelService --> AuthService : usuário atual
 DevolucaoService --> EstoqueService
 DevolucaoService --> IRepositorioAlugueis
 DevolucaoService --> FinanceiroService
 VendaService --> EstoqueService
 VendaService --> IRepositorioVendas
 VendaService --> FinanceiroService
+VendaService --> AuthService : usuário atual
 
 AluguelService ..> "ValidadorMestre" : valida (ver diagrama de validação)
 note bottom of IRepositorioPlataformas
@@ -230,5 +248,7 @@ note as NSing
   dos repositórios (via interface) e dos outros services,
   então todos enxergam o mesmo conjunto de dados.
   A camada gui (Contexto) obtém os services só por getInstance().
+  Venda e locação são sempre feitas pelo usuário atual
+  (AuthService): sem login, são recusadas.
 end note
 @enduml

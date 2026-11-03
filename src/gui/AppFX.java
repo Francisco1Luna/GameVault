@@ -11,7 +11,7 @@ public class AppFX extends Application {
     @Override
     public void start(Stage palco) throws Exception {
         Parent raiz = FXMLLoader.load(
-                getClass().getResource("/gui/view/Principal.fxml")
+                getClass().getResource("/gui/view/Login.fxml")
         );
 
         palco.setScene(new Scene(raiz, 900, 600));
@@ -20,7 +20,4 @@ public class AppFX extends Application {
         palco.show();
     }
 
-    public static void main(String[] args) {
-        launch(args);
-    }
 }

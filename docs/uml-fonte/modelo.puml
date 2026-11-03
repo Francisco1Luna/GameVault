@@ -37,6 +37,7 @@ package model {
     -telefone: String
     -limiteAluguelSimultaneo: int
     -alugueis: List<Aluguel>
+    -senhaHash: String
     +getIdade(): int
   }
 
