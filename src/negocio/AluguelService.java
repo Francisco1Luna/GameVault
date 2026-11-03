@@ -1,5 +1,6 @@
 package negocio;
 
+import dados.RepositorioAlugueisLista;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -18,21 +19,21 @@ import negocio.validacao.ValidadorMestre;
  */
 public class AluguelService {
 
+  // Singleton: uma única instância em memória; use AluguelService.getInstance().
+  private static final AluguelService INSTANCIA = new AluguelService(
+    EstoqueService.getInstance(), RepositorioAlugueisLista.getInstance(),
+    FinanceiroService.getInstance(), new ValidadorMestre());
+
+  public static AluguelService getInstance() {
+    return INSTANCIA;
+  }
+
   private final EstoqueService estoqueService;
   private final IRepositorioAlugueis repositorioAlugueis;
   private final FinanceiroService financeiroService;
   private final ValidadorMestre validadorMestre;
 
-  public AluguelService(EstoqueService estoqueService, IRepositorioAlugueis repositorioAlugueis) {
-    this(estoqueService, repositorioAlugueis, new FinanceiroService(), new ValidadorMestre());
-  }
-
-  public AluguelService(EstoqueService estoqueService, IRepositorioAlugueis repositorioAlugueis,
-      ValidadorMestre validadorMestre) {
-    this(estoqueService, repositorioAlugueis, new FinanceiroService(), validadorMestre);
-  }
-
-  public AluguelService(EstoqueService estoqueService, IRepositorioAlugueis repositorioAlugueis,
+  private AluguelService(EstoqueService estoqueService, IRepositorioAlugueis repositorioAlugueis,
       FinanceiroService financeiroService, ValidadorMestre validadorMestre) {
     if (estoqueService == null) {
       throw new IllegalArgumentException("O serviço de estoque é obrigatório.");

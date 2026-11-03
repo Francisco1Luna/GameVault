@@ -22,13 +22,17 @@ public class FinanceiroService {
   //Valor cobrado por dia de atraso quando nenhuma taxa é informada.
   public static final double MULTA_DIARIA_PADRAO = 5.00;
 
-  private final double multaDiaria;
+  // Singleton: uma única instância em memória; use FinanceiroService.getInstance().
+  private static final FinanceiroService INSTANCIA = new FinanceiroService(
+    MULTA_DIARIA_PADRAO);
 
-  public FinanceiroService() {
-    this(MULTA_DIARIA_PADRAO);
+  public static FinanceiroService getInstance() {
+    return INSTANCIA;
   }
 
-  public FinanceiroService(double multaDiaria) {
+  private final double multaDiaria;
+
+  private FinanceiroService(double multaDiaria) {
     if (multaDiaria < 0) {
       throw new IllegalArgumentException("A multa diária não pode ser negativa.");
     }

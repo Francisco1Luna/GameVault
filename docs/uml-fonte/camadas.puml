@@ -4,6 +4,7 @@ skinparam dpi 140
 skinparam nodesep 25
 skinparam ranksep 55
 skinparam shadowing false
+skinparam linetype ortho
 skinparam ArrowColor #181818
 skinparam ArrowFontSize 11
 skinparam PackageBorderColor #000000
@@ -26,7 +27,7 @@ skinparam interface {
   BackgroundColor #F1F1F1
   BorderColor #181818
 }
-title GameVault - Arquitetura em camadas (negocio e dados)
+title GameVault - Arquitetura em camadas (negocio e dados) - padrao Singleton
 
 package dados {
   interface IRepositorioPlataformas {
@@ -64,37 +65,58 @@ package dados {
     +listarPorCliente(Cliente): List<Venda>
     +listar(): List<Venda>
   }
-  class RepositoriosPlataformas {
+  class RepositoriosPlataformas <<Singleton>> {
+    {static} -INSTANCIA: RepositoriosPlataformas
+    -RepositoriosPlataformas()
+    {static} +getInstance(): RepositoriosPlataformas
     -plataformas: List<Plataforma>
     -proximoId: long
   }
-  class RepositorioJogosLista {
+  class RepositorioJogosLista <<Singleton>> {
+    {static} -INSTANCIA: RepositorioJogosLista
+    -RepositorioJogosLista()
+    {static} +getInstance(): RepositorioJogosLista
     -jogos: List<Jogo>
     -proximoId: long
   }
-  class RepositorioClientesLista {
+  class RepositorioClientesLista <<Singleton>> {
+    {static} -INSTANCIA: RepositorioClientesLista
+    -RepositorioClientesLista()
+    {static} +getInstance(): RepositorioClientesLista
     -clientes: List<Cliente>
     -proximoId: long
   }
-  class RepositorioAlugueisLista {
+  class RepositorioAlugueisLista <<Singleton>> {
+    {static} -INSTANCIA: RepositorioAlugueisLista
+    -RepositorioAlugueisLista()
+    {static} +getInstance(): RepositorioAlugueisLista
     -alugueis: List<Aluguel>
     -proximoId: long
   }
-  class RepositorioVendasLista {
+  class RepositorioVendasLista <<Singleton>> {
+    {static} -INSTANCIA: RepositorioVendasLista
+    -RepositorioVendasLista()
+    {static} +getInstance(): RepositorioVendasLista
     -vendas: List<Venda>
     -proximoId: long
   }
 }
 
 package negocio {
-  class PlataformaService {
+  class PlataformaService <<Singleton>> {
+    {static} -INSTANCIA: PlataformaService
+    -PlataformaService()
+    {static} +getInstance(): PlataformaService
     +cadastrar(Plataforma): Plataforma
     +atualizar(Plataforma)
     +remover(Long): boolean
     +buscarPorId(Long): Optional<Plataforma>
     +listar(): List<Plataforma>
   }
-  class JogoService {
+  class JogoService <<Singleton>> {
+    {static} -INSTANCIA: JogoService
+    -JogoService()
+    {static} +getInstance(): JogoService
     +salvar(Jogo): Jogo
     +atualizar(Jogo)
     +remover(Long): boolean
@@ -104,7 +126,10 @@ package negocio {
     +listarPorPlataforma(Long): List<Jogo>
     +listar(): List<Jogo>
   }
-  class ClienteService {
+  class ClienteService <<Singleton>> {
+    {static} -INSTANCIA: ClienteService
+    -ClienteService()
+    {static} +getInstance(): ClienteService
     +salvar(Cliente): Cliente
     +atualizar(Cliente)
     +remover(Long): boolean
@@ -112,7 +137,10 @@ package negocio {
     +buscarPorCpf(String): Optional<Cliente>
     +listar(): List<Cliente>
   }
-  class EstoqueService {
+  class EstoqueService <<Singleton>> {
+    {static} -INSTANCIA: EstoqueService
+    -EstoqueService()
+    {static} +getInstance(): EstoqueService
     +definirEstoque(Jogo, Plataforma, int)
     +adicionarExemplares(Jogo, Plataforma, int): int
     +removerExemplares(Jogo, Plataforma, int): int
@@ -121,7 +149,10 @@ package negocio {
     +consultarDisponibilidade(Jogo): Map<Plataforma, Integer>
     +possuiAlgumaDisponibilidade(Jogo): boolean
   }
-  class FinanceiroService {
+  class FinanceiroService <<Singleton>> {
+    {static} -INSTANCIA: FinanceiroService
+    -FinanceiroService()
+    {static} +getInstance(): FinanceiroService
     {static} +MULTA_DIARIA_PADRAO: double = 5.00
     -multaDiaria: double
     +calcularValorLocacao(Jogo, LocalDate, LocalDate): double
@@ -133,13 +164,22 @@ package negocio {
     +calcularTotalPendente(Cliente): double
     +possuiPendencias(Cliente): boolean
   }
-  class AluguelService {
+  class AluguelService <<Singleton>> {
+    {static} -INSTANCIA: AluguelService
+    -AluguelService()
+    {static} +getInstance(): AluguelService
     +realizarLocacao(Cliente, Jogo, Plataforma, LocalDate, LocalDate): Aluguel
   }
-  class DevolucaoService {
+  class DevolucaoService <<Singleton>> {
+    {static} -INSTANCIA: DevolucaoService
+    -DevolucaoService()
+    {static} +getInstance(): DevolucaoService
     +devolver(Aluguel, LocalDate)
   }
-  class VendaService {
+  class VendaService <<Singleton>> {
+    {static} -INSTANCIA: VendaService
+    -VendaService()
+    {static} +getInstance(): VendaService
     +registrarVenda(Cliente, List<ItemVenda>, LocalDate): Venda
     +buscarPorId(Long): Optional<Venda>
     +listarPorCliente(Cliente): List<Venda>
@@ -180,4 +220,15 @@ note bottom of IRepositorioPlataformas
   (synchronized, ids gerados no próprio repositório).
 end note
 
+
+note as NSing
+  Padrão Singleton (instância única em memória):
+  todo repositório e todo service tem construtor privado,
+  uma instância estática final criada na carga da classe
+  e getInstance() público. Cada service recebe, pelo
+  getInstance() dos colaboradores, as MESMAS instâncias
+  dos repositórios (via interface) e dos outros services,
+  então todos enxergam o mesmo conjunto de dados.
+  A camada gui (Contexto) obtém os services só por getInstance().
+end note
 @enduml

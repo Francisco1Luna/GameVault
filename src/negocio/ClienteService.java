@@ -1,5 +1,6 @@
 package negocio;
 
+import dados.RepositorioClientesLista;
 import dados.IRepositorioClientes;
 import model.Aluguel;
 import model.Cliente;
@@ -10,14 +11,18 @@ import java.util.Optional;
 
 public class ClienteService {
 
+    // Singleton: uma única instância em memória; use ClienteService.getInstance().
+    private static final ClienteService INSTANCIA = new ClienteService(
+        RepositorioClientesLista.getInstance(), FinanceiroService.getInstance());
+
+    public static ClienteService getInstance() {
+        return INSTANCIA;
+    }
+
     private final IRepositorioClientes repositorioClientes;
     private final FinanceiroService financeiroService;
 
-    public ClienteService(IRepositorioClientes repositorioClientes) {
-        this(repositorioClientes, new FinanceiroService());
-    }
-
-    public ClienteService(IRepositorioClientes repositorioClientes, FinanceiroService financeiroService) {
+    private ClienteService(IRepositorioClientes repositorioClientes, FinanceiroService financeiroService) {
         if (repositorioClientes == null) {
             throw new IllegalArgumentException("O repositório de clientes deve existir.");
         }

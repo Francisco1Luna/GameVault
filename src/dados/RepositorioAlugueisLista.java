@@ -13,6 +13,16 @@ import model.Cliente;
  */
 public class RepositorioAlugueisLista implements IRepositorioAlugueis {
 
+  // Singleton: uma única instância em memória, compartilhada por todos os services.
+  private static final RepositorioAlugueisLista INSTANCIA = new RepositorioAlugueisLista();
+
+  public static RepositorioAlugueisLista getInstance() {
+    return INSTANCIA;
+  }
+
+  private RepositorioAlugueisLista() {
+  }
+
   private final List<Aluguel> alugueis = new ArrayList<>();
   private long proximoId = 1;
 

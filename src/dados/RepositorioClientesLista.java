@@ -9,6 +9,16 @@ import model.Cliente;
 /** Repositório em memória: guarda os clientes (padrão e assinantes) em uma lista. */
 public class RepositorioClientesLista implements IRepositorioClientes {
 
+  // Singleton: uma única instância em memória, compartilhada por todos os services.
+  private static final RepositorioClientesLista INSTANCIA = new RepositorioClientesLista();
+
+  public static RepositorioClientesLista getInstance() {
+    return INSTANCIA;
+  }
+
+  private RepositorioClientesLista() {
+  }
+
   private final List<Cliente> clientes = new ArrayList<>();
   private long proximoId = 1;
 

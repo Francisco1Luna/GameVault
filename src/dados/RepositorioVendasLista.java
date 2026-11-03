@@ -10,6 +10,16 @@ import model.Venda;
 /** Repositório em memória: guarda as vendas em uma lista e gera os ids. */
 public class RepositorioVendasLista implements IRepositorioVendas {
 
+  // Singleton: uma única instância em memória, compartilhada por todos os services.
+  private static final RepositorioVendasLista INSTANCIA = new RepositorioVendasLista();
+
+  public static RepositorioVendasLista getInstance() {
+    return INSTANCIA;
+  }
+
+  private RepositorioVendasLista() {
+  }
+
   private final List<Venda> vendas = new ArrayList<>();
   private long proximoId = 1;
 

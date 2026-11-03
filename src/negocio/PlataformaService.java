@@ -1,5 +1,7 @@
 package negocio;
 
+import dados.RepositorioJogosLista;
+import dados.RepositoriosPlataformas;
 import dados.IRepositorioJogos;
 import dados.IRepositorioPlataformas;
 import model.Jogo;
@@ -10,10 +12,18 @@ import java.util.Optional;
 
 public class PlataformaService {
 
+    // Singleton: uma única instância em memória; use PlataformaService.getInstance().
+    private static final PlataformaService INSTANCIA = new PlataformaService(
+        RepositoriosPlataformas.getInstance(), RepositorioJogosLista.getInstance());
+
+    public static PlataformaService getInstance() {
+        return INSTANCIA;
+    }
+
     private final IRepositorioPlataformas repositorioPlataformas;
     private final IRepositorioJogos repositorioJogos;
 
-    public PlataformaService(IRepositorioPlataformas repositorioPlataformas, IRepositorioJogos repositorioJogos) {
+    private PlataformaService(IRepositorioPlataformas repositorioPlataformas, IRepositorioJogos repositorioJogos) {
         if (repositorioPlataformas == null) {
             throw new IllegalArgumentException("O repósitorio de plataformas não pode ser vazio.");
         }

@@ -1,5 +1,6 @@
 package negocio;
 
+import dados.RepositorioVendasLista;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -17,15 +18,20 @@ import model.Venda;
  */
 public class VendaService {
 
+  // Singleton: uma única instância em memória; use VendaService.getInstance().
+  private static final VendaService INSTANCIA = new VendaService(
+    EstoqueService.getInstance(), RepositorioVendasLista.getInstance(),
+    FinanceiroService.getInstance());
+
+  public static VendaService getInstance() {
+    return INSTANCIA;
+  }
+
   private final EstoqueService estoqueService;
   private final IRepositorioVendas repositorioVendas;
   private final FinanceiroService financeiroService;
 
-  public VendaService(EstoqueService estoqueService, IRepositorioVendas repositorioVendas) {
-    this(estoqueService, repositorioVendas, new FinanceiroService());
-  }
-
-  public VendaService(EstoqueService estoqueService, IRepositorioVendas repositorioVendas,
+  private VendaService(EstoqueService estoqueService, IRepositorioVendas repositorioVendas,
       FinanceiroService financeiroService) {
     if (estoqueService == null) {
       throw new IllegalArgumentException("O serviço de estoque é obrigatório.");
