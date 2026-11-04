@@ -10,6 +10,9 @@ public class AppFX extends Application {
 
     @Override
     public void start(Stage palco) throws Exception {
+
+        Contexto.get().getAuthService().garantirAdministradorPadrao();
+
         Parent raiz = FXMLLoader.load(
                 getClass().getResource("/gui/view/Login.fxml")
         );

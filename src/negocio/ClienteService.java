@@ -43,6 +43,9 @@ public class ClienteService {
         if (cliente.getCpf() == null || cliente.getCpf().trim().isEmpty()) {
             throw new IllegalArgumentException("O CPF do cliente é obrigatório.");
         }
+        if (repositorioClientes.buscarPorCpf(cliente.getCpf().trim()).isPresent()) {
+            throw new IllegalStateException("Já existe um cliente com o CPF " + cliente.getCpf().trim() + ".");
+        }
         return repositorioClientes.salvar(cliente);
     }
 
@@ -55,6 +58,10 @@ public class ClienteService {
         }
         if (cliente.getCpf() == null || cliente.getCpf().trim().isEmpty()) {
             throw new IllegalArgumentException("O CPF do cliente não pode ser vazio.");
+        }
+        Optional<Cliente> mesmoCpf = repositorioClientes.buscarPorCpf(cliente.getCpf().trim());
+        if (mesmoCpf.isPresent() && !mesmoCpf.get().getId().equals(cliente.getId())) {
+            throw new IllegalStateException("Já existe outro cliente com o CPF " + cliente.getCpf().trim() + ".");
         }
         repositorioClientes.atualizar(cliente);
     }

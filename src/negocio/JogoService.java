@@ -43,7 +43,7 @@ public class JogoService {
             throw new IllegalArgumentException("O jogo não pode ser vazio e deve possuir id.");
         }
         if (jogo.getTitulo() == null || jogo.getTitulo().trim().isEmpty()) {
-            throw new IllegalArgumentException("O jogo não pode ser vazaio e deve possuir um título.");
+            throw new IllegalArgumentException("O jogo não pode ser vazio e deve possuir um título.");
         }
        return repositorioJogos.salvar(jogo);
 
