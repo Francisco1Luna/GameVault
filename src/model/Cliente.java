@@ -28,6 +28,16 @@ public abstract class Cliente {
     this.limiteAluguelSimultaneo = limiteAluguelSimultaneo;
   }
 
+  private boolean administrador;
+
+  public boolean isAdministrador() {
+    return administrador;
+  }
+
+  public void setAdministrador(boolean administrador) {
+    this.administrador = administrador;
+  }
+
   public Long getId() {
     return id;
   }

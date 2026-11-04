@@ -3,11 +3,10 @@
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
-<?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
-
 
 <AnchorPane prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/26" xmlns:fx="http://javafx.com/fxml/1" fx:controller="gui.PrincipalController">
    <children>
@@ -24,11 +23,12 @@
             </HBox>
          </top>
          <left>
-            <VBox prefHeight="200.0" prefWidth="100.0" BorderPane.alignment="CENTER">
+            <VBox prefWidth="110.0" BorderPane.alignment="CENTER">
                <children>
-                  <Button mnemonicParsing="false" onAction="#abrirLoja" prefHeight="25.0" prefWidth="101.0" text="Loja" />
-                  <Button mnemonicParsing="false" onAction="#abrirPlataformas" prefHeight="25.0" prefWidth="101.0" text="Plataformas" />
-                  <Button mnemonicParsing="false" onAction="#abrirJogos" prefHeight="25.0" prefWidth="102.0" text="Jogos" />
+                  <Button maxWidth="Infinity" mnemonicParsing="false" onAction="#abrirLoja" text="Loja" />
+                  <Button fx:id="botaoPlataformas" maxWidth="Infinity" mnemonicParsing="false" onAction="#abrirPlataformas" text="Plataformas" />
+                  <Button fx:id="botaoJogos" maxWidth="Infinity" mnemonicParsing="false" onAction="#abrirJogos" text="Jogos" />
+                  <Button fx:id="botaoClientes" maxWidth="Infinity" mnemonicParsing="false" onAction="#abrirClientes" text="Clientes" />
                </children>
             </VBox>
          </left>

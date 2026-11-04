@@ -130,6 +130,21 @@ public class AuthService {
     return getUsuarioAtual().map(c -> c instanceof ClienteAssinante).orElse(false);
   }
 
+  public boolean usuarioAtualEhAdmin() {
+    return getUsuarioAtual().map(Cliente::isAdministrador).orElse(false);
+  }
+
+  /** Cria o administrador de demonstração (CPF 00000000000, senha admin123) se ainda não existir. */
+  public synchronized void garantirAdministradorPadrao() {
+    String cpf = "00000000000";
+    if (clienteService.buscarPorCpf(cpf).isPresent()) {
+      return;
+    }
+    Cliente admin = cadastrar("Administrador", cpf, LocalDate.of(1990, 1, 1), null, null, "admin123", false);
+    admin.setAdministrador(true);
+    clienteService.atualizar(admin);
+  }
+
   // ---- senha ----
 
   private String gerarHash(String senha) {
