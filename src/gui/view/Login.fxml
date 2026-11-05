@@ -16,7 +16,7 @@
          <style>-fx-font-size: 28px; -fx-font-weight: bold;</style>
       </Label>
       <Label text="Entre com seu CPF e senha" />
-      <TextField fx:id="campoCpf" maxWidth="280.0" promptText="CPF" />
+      <TextField fx:id="campoCpf" maxWidth="280.0" promptText="CPF (000.000.000-00)" />
       <PasswordField fx:id="campoSenha" maxWidth="280.0" onAction="#aoEntrar" promptText="Senha" />
       <Button defaultButton="true" maxWidth="280.0" mnemonicParsing="false" onAction="#aoEntrar" text="Entrar" />
       <Button maxWidth="280.0" mnemonicParsing="false" onAction="#aoCriarConta" text="Criar conta" />

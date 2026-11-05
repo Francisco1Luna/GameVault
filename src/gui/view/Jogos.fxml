@@ -43,13 +43,13 @@
                     <children>
                         <ComboBox fx:id="comboClassificacao" prefWidth="160.0" promptText="Classificação" />
                         <ListView fx:id="listaPlataformas" prefHeight="80.0" prefWidth="200.0" />
-                        <TextField fx:id="campoEstoque" promptText="Estoque (vazio = manter)" HBox.hgrow="ALWAYS" />
+                        <TextField fx:id="campoEstoque" promptText="Estoque (inteiro; vazio = manter)" HBox.hgrow="ALWAYS" />
                     </children>
                 </HBox>
                 <HBox spacing="8.0">
                     <children>
-                        <TextField fx:id="campoPreco" promptText="Preço" HBox.hgrow="ALWAYS" />
-                        <TextField fx:id="campoLocacao" promptText="Locação por dia" HBox.hgrow="ALWAYS" />
+                        <TextField fx:id="campoPreco" promptText="Preço (ex.: 59,90)" HBox.hgrow="ALWAYS" />
+                        <TextField fx:id="campoLocacao" promptText="Locação por dia (ex.: 5,90)" HBox.hgrow="ALWAYS" />
                         <Button mnemonicParsing="false" onAction="#aoAdicionar" text="Adicionar" />
                         <Button mnemonicParsing="false" onAction="#aoRemover" text="Remover" />
                         <Button mnemonicParsing="false" onAction="#aoEditar" text="Salvar alterações" />

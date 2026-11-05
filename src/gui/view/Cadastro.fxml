@@ -18,7 +18,7 @@
          <style>-fx-font-size: 24px; -fx-font-weight: bold;</style>
       </Label>
       <TextField fx:id="campoNome" maxWidth="320.0" promptText="Nome completo" />
-      <TextField fx:id="campoCpf" maxWidth="320.0" promptText="CPF (11 dígitos)" />
+      <TextField fx:id="campoCpf" maxWidth="320.0" promptText="CPF (000.000.000-00)" />
       <DatePicker fx:id="campoNascimento" maxWidth="320.0" promptText="Data de nascimento" />
       <TextField fx:id="campoEmail" maxWidth="320.0" promptText="E-mail (opcional)" />
       <TextField fx:id="campoTelefone" maxWidth="320.0" promptText="Telefone (opcional)" />

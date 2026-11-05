@@ -19,9 +19,11 @@ public class ClientesController {
 
     @FXML
     public void initialize() {
+        Formatadores.cpf(campoCpf);
         colId.setCellValueFactory(new PropertyValueFactory<>("id"));
         colNome.setCellValueFactory(new PropertyValueFactory<>("nome"));
-        colCpf.setCellValueFactory(new PropertyValueFactory<>("cpf"));
+        colCpf.setCellValueFactory(c -> new javafx.beans.property.SimpleStringProperty(
+                Formatadores.formatarCpf(c.getValue().getCpf())));
         atualizar();
     }
 

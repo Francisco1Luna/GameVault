@@ -21,7 +21,7 @@
         <HBox spacing="8.0" BorderPane.alignment="CENTER">
             <children>
                 <TextField fx:id="campoNome" promptText="Nome" />
-                <TextField fx:id="campoCpf" promptText="CPF" />
+                <TextField fx:id="campoCpf" promptText="CPF (000.000.000-00)" />
                 <Button mnemonicParsing="false" onAction="#aoRemover" text="Remover" />
             </children>
         </HBox>

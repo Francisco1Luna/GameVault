@@ -72,6 +72,9 @@ public class JogosController {
 
     @FXML
     public void initialize() {
+        Formatadores.decimal(campoPreco);
+        Formatadores.decimal(campoLocacao);
+        Formatadores.inteiro(campoEstoque);
         colId.setCellValueFactory(new PropertyValueFactory<>("id"));
         colTitulo.setCellValueFactory(new PropertyValueFactory<>("titulo"));
         colGenero.setCellValueFactory(new PropertyValueFactory<>("genero"));
@@ -318,6 +321,7 @@ public class JogosController {
             for (Plataforma plataforma : plataformas) {
                 TextField campo = new TextField(
                         String.valueOf(estoqueService.consultarQuantidade(selecionado, plataforma)));
+                Formatadores.inteiro(campo);
                 grade.add(new Label(plataforma.getNome()), 0, linha);
                 grade.add(campo, 1, linha);
                 campos.put(plataforma, campo);
