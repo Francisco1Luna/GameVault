@@ -36,6 +36,12 @@ public class CadastroController {
     private CheckBox checkAssinante;
 
     @FXML
+    public void initialize() {
+        Formatadores.cpf(campoCpf);
+        Formatadores.telefone(campoTelefone);
+    }
+
+    @FXML
     private void aoCadastrar() {
         if (!campoSenha.getText().equals(campoConfirmarSenha.getText())) {
             Telas.erro("A confirmação de senha não confere.");

@@ -16,6 +16,9 @@ public class PlataformasController {
     private TextField campoFabricante;
 
     @FXML
+    private TextField campoPesquisa;
+
+    @FXML
     private TableView<Plataforma> tabelaPlataformas;
 
     @FXML
@@ -40,11 +43,16 @@ public class PlataformasController {
                 campoFabricante.setText(novo.getFabricante());
             }
         });
+        campoPesquisa.textProperty().addListener((obs, antigo, novo) -> atualizar());
         atualizar();
     }
 
     private void atualizar() {
-        tabelaPlataformas.getItems().setAll(service.listar());
+        String pesquisa = campoPesquisa.getText() == null ? "" : campoPesquisa.getText().trim().toLowerCase();
+        tabelaPlataformas.getItems().setAll(service.listar().stream()
+                .filter(plataforma -> plataforma.getNome().toLowerCase().contains(pesquisa)
+                        || plataforma.getFabricante().toLowerCase().contains(pesquisa))
+                .collect(java.util.stream.Collectors.toList()));
     }
 
     @FXML

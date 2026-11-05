@@ -10,6 +10,16 @@
 <?import javafx.scene.text.Font?>
 
 <BorderPane prefHeight="489.0" prefWidth="512.0" xmlns="http://javafx.com/javafx/26" xmlns:fx="http://javafx.com/fxml/1" fx:controller="gui.PlataformasController">
+   <top>
+      <HBox spacing="8.0" BorderPane.alignment="CENTER">
+         <padding>
+            <Insets bottom="8.0" left="8.0" right="8.0" top="8.0" />
+         </padding>
+         <children>
+            <TextField fx:id="campoPesquisa" promptText="Pesquisar plataforma ou fabricante" HBox.hgrow="ALWAYS" />
+         </children>
+      </HBox>
+   </top>
    <center>
       <TableView fx:id="tabelaPlataformas" BorderPane.alignment="CENTER">
          <columnResizePolicy>

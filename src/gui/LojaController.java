@@ -9,6 +9,7 @@ import javafx.scene.control.Label;
 import javafx.scene.control.Spinner;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
+import javafx.scene.control.TextField;
 import model.Aluguel;
 import model.Cliente;
 import model.ClienteAssinante;
@@ -61,6 +62,7 @@ public class LojaController {
     }
 
     @FXML private Label rotuloConta;
+    @FXML private TextField campoPesquisaCatalogo;
     @FXML private TableView<ItemCatalogo> tabelaCatalogo;
     @FXML private TableColumn<ItemCatalogo, String> colJogo;
     @FXML private TableColumn<ItemCatalogo, String> colPlataforma;
@@ -93,6 +95,7 @@ public class LojaController {
     public void initialize() {
         spinnerQuantidade.setValueFactory(new javafx.scene.control.SpinnerValueFactory.IntegerSpinnerValueFactory(1, 99, 1));
         spinnerDias.setValueFactory(new javafx.scene.control.SpinnerValueFactory.IntegerSpinnerValueFactory(1, 30, 1));
+        campoPesquisaCatalogo.textProperty().addListener((obs, antigo, novo) -> atualizarTudo());
 
         colJogo.setCellValueFactory(c -> new SimpleStringProperty(c.getValue().jogo.getTitulo()));
         colPlataforma.setCellValueFactory(c -> new SimpleStringProperty(
@@ -218,9 +221,14 @@ public class LojaController {
                 }
             }
         }
-        tabelaCatalogo.getItems().setAll(linhas);
+        String pesquisa = campoPesquisaCatalogo.getText() == null ? "" : campoPesquisaCatalogo.getText().trim().toLowerCase();
+        List<ItemCatalogo> linhasFiltradas = linhas.stream()
+                .filter(linha -> linha.jogo.getTitulo().toLowerCase().contains(pesquisa)
+                        || (linha.plataforma != null && linha.plataforma.getNome().toLowerCase().contains(pesquisa)))
+                .collect(Collectors.toList());
+        tabelaCatalogo.getItems().setAll(linhasFiltradas);
         if (marcado != null) {
-            for (ItemCatalogo linha : linhas) {
+            for (ItemCatalogo linha : linhasFiltradas) {
                 if (linha.jogo == marcado.jogo && linha.plataforma == marcado.plataforma) {
                     tabelaCatalogo.getSelectionModel().select(linha);
                     break;

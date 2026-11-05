@@ -24,11 +24,18 @@ public class ClientesController {
         colNome.setCellValueFactory(new PropertyValueFactory<>("nome"));
         colCpf.setCellValueFactory(c -> new javafx.beans.property.SimpleStringProperty(
                 Formatadores.formatarCpf(c.getValue().getCpf())));
+        campoNome.textProperty().addListener((obs, antigo, novo) -> atualizar());
+        campoCpf.textProperty().addListener((obs, antigo, novo) -> atualizar());
         atualizar();
     }
 
     private void atualizar() {
-        tabelaClientes.getItems().setAll(clienteService.listar());
+        String nome = campoNome.getText() == null ? "" : campoNome.getText().trim().toLowerCase();
+        String cpf = campoCpf.getText() == null ? "" : campoCpf.getText().replaceAll("\\D", "");
+        tabelaClientes.getItems().setAll(clienteService.listar().stream()
+                .filter(cliente -> cliente.getNome().toLowerCase().contains(nome))
+                .filter(cliente -> cliente.getCpf().replaceAll("\\D", "").contains(cpf))
+                .collect(java.util.stream.Collectors.toList()));
     }
 
     @FXML

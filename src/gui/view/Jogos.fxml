@@ -12,6 +12,13 @@
 <?import javafx.scene.layout.VBox?>
 
 <BorderPane prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/26" xmlns:fx="http://javafx.com/fxml/1" fx:controller="gui.JogosController">
+    <top>
+        <HBox spacing="8.0">
+            <children>
+                <TextField fx:id="campoPesquisa" promptText="Pesquisar por título ou gênero" HBox.hgrow="ALWAYS" />
+            </children>
+        </HBox>
+    </top>
     <center>
         <TableView fx:id="tabelaJogos" BorderPane.alignment="CENTER">
             <columnResizePolicy>
@@ -36,6 +43,8 @@
                 <HBox spacing="8.0">
                     <children>
                         <TextField fx:id="campoTitulo" promptText="Título" HBox.hgrow="ALWAYS" />
+                        <Button mnemonicParsing="false" onAction="#aoBuscarDados" text="Buscar dados" />
+                        <Button mnemonicParsing="false" onAction="#aoImportarCatalogo" text="Importar catálogo FreeToGame" />
                         <TextField fx:id="campoGenero" promptText="Gênero" HBox.hgrow="ALWAYS" />
                     </children>
                 </HBox>
@@ -48,6 +57,13 @@
                 </HBox>
                 <HBox spacing="8.0">
                     <children>
+                        <TextField fx:id="campoDesenvolvedora" editable="false" promptText="Desenvolvedora (FreeToGame)" HBox.hgrow="ALWAYS" />
+                        <TextField fx:id="campoPublicadora" editable="false" promptText="Publicadora (FreeToGame)" HBox.hgrow="ALWAYS" />
+                    </children>
+                </HBox>
+                <HBox spacing="8.0">
+                    <children>
+                        <TextField fx:id="campoLink" editable="false" promptText="Link do jogo (FreeToGame)" HBox.hgrow="ALWAYS" />
                         <TextField fx:id="campoPreco" promptText="Preço (ex.: 59,90)" HBox.hgrow="ALWAYS" />
                         <TextField fx:id="campoLocacao" promptText="Locação por dia (ex.: 5,90)" HBox.hgrow="ALWAYS" />
                         <Button mnemonicParsing="false" onAction="#aoAdicionar" text="Adicionar" />
