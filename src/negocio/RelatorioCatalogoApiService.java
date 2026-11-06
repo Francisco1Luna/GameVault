@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.TreeMap;
 
 import dados.IRepositorioJogos;
+import dados.RepositorioJogosLista;
 import model.Jogo;
 
 /**
@@ -14,6 +15,14 @@ import model.Jogo;
  * Depende exclusivamente do repositório de jogos.
  */
 public class RelatorioCatalogoApiService {
+
+  // Singleton: uma única instância em memória; use RelatorioCatalogoApiService.getInstance().
+  private static final RelatorioCatalogoApiService INSTANCIA = new RelatorioCatalogoApiService(
+      RepositorioJogosLista.getInstance());
+
+  public static RelatorioCatalogoApiService getInstance() {
+    return INSTANCIA;
+  }
 
   private final IRepositorioJogos repositorioJogos;
 

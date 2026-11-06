@@ -6,6 +6,8 @@ import java.util.TreeMap;
 
 import dados.IRepositorioAlugueis;
 import dados.IRepositorioVendas;
+import dados.RepositorioAlugueisLista;
+import dados.RepositorioVendasLista;
 import model.Aluguel;
 import model.Venda;
 
@@ -14,6 +16,14 @@ import model.Venda;
  * Depende dos repositórios de aluguéis e vendas.
  */
 public class RelatorioReceitaService {
+
+  // Singleton: uma única instância em memória; use RelatorioReceitaService.getInstance().
+  private static final RelatorioReceitaService INSTANCIA = new RelatorioReceitaService(
+      RepositorioAlugueisLista.getInstance(), RepositorioVendasLista.getInstance());
+
+  public static RelatorioReceitaService getInstance() {
+    return INSTANCIA;
+  }
 
   private final IRepositorioAlugueis repositorioAlugueis;
   private final IRepositorioVendas repositorioVendas;

@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.Map;
 
 import dados.IRepositorioAlugueis;
+import dados.RepositorioAlugueisLista;
 import model.Aluguel;
 import model.Jogo;
 
@@ -21,6 +22,14 @@ import model.Jogo;
  * Depende exclusivamente do repositório de aluguéis.
  */
 public class RelatorioMaisLocadosService {
+
+  // Singleton: uma única instância em memória; use RelatorioMaisLocadosService.getInstance().
+  private static final RelatorioMaisLocadosService INSTANCIA = new RelatorioMaisLocadosService(
+      RepositorioAlugueisLista.getInstance());
+
+  public static RelatorioMaisLocadosService getInstance() {
+    return INSTANCIA;
+  }
 
   private final IRepositorioAlugueis repositorioAlugueis;
 

@@ -19,9 +19,22 @@ import model.Jogo;
  */
 public class RelatorioService {
 
+  // Singleton: uma única instância em memória; use RelatorioService.getInstance().
+  private static final RelatorioService INSTANCIA = new RelatorioService();
+
+  public static RelatorioService getInstance() {
+    return INSTANCIA;
+  }
+
   private final RelatorioMaisLocadosService maisLocadosService;
   private final RelatorioReceitaService receitaService;
   private final RelatorioCatalogoApiService catalogoApiService;
+
+  public RelatorioService() {
+    this(RelatorioMaisLocadosService.getInstance(),
+        RelatorioReceitaService.getInstance(),
+        RelatorioCatalogoApiService.getInstance());
+  }
 
   public RelatorioService(IRepositorioAlugueis repositorioAlugueis,
       IRepositorioJogos repositorioJogos,
