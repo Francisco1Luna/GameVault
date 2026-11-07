@@ -20,6 +20,7 @@ public class Contexto {
     private final FinanceiroService financeiroService;
     private final PlataformaService plataformaService;
     private final AuthService authService;
+    private final RelatorioService relatorioService;
 
     private Contexto() {
         this.jogoService = JogoService.getInstance();
@@ -31,6 +32,7 @@ public class Contexto {
         this.financeiroService = FinanceiroService.getInstance();
         this.plataformaService = PlataformaService.getInstance();
         this.authService = AuthService.getInstance();
+        this.relatorioService = RelatorioService.getInstance();
     }
 
     public static Contexto get() { return INSTANCIA; }
@@ -44,4 +46,5 @@ public class Contexto {
     public FinanceiroService getFinanceiroService() { return financeiroService; }
     public PlataformaService getPlataformaService() { return plataformaService; }
     public AuthService getAuthService() { return authService; }
+    public RelatorioService getRelatorioService() { return relatorioService; }
 }
