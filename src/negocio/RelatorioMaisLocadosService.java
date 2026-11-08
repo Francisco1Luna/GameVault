@@ -1,8 +1,10 @@
 package negocio;
 
 import java.io.BufferedWriter;
-import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.time.LocalDate;
 import java.util.AbstractMap;
 import java.util.ArrayList;
@@ -42,11 +44,11 @@ public class RelatorioMaisLocadosService {
 
   /**
    * Retorna os jogos mais locados dentro do período informado (início e fim inclusivos),
-   * ordenados do mais locado para o menos locado.
+   * ordenados por quantidade decrescente e, em caso de empate, por título e ID.
    *
    * @param inicio data inicial do período (inclusiva)
    * @param fim    data final do período (inclusiva)
-   * @return lista de pares (jogo, quantidade) ordenada por quantidade decrescente
+   * @return lista imutável de pares (jogo, quantidade)
    */
   public List<Map.Entry<Jogo, Long>> jogosMaisLocadosPorPeriodo(LocalDate inicio, LocalDate fim) {
     validarPeriodo(inicio, fim);
@@ -55,6 +57,9 @@ public class RelatorioMaisLocadosService {
     Map<Long, Jogo> jogosPorId = new LinkedHashMap<>();
 
     for (Aluguel aluguel : repositorioAlugueis.listar()) {
+      if (aluguel == null) {
+        continue;
+      }
       LocalDate dataLocacao = aluguel.getDataInicio();
       if (dataLocacao != null && !dataLocacao.isBefore(inicio) && !dataLocacao.isAfter(fim)) {
         Jogo jogo = aluguel.getJogo();
@@ -69,21 +74,24 @@ public class RelatorioMaisLocadosService {
     List<Map.Entry<Jogo, Long>> resultado = new ArrayList<>();
     for (Map.Entry<Long, Long> entrada : contagemPorJogoId.entrySet()) {
       Jogo jogo = jogosPorId.get(entrada.getKey());
-      resultado.add(new AbstractMap.SimpleEntry<>(jogo, entrada.getValue()));
+      resultado.add(new AbstractMap.SimpleImmutableEntry<>(jogo, entrada.getValue()));
     }
 
-    resultado.sort(new Comparator<Map.Entry<Jogo, Long>>() {
-      @Override
-      public int compare(Map.Entry<Jogo, Long> a, Map.Entry<Jogo, Long> b) {
-        return Long.compare(b.getValue(), a.getValue());
-      }
-    });
+    resultado.sort(Comparator
+        .<Map.Entry<Jogo, Long>>comparingLong(Map.Entry::getValue)
+        .reversed()
+        .thenComparing(entry -> entry.getKey().getTitulo(),
+            Comparator.nullsLast(String.CASE_INSENSITIVE_ORDER))
+        .thenComparing(entry -> entry.getKey().getTitulo(),
+            Comparator.nullsLast(Comparator.naturalOrder()))
+        .thenComparing(entry -> entry.getKey().getId(), Comparator.nullsLast(Long::compareTo)));
 
     return Collections.unmodifiableList(resultado);
   }
 
   /**
    * Gera o conteúdo CSV do relatório de jogos mais locados no período.
+   * Campos textuais são protegidos contra fórmulas de planilha e delimitadores CSV.
    *
    * @param inicio data inicial do período (inclusiva)
    * @param fim    data final do período (inclusiva)
@@ -92,7 +100,7 @@ public class RelatorioMaisLocadosService {
   public String gerarCsvJogosMaisLocados(LocalDate inicio, LocalDate fim) {
     List<Map.Entry<Jogo, Long>> ranking = jogosMaisLocadosPorPeriodo(inicio, fim);
     StringBuilder csv = new StringBuilder();
-    csv.append("Posicao;ID;Titulo;Genero;Quantidade de Locacoes\n");
+    csv.append("Posição;ID;Título;Gênero;Quantidade de Locações\r\n");
 
     int posicao = 1;
     for (Map.Entry<Jogo, Long> entrada : ranking) {
@@ -101,14 +109,14 @@ public class RelatorioMaisLocadosService {
       csv.append(jogo.getId()).append(";");
       csv.append(escaparCsv(jogo.getTitulo())).append(";");
       csv.append(escaparCsv(jogo.getGenero())).append(";");
-      csv.append(entrada.getValue()).append("\n");
+      csv.append(entrada.getValue()).append("\r\n");
     }
 
     return csv.toString();
   }
 
   /**
-   * Exporta o relatório de jogos mais locados para um arquivo CSV no caminho informado.
+   * Exporta o relatório de jogos mais locados para um arquivo CSV UTF-8 no caminho informado.
    *
    * @param inicio         data inicial do período (inclusiva)
    * @param fim            data final do período (inclusiva)
@@ -121,7 +129,8 @@ public class RelatorioMaisLocadosService {
       throw new IllegalArgumentException("O caminho do arquivo é obrigatório.");
     }
     String conteudo = gerarCsvJogosMaisLocados(inicio, fim);
-    try (BufferedWriter writer = new BufferedWriter(new FileWriter(caminhoArquivo))) {
+    try (BufferedWriter writer = Files.newBufferedWriter(
+        Path.of(caminhoArquivo.trim()), StandardCharsets.UTF_8)) {
       writer.write(conteudo);
     }
   }
@@ -139,8 +148,20 @@ public class RelatorioMaisLocadosService {
     if (valor == null) {
       return "";
     }
-    if (valor.contains(";") || valor.contains("\"") || valor.contains("\n")) {
-      return "\"" + valor.replace("\"", "\"\"") + "\"";
+    String seguro = neutralizarFormula(valor);
+    if (seguro.contains(";") || seguro.contains("\"") || seguro.contains("\n") || seguro.contains("\r")) {
+      return "\"" + seguro.replace("\"", "\"\"") + "\"";
+    }
+    return seguro;
+  }
+
+  /** Evita que textos importados sejam executados como fórmulas ao abrir o CSV em planilhas. */
+  private static String neutralizarFormula(String valor) {
+    for (int i = 0; i < valor.length(); i++) {
+      char caractere = valor.charAt(i);
+      if (!Character.isWhitespace(caractere) && !Character.isISOControl(caractere)) {
+        return "=+-@".indexOf(caractere) >= 0 ? "'" + valor : valor;
+      }
     }
     return valor;
   }
