@@ -1,7 +1,12 @@
 package negocio;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.YearMonth;
+import java.util.Collections;
+import java.util.Locale;
 import java.util.Map;
+import java.util.NavigableMap;
 import java.util.TreeMap;
 
 import dados.IRepositorioAlugueis;
@@ -13,7 +18,7 @@ import model.Venda;
 
 /**
  * REQ15 – Relatório de receita (locações + vendas) por mês.
- * Depende dos repositórios de aluguéis e vendas.
+ * Considera o valor registrado no momento da operação e agrupa pela data da locação/venda.
  */
 public class RelatorioReceitaService {
 
@@ -40,89 +45,113 @@ public class RelatorioReceitaService {
   }
 
   /**
-   * Calcula a receita total por mês, somando receita de locações e de vendas.
-   * Retorna um mapa ordenado por mês (YearMonth), onde cada entrada contém um array
-   * de 3 valores: [receitaLocacoes, receitaVendas, receitaTotal].
+   * Calcula a receita registrada por mês usando valores decimais exatos.
+   * A locação é contabilizada no mês de início e as vendas no mês em que foram registradas.
+   * O domínio não possui estado de pagamento/cancelamento; por isso, cada operação registrada
+   * conta, independentemente de a locação ainda estar ativa ou já ter sido devolvida.
+   * Registros sem data ou valor válido causam erro explícito para evitar totais silenciosamente incorretos.
    *
-   * @return mapa ordenado de YearMonth para double[3] {receitaLocacoes, receitaVendas, receitaTotal}
+   * @return mapa ordenado e imutável por mês
    */
-  public Map<YearMonth, double[]> receitaPorMes() {
-    Map<YearMonth, double[]> receitas = new TreeMap<>();
+  public NavigableMap<YearMonth, ResumoMensal> resumoReceitaPorMes() {
+    Map<YearMonth, BigDecimal[]> acumulados = new TreeMap<>();
 
-    // Receita de locações (usa o preço do jogo como valor da locação)
     for (Aluguel aluguel : repositorioAlugueis.listar()) {
-      if (aluguel.getDataInicio() == null) {
-        continue;
+      if (aluguel == null) {
+        throw new IllegalStateException("O repositório contém um aluguel nulo; não foi possível calcular a receita.");
       }
-      YearMonth mes = YearMonth.from(aluguel.getDataInicio());
-      double valor = 0.0;
-      if (aluguel.getValorLocacao() != null) {
-        valor = aluguel.getValorLocacao();
-      } else if (aluguel.getJogo() != null && aluguel.getJogo().getPrecoLocacaoDiaria() != null) {
-        valor = aluguel.getJogo().getPrecoLocacaoDiaria();
-      } else if (aluguel.getJogo() != null && aluguel.getJogo().getPreco() != null) {
-        valor = aluguel.getJogo().getPreco();
-      }
-      double[] rec = receitas.computeIfAbsent(mes, k -> new double[3]);
-      rec[0] += valor;
+      YearMonth mes = mesObrigatorio(aluguel.getDataInicio(), "aluguel", aluguel.getId());
+      BigDecimal valor = valorObrigatorio(aluguel.getValorLocacao(), "aluguel", aluguel.getId());
+      BigDecimal[] valores = acumulados.computeIfAbsent(mes, chave -> novosAcumuladores());
+      valores[0] = valores[0].add(valor);
     }
 
-    // Receita de vendas
     for (Venda venda : repositorioVendas.listar()) {
-      if (venda.getDataVenda() == null) {
-        continue;
+      if (venda == null) {
+        throw new IllegalStateException("O repositório contém uma venda nula; não foi possível calcular a receita.");
       }
-      YearMonth mes = YearMonth.from(venda.getDataVenda());
-      double valor = venda.getValorTotal() != null ? venda.getValorTotal() : 0.0;
-      double[] rec = receitas.computeIfAbsent(mes, k -> new double[3]);
-      rec[1] += valor;
+      YearMonth mes = mesObrigatorio(venda.getDataVenda(), "venda", venda.getId());
+      BigDecimal valor = valorObrigatorio(venda.getValorTotal(), "venda", venda.getId());
+      BigDecimal[] valores = acumulados.computeIfAbsent(mes, chave -> novosAcumuladores());
+      valores[1] = valores[1].add(valor);
     }
 
-    // Calcula totais com arredondamento
-    for (double[] rec : receitas.values()) {
-      rec[0] = arredondar(rec[0]);
-      rec[1] = arredondar(rec[1]);
-      rec[2] = arredondar(rec[0] + rec[1]);
-    }
-
-    return receitas;
+    NavigableMap<YearMonth, ResumoMensal> resultado = new TreeMap<>();
+    acumulados.forEach((mes, valores) -> resultado.put(mes,
+        new ResumoMensal(valores[0], valores[1], valores[0].add(valores[1]))));
+    return Collections.unmodifiableNavigableMap(resultado);
   }
 
   /**
-   * Gera uma representação textual do relatório de receita por mês, formatada
-   * como tabela legível para exibição.
-   *
-   * @return relatório formatado como String
+   * Compatibilidade com chamadas existentes. Para novos usos, prefira {@link #resumoReceitaPorMes()}.
+   * Cada chamada cria um mapa e arrays novos, sem expor estado interno do serviço.
    */
+  @Deprecated
+  public Map<YearMonth, double[]> receitaPorMes() {
+    Map<YearMonth, double[]> resultado = new TreeMap<>();
+    resumoReceitaPorMes().forEach((mes, resumo) -> resultado.put(mes,
+        new double[] { resumo.receitaLocacoes().doubleValue(), resumo.receitaVendas().doubleValue(),
+            resumo.receitaTotal().doubleValue() }));
+    return Collections.unmodifiableMap(resultado);
+  }
+
+  /** Gera uma tabela textual legível do relatório mensal de receita. */
   public String gerarRelatorioReceitaPorMes() {
-    Map<YearMonth, double[]> receitas = receitaPorMes();
+    NavigableMap<YearMonth, ResumoMensal> receitas = resumoReceitaPorMes();
     StringBuilder sb = new StringBuilder();
-    sb.append(String.format("%-10s | %18s | %18s | %18s%n", "Mês", "Receita Locações",
+    sb.append(String.format(Locale.ROOT, "%-10s | %18s | %18s | %18s%n", "Mês", "Receita Locações",
         "Receita Vendas", "Receita Total"));
     sb.append("-----------|--------------------|--------------------|--------------------\n");
 
-    double totalLocacoes = 0;
-    double totalVendas = 0;
-    double totalGeral = 0;
+    BigDecimal totalLocacoes = BigDecimal.ZERO;
+    BigDecimal totalVendas = BigDecimal.ZERO;
+    BigDecimal totalGeral = BigDecimal.ZERO;
 
-    for (Map.Entry<YearMonth, double[]> entrada : receitas.entrySet()) {
+    for (Map.Entry<YearMonth, ResumoMensal> entrada : receitas.entrySet()) {
       YearMonth mes = entrada.getKey();
-      double[] rec = entrada.getValue();
-      sb.append(String.format("%-10s | %18.2f | %18.2f | %18.2f%n",
-          mes.toString(), rec[0], rec[1], rec[2]));
-      totalLocacoes += rec[0];
-      totalVendas += rec[1];
-      totalGeral += rec[2];
+      ResumoMensal resumo = entrada.getValue();
+      sb.append(String.format(Locale.ROOT, "%-10s | %18.2f | %18.2f | %18.2f%n",
+          mes.toString(), resumo.receitaLocacoes(), resumo.receitaVendas(), resumo.receitaTotal()));
+      totalLocacoes = totalLocacoes.add(resumo.receitaLocacoes());
+      totalVendas = totalVendas.add(resumo.receitaVendas());
+      totalGeral = totalGeral.add(resumo.receitaTotal());
     }
 
     sb.append("-----------|--------------------|--------------------|--------------------\n");
-    sb.append(String.format("%-10s | %18.2f | %18.2f | %18.2f%n", "TOTAL",
-        arredondar(totalLocacoes), arredondar(totalVendas), arredondar(totalGeral)));
+    sb.append(String.format(Locale.ROOT, "%-10s | %18.2f | %18.2f | %18.2f%n", "TOTAL",
+        totalLocacoes, totalVendas, totalGeral));
 
     return sb.toString();
   }
 
-  private static double arredondar(double valor) {
-    return Math.round(valor * 100.0) / 100.0;
+  private static BigDecimal[] novosAcumuladores() {
+    return new BigDecimal[] { BigDecimal.ZERO, BigDecimal.ZERO };
+  }
+
+  private static YearMonth mesObrigatorio(java.time.LocalDate data, String tipo, Long id) {
+    if (data == null) {
+      throw new IllegalStateException("O " + tipo + " " + id + " não possui data e não pode entrar no relatório.");
+    }
+    return YearMonth.from(data);
+  }
+
+  private static BigDecimal valorObrigatorio(Double valor, String tipo, Long id) {
+    if (valor == null || !Double.isFinite(valor) || valor < 0) {
+      throw new IllegalStateException("O " + tipo + " " + id
+          + " não possui um valor financeiro válido; não foi possível calcular a receita.");
+    }
+    return BigDecimal.valueOf(valor).setScale(2, RoundingMode.HALF_UP);
+  }
+
+  /** Imutável e tipado para evitar o uso de arrays mutáveis e valores double em dinheiro. */
+  public record ResumoMensal(BigDecimal receitaLocacoes, BigDecimal receitaVendas, BigDecimal receitaTotal) {
+    public ResumoMensal {
+      if (receitaLocacoes == null || receitaVendas == null || receitaTotal == null) {
+        throw new IllegalArgumentException("Os valores do resumo mensal são obrigatórios.");
+      }
+      receitaLocacoes = receitaLocacoes.setScale(2, RoundingMode.HALF_UP);
+      receitaVendas = receitaVendas.setScale(2, RoundingMode.HALF_UP);
+      receitaTotal = receitaTotal.setScale(2, RoundingMode.HALF_UP);
+    }
   }
 }

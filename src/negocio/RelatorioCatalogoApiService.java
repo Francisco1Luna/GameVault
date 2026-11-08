@@ -34,66 +34,56 @@ public class RelatorioCatalogoApiService {
   }
 
   /**
-   * Agrupa TODOS os jogos importados da API por gênero.
-   * Os gêneros são ordenados em ordem alfabética através de um TreeMap.
-   * Jogos importados são aqueles que possuem {@code urlReferencia} preenchida.
+   * Agrupa os jogos importados da API por gênero, considerando sem gênero como "Outros".
+   * Os gêneros são ordenados sem diferenciar maiúsculas de minúsculas.
    *
-   * @return mapa onde cada chave é o gênero e o valor é a lista de jogos daquele gênero
+   * @return mapa e listas imutáveis com os jogos importados agrupados por gênero
    */
   public Map<String, List<Jogo>> listarTodosImportadosAgrupadosPorGenero() {
     Map<String, List<Jogo>> agrupamento = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
 
     for (Jogo jogo : repositorioJogos.listar()) {
       if (isImportadoDaApi(jogo)) {
-        String genero = (jogo.getGenero() != null && !jogo.getGenero().trim().isEmpty())
-            ? jogo.getGenero().trim()
-            : "Outros";
-
-        agrupamento.computeIfAbsent(genero, k -> new ArrayList<>()).add(jogo);
+        String genero = normalizarGenero(jogo.getGenero());
+        agrupamento.computeIfAbsent(genero, chave -> new ArrayList<>()).add(jogo);
       }
     }
 
-    return agrupamento;
+    Map<String, List<Jogo>> resultado = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
+    agrupamento.forEach((genero, jogos) ->
+        resultado.put(genero, Collections.unmodifiableList(new ArrayList<>(jogos))));
+    return Collections.unmodifiableMap(resultado);
   }
 
   /**
    * Lista os jogos importados da API filtrados por um gênero específico.
-   * A busca ignora maiúsculas e minúsculas.
+   * A busca ignora espaços externos e maiúsculas/minúsculas.
    *
-   * @param genero gênero a ser pesquisado (ex: "Shooter", "MMORPG")
-   * @return lista de jogos do gênero correspondente
+   * @param genero gênero a ser pesquisado (ex: "Shooter", "MMORPG", "Outros")
+   * @return lista imutável dos jogos correspondentes
    */
   public List<Jogo> listarImportadosPorGenero(String genero) {
     if (genero == null || genero.trim().isEmpty()) {
       throw new IllegalArgumentException("O gênero é obrigatório.");
     }
 
+    String generoPesquisado = normalizarGenero(genero);
     List<Jogo> resultado = new ArrayList<>();
     for (Jogo jogo : repositorioJogos.listar()) {
-      if (isImportadoDaApi(jogo) && genero.equalsIgnoreCase(jogo.getGenero())) {
+      if (isImportadoDaApi(jogo) && generoPesquisado.equalsIgnoreCase(normalizarGenero(jogo.getGenero()))) {
         resultado.add(jogo);
       }
     }
     return Collections.unmodifiableList(resultado);
   }
 
-  /**
-   * Lista todos os gêneros distintos presentes nos jogos importados da API.
-   *
-   * @return lista ordenada com os nomes dos gêneros
-   */
+  /** Lista os gêneros distintos dos jogos importados, em ordem alfabética sem distinção de caixa. */
   public List<String> listarGenerosDisponiveis() {
-    List<String> generos = new ArrayList<>(listarTodosImportadosAgrupadosPorGenero().keySet());
-    Collections.sort(generos);
-    return Collections.unmodifiableList(generos);
+    return Collections.unmodifiableList(
+        new ArrayList<>(listarTodosImportadosAgrupadosPorGenero().keySet()));
   }
 
-  /**
-   * Gera um relatório textual completo de conferência do catálogo sincronizado,
-   * exibindo todos os gêneros e todos os jogos importados da API sob cada gênero.
-   *
-   * @return texto formatado do relatório para exibição no console ou interface
-   */
+  /** Gera um relatório textual completo de conferência do catálogo sincronizado. */
   public String gerarRelatorioConferenciaCatalogo() {
     Map<String, List<Jogo>> agrupamento = listarTodosImportadosAgrupadosPorGenero();
     StringBuilder sb = new StringBuilder();
@@ -136,9 +126,15 @@ public class RelatorioCatalogoApiService {
     return sb.toString();
   }
 
-  /**
-   * Um jogo é considerado importado da API quando possui uma URL de referência cadastrada.
-   */
+  /** Normaliza categorias para que agrupamento e pesquisa compartilhem a regra "Outros". */
+  private static String normalizarGenero(String genero) {
+    if (genero == null || genero.trim().isEmpty()) {
+      return "Outros";
+    }
+    return genero.trim();
+  }
+
+  /** Um jogo importado possui uma URL de referência cadastrada. */
   private boolean isImportadoDaApi(Jogo jogo) {
     return jogo != null
         && jogo.getUrlReferencia() != null

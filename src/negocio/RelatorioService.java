@@ -72,6 +72,12 @@ public class RelatorioService {
 
   // --- REQ15 ---
 
+  public Map<YearMonth, RelatorioReceitaService.ResumoMensal> resumoReceitaPorMes() {
+    return receitaService.resumoReceitaPorMes();
+  }
+
+  /** @deprecated prefira {@link #resumoReceitaPorMes()}, que retorna valores imutáveis em BigDecimal. */
+  @Deprecated
   public Map<YearMonth, double[]> receitaPorMes() {
     return receitaService.receitaPorMes();
   }
