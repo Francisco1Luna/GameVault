@@ -14,6 +14,7 @@ public class PlataformasController {
 
     @FXML
     private TextField campoFabricante;
+    @FXML private TextField campoPesquisa;
 
     @FXML
     private TableView<Plataforma> tabelaPlataformas;
@@ -32,6 +33,7 @@ public class PlataformasController {
         colId.setCellValueFactory(new PropertyValueFactory<>("id"));
         colNome.setCellValueFactory(new PropertyValueFactory<>("nome"));
         colFabricante.setCellValueFactory(new PropertyValueFactory<>("fabricante"));
+        campoPesquisa.textProperty().addListener((obs, antigo, novo) -> atualizar());
 
         // ao clicar numa linha, preenche os campos para editar
         tabelaPlataformas.getSelectionModel().selectedItemProperty().addListener((obs, antigo, novo) -> {
@@ -44,7 +46,11 @@ public class PlataformasController {
     }
 
     private void atualizar() {
-        tabelaPlataformas.getItems().setAll(service.listar());
+        String pesquisa = campoPesquisa.getText() == null ? "" : campoPesquisa.getText().trim().toLowerCase();
+        tabelaPlataformas.getItems().setAll(service.listar().stream()
+                .filter(plataforma -> plataforma.getNome().toLowerCase().contains(pesquisa)
+                        || plataforma.getFabricante().toLowerCase().contains(pesquisa))
+                .collect(java.util.stream.Collectors.toList()));
     }
 
     @FXML

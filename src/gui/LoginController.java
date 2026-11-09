@@ -16,6 +16,11 @@ public class LoginController {
     private PasswordField campoSenha;
 
     @FXML
+    public void initialize() {
+        Formatadores.cpf(campoCpf);
+    }
+
+    @FXML
     private void aoEntrar() {
         try {
             auth.login(campoCpf.getText(), campoSenha.getText());

@@ -29,14 +29,18 @@ public class ClientesController {
     @FXML private TextField campoTelefone;
     @FXML private PasswordField campoSenha;
     @FXML private CheckBox checkAssinante;
+    @FXML private TextField campoPesquisa;
 
     @FXML
     public void initialize() {
+        Formatadores.cpf(campoCpf);
+        Formatadores.telefone(campoTelefone);
         colId.setCellValueFactory(new PropertyValueFactory<>("id"));
         colNome.setCellValueFactory(new PropertyValueFactory<>("nome"));
-        colCpf.setCellValueFactory(new PropertyValueFactory<>("cpf"));
+        colCpf.setCellValueFactory(c -> new SimpleStringProperty(Formatadores.formatarCpf(c.getValue().getCpf())));
         colTipo.setCellValueFactory(c -> new SimpleStringProperty(
                 c.getValue() instanceof ClienteAssinante ? "Assinante" : "Padrão"));
+        campoPesquisa.textProperty().addListener((obs, antigo, novo) -> atualizar());
 
         // ao clicar numa linha, preenche os campos para editar
         tabelaClientes.getSelectionModel().selectedItemProperty().addListener((obs, antigo, novo) -> {
@@ -54,7 +58,11 @@ public class ClientesController {
     }
 
     private void atualizar() {
-        tabelaClientes.getItems().setAll(clienteService.listar());
+        String pesquisa = campoPesquisa.getText() == null ? "" : campoPesquisa.getText().trim().toLowerCase();
+        tabelaClientes.getItems().setAll(clienteService.listar().stream()
+                .filter(cliente -> cliente.getNome().toLowerCase().contains(pesquisa)
+                        || cliente.getCpf().contains(pesquisa.replaceAll("\\D", "")))
+                .collect(java.util.stream.Collectors.toList()));
     }
 
     @FXML

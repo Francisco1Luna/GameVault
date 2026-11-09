@@ -15,6 +15,7 @@
 <?import javafx.scene.layout.HBox?>
 
 <BorderPane prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/26" xmlns:fx="http://javafx.com/fxml/1" fx:controller="gui.ClientesController">
+    <top><HBox spacing="8.0"><padding><Insets bottom="8.0" left="12.0" right="12.0" top="8.0" /></padding><children><TextField fx:id="campoPesquisa" promptText="Pesquisar por nome ou CPF" HBox.hgrow="ALWAYS" /></children></HBox></top>
     <center>
         <TableView fx:id="tabelaClientes" BorderPane.alignment="CENTER">
             <columnResizePolicy>

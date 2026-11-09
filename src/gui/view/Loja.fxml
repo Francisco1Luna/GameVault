@@ -8,6 +8,7 @@
 <?import javafx.scene.control.TabPane?>
 <?import javafx.scene.control.TableColumn?>
 <?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
@@ -24,6 +25,7 @@
                      </padding>
                      <children>
                         <Label fx:id="rotuloConta" maxWidth="Infinity" text="Conta" HBox.hgrow="ALWAYS" />
+                        <TextField fx:id="campoPesquisaCatalogo" prefWidth="210.0" promptText="Pesquisar jogo ou plataforma" />
                         <Button mnemonicParsing="false" onAction="#aoAtualizar" text="Atualizar" />
                      </children>
                   </HBox>

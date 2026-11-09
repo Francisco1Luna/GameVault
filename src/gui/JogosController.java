@@ -9,6 +9,8 @@ import model.enums.ClassificacaoIndicativa;
 import negocio.EstoqueService;
 import negocio.PlataformaService;
 import negocio.JogoService;
+import negocio.FreeToGameService;
+import javafx.concurrent.Task;
 import javafx.scene.control.cell.PropertyValueFactory;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -17,6 +19,8 @@ import javafx.geometry.Insets;
 import javafx.scene.layout.GridPane;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.HashSet;
+import java.util.Set;
 
 public class JogosController {
 
@@ -25,6 +29,7 @@ public class JogosController {
     private final JogoService jogoService = Contexto.get().getJogoService();
     private final EstoqueService estoqueService = Contexto.get().getEstoqueService();
     private final PlataformaService plataformaService = Contexto.get().getPlataformaService();
+    private final FreeToGameService freeToGameService = new FreeToGameService();
 
     @FXML private TableView<Jogo> tabelaJogos;
     @FXML private TableColumn<Jogo, Long> colId;
@@ -40,11 +45,19 @@ public class JogosController {
     @FXML private TextField campoEstoque;
     @FXML private ComboBox<ClassificacaoIndicativa> comboClassificacao;
     @FXML private ListView<Plataforma> listaPlataformas;
+    @FXML private TextField campoPesquisa;
+    @FXML private TextField campoDesenvolvedora;
+    @FXML private TextField campoPublicadora;
+    @FXML private TextField campoLink;
+    private String urlThumbnail;
 
     // ------------------------------------------------------------ initialize
 
     @FXML
     public void initialize() {
+        Formatadores.decimal(campoPreco);
+        Formatadores.decimal(campoLocacao);
+        Formatadores.inteiro(campoEstoque);
         colId.setCellValueFactory(new PropertyValueFactory<>("id"));
         colTitulo.setCellValueFactory(new PropertyValueFactory<>("titulo"));
         colGenero.setCellValueFactory(new PropertyValueFactory<>("genero"));
@@ -58,6 +71,7 @@ public class JogosController {
         comboClassificacao.getSelectionModel().select(ClassificacaoIndicativa.LIVRE);
         listaPlataformas.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
         listaPlataformas.setItems(FXCollections.observableArrayList(plataformaService.listar()));
+        campoPesquisa.textProperty().addListener((obs, antigo, novo) -> atualizar());
         listaPlataformas.setCellFactory(lista -> new ListCell<Plataforma>() {
             @Override
             protected void updateItem(Plataforma plataforma, boolean vazio) {
@@ -71,6 +85,10 @@ public class JogosController {
                 campoGenero.setText(novo.getGenero());
                 campoPreco.setText(String.valueOf(novo.getPreco()));
                 campoLocacao.setText(String.valueOf(novo.getPrecoLocacaoDiaria()));
+                campoDesenvolvedora.setText(novo.getDesenvolvedora());
+                campoPublicadora.setText(novo.getPublicadora());
+                campoLink.setText(novo.getUrlReferencia());
+                urlThumbnail = novo.getUrlThumbnail();
 
                 // classificação: se o jogo não tiver, volta para LIVRE (select(null) só limparia o combo)
                 comboClassificacao.getSelectionModel().select(
@@ -113,8 +131,8 @@ public class JogosController {
             }
 
             // 3. SALVAR
-            Jogo novo = new Jogo(null, titulo, comboClassificacao.getValue(), null, genero, null,
-                    preco, locacao, plataformas, new HashMap<>(), null, null);
+            Jogo novo = new Jogo(null, titulo, comboClassificacao.getValue(), campoDesenvolvedora.getText(), genero, campoPublicadora.getText(),
+                    preco, locacao, plataformas, new HashMap<>(), urlThumbnail, campoLink.getText());
             Jogo salvo = jogoService.salvar(novo);
             for (Plataforma plataforma : plataformas) {
                 estoqueService.definirEstoque(salvo, plataforma, estoque); // mesmo estoque em cada plataforma marcada
@@ -202,6 +220,10 @@ public class JogosController {
                 selecionado.setPrecoLocacaoDiaria(locacao);
                 selecionado.setClassificacaoIndicativa(comboClassificacao.getValue());
                 selecionado.setPlataformas(plataformas);
+                selecionado.setDesenvolvedora(campoDesenvolvedora.getText());
+                selecionado.setPublicadora(campoPublicadora.getText());
+                selecionado.setUrlReferencia(campoLink.getText());
+                selecionado.setUrlThumbnail(urlThumbnail);
 
                 // remove do mapa o estoque de plataformas que foram desmarcadas
                 if (selecionado.getEstoquePorPlataforma() != null) {
@@ -292,7 +314,11 @@ public class JogosController {
     // -------------------------------------------------------------- auxiliares
 
     private void atualizar() {
-        tabelaJogos.getItems().setAll(jogoService.listar());
+        String pesquisa = campoPesquisa.getText() == null ? "" : campoPesquisa.getText().trim().toLowerCase();
+        tabelaJogos.getItems().setAll(jogoService.listar().stream()
+                .filter(jogo -> jogo.getTitulo().toLowerCase().contains(pesquisa)
+                        || (jogo.getGenero() != null && jogo.getGenero().toLowerCase().contains(pesquisa)))
+                .collect(java.util.stream.Collectors.toList()));
     }
 
     private void limparCampos() {
@@ -301,6 +327,10 @@ public class JogosController {
         campoPreco.clear();
         campoLocacao.clear();
         campoEstoque.clear();
+        campoDesenvolvedora.clear();
+        campoPublicadora.clear();
+        campoLink.clear();
+        urlThumbnail = null;
         listaPlataformas.getSelectionModel().clearSelection();
     }
 
@@ -361,4 +391,74 @@ public class JogosController {
             throw new IllegalArgumentException("O estoque de " + nomePlataforma + " deve ser um número inteiro.");
         }
     }
+
+    @FXML
+    private void aoBuscarDados() {
+        String titulo = campoTitulo.getText();
+        Task<FreeToGameService.DadosJogo> consulta = new Task<>() {
+            @Override protected FreeToGameService.DadosJogo call() { return freeToGameService.buscarPorTitulo(titulo); }
+        };
+        consulta.setOnSucceeded(evento -> preencherDadosApi(consulta.getValue()));
+        consulta.setOnFailed(evento -> Alertas.avisar(consulta.getException().getMessage()));
+        Thread thread = new Thread(consulta, "consulta-freetogame");
+        thread.setDaemon(true);
+        thread.start();
+    }
+
+    @FXML
+    private void aoImportarCatalogo() {
+        Task<Integer> importacao = new Task<>() {
+            @Override protected Integer call() { return importarCatalogo(freeToGameService.listarJogos()); }
+        };
+        importacao.setOnSucceeded(evento -> {
+            listaPlataformas.setItems(FXCollections.observableArrayList(plataformaService.listar()));
+            atualizar();
+            Alertas.informar(importacao.getValue() + " jogos novos foram importados da FreeToGame.");
+        });
+        importacao.setOnFailed(evento -> Alertas.avisar(importacao.getException().getMessage()));
+        Thread thread = new Thread(importacao, "importacao-freetogame");
+        thread.setDaemon(true);
+        thread.start();
+    }
+
+    private void preencherDadosApi(FreeToGameService.DadosJogo dados) {
+        campoTitulo.setText(dados.getTitulo());
+        campoGenero.setText(dados.getGenero());
+        campoDesenvolvedora.setText(dados.getDesenvolvedora());
+        campoPublicadora.setText(dados.getPublicadora());
+        campoLink.setText(dados.getUrlReferencia());
+        urlThumbnail = dados.getUrlThumbnail();
+        listaPlataformas.getSelectionModel().clearSelection();
+        String plataformasApi = dados.getPlataformas() == null ? "" : dados.getPlataformas().toLowerCase();
+        for (Plataforma plataforma : listaPlataformas.getItems()) {
+            String nome = plataforma.getNome().toLowerCase();
+            if ((nome.contains("pc") && plataformasApi.contains("pc")) || (nome.contains("web") && plataformasApi.contains("web"))) {
+                listaPlataformas.getSelectionModel().select(plataforma);
+            }
+        }
+    }
+
+    private int importarCatalogo(List<FreeToGameService.DadosJogo> dadosApi) {
+        Map<String, Plataforma> plataformas = new HashMap<>();
+        for (Plataforma plataforma : plataformaService.listar()) plataformas.put(chave(plataforma.getNome()), plataforma);
+        Set<String> titulos = new HashSet<>();
+        for (Jogo jogo : jogoService.listar()) titulos.add(chave(jogo.getTitulo()));
+        int importados = 0;
+        for (FreeToGameService.DadosJogo dado : dadosApi) {
+            if (!titulos.add(chave(dado.getTitulo()))) continue;
+            String nomePlataforma = dado.getPlataformas() == null ? "Outras" : dado.getPlataformas().trim();
+            Plataforma plataforma = plataformas.get(chave(nomePlataforma));
+            if (plataforma == null) {
+                plataforma = plataformaService.cadastrar(new Plataforma(null, nomePlataforma, "FreeToGame"));
+                plataformas.put(chave(nomePlataforma), plataforma);
+            }
+            jogoService.salvar(new Jogo(null, dado.getTitulo(), ClassificacaoIndicativa.LIVRE,
+                    dado.getDesenvolvedora(), dado.getGenero(), dado.getPublicadora(), 0.0, 0.0,
+                    List.of(plataforma), new HashMap<>(), dado.getUrlThumbnail(), dado.getUrlReferencia()));
+            importados++;
+        }
+        return importados;
+    }
+
+    private static String chave(String valor) { return valor == null ? "" : valor.trim().toLowerCase(java.util.Locale.ROOT); }
 }

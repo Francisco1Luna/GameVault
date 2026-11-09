@@ -14,6 +14,14 @@
 <?import javafx.scene.layout.HBox?>
 
 <BorderPane prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/26" xmlns:fx="http://javafx.com/fxml/1" fx:controller="gui.JogosController">
+    <top>
+        <HBox spacing="8.0">
+            <children>
+                <TextField fx:id="campoPesquisa" promptText="Pesquisar por título ou gênero" HBox.hgrow="ALWAYS" />
+            </children>
+            <padding><Insets bottom="8.0" left="12.0" right="12.0" top="8.0" /></padding>
+        </HBox>
+    </top>
     <center>
         <TableView fx:id="tabelaJogos" BorderPane.alignment="CENTER">
             <columnResizePolicy>
@@ -43,23 +51,28 @@
             <children>
                 <Label text="Título" GridPane.columnIndex="0" GridPane.rowIndex="0" />
                 <TextField fx:id="campoTitulo" maxWidth="Infinity" promptText="Título do jogo" GridPane.columnIndex="1" GridPane.rowIndex="0" />
-                <Label text="Gênero" GridPane.columnIndex="2" GridPane.rowIndex="0" />
-                <TextField fx:id="campoGenero" maxWidth="Infinity" promptText="Gênero" GridPane.columnIndex="3" GridPane.rowIndex="0" />
+                <Button mnemonicParsing="false" onAction="#aoBuscarDados" text="Buscar dados" GridPane.columnIndex="2" GridPane.rowIndex="0" />
+                <Button mnemonicParsing="false" onAction="#aoImportarCatalogo" text="Importar catálogo" GridPane.columnIndex="3" GridPane.rowIndex="0" />
+                <Label text="Gênero" GridPane.columnIndex="0" GridPane.rowIndex="1" />
+                <TextField fx:id="campoGenero" maxWidth="Infinity" promptText="Gênero" GridPane.columnIndex="1" GridPane.rowIndex="1" />
 
-                <Label text="Preço" GridPane.columnIndex="0" GridPane.rowIndex="1" />
-                <TextField fx:id="campoPreco" maxWidth="Infinity" promptText="Ex.: 199,90" GridPane.columnIndex="1" GridPane.rowIndex="1" />
-                <Label text="Locação/dia" GridPane.columnIndex="2" GridPane.rowIndex="1" />
-                <TextField fx:id="campoLocacao" maxWidth="Infinity" promptText="Ex.: 9,90" GridPane.columnIndex="3" GridPane.rowIndex="1" />
+                <Label text="Preço" GridPane.columnIndex="2" GridPane.rowIndex="1" />
+                <TextField fx:id="campoPreco" maxWidth="Infinity" promptText="Ex.: 199,90" GridPane.columnIndex="3" GridPane.rowIndex="1" />
+                <Label text="Locação/dia" GridPane.columnIndex="0" GridPane.rowIndex="2" />
+                <TextField fx:id="campoLocacao" maxWidth="Infinity" promptText="Ex.: 9,90" GridPane.columnIndex="1" GridPane.rowIndex="2" />
 
-                <Label text="Classificação" GridPane.columnIndex="0" GridPane.rowIndex="2" />
-                <ComboBox fx:id="comboClassificacao" maxWidth="Infinity" GridPane.columnIndex="1" GridPane.rowIndex="2" />
-                <Label text="Estoque" GridPane.columnIndex="2" GridPane.rowIndex="2" />
-                <TextField fx:id="campoEstoque" maxWidth="Infinity" promptText="Vazio = manter" GridPane.columnIndex="3" GridPane.rowIndex="2" />
+                <Label text="Classificação" GridPane.columnIndex="2" GridPane.rowIndex="2" />
+                <ComboBox fx:id="comboClassificacao" maxWidth="Infinity" GridPane.columnIndex="3" GridPane.rowIndex="2" />
+                <Label text="Estoque" GridPane.columnIndex="0" GridPane.rowIndex="3" />
+                <TextField fx:id="campoEstoque" maxWidth="Infinity" promptText="Vazio = manter" GridPane.columnIndex="1" GridPane.rowIndex="3" />
+                <TextField fx:id="campoDesenvolvedora" editable="false" maxWidth="Infinity" promptText="Desenvolvedora (API)" GridPane.columnIndex="2" GridPane.columnSpan="2" GridPane.rowIndex="3" />
 
-                <Label text="Plataformas" GridPane.columnIndex="0" GridPane.rowIndex="3" />
-                <ListView fx:id="listaPlataformas" prefHeight="90.0" GridPane.columnIndex="1" GridPane.columnSpan="3" GridPane.rowIndex="3" />
+                <TextField fx:id="campoPublicadora" editable="false" maxWidth="Infinity" promptText="Publicadora (API)" GridPane.columnIndex="0" GridPane.columnSpan="2" GridPane.rowIndex="4" />
+                <TextField fx:id="campoLink" editable="false" maxWidth="Infinity" promptText="Link do jogo (API)" GridPane.columnIndex="2" GridPane.columnSpan="2" GridPane.rowIndex="4" />
+                <Label text="Plataformas" GridPane.columnIndex="0" GridPane.rowIndex="5" />
+                <ListView fx:id="listaPlataformas" prefHeight="90.0" GridPane.columnIndex="1" GridPane.columnSpan="3" GridPane.rowIndex="5" />
 
-                <HBox spacing="8.0" GridPane.columnIndex="1" GridPane.columnSpan="3" GridPane.rowIndex="4">
+                <HBox spacing="8.0" GridPane.columnIndex="1" GridPane.columnSpan="3" GridPane.rowIndex="6">
                     <children>
                         <Button mnemonicParsing="false" onAction="#aoAdicionar" styleClass="primario" text="Adicionar" />
                         <Button mnemonicParsing="false" onAction="#aoEditar" text="Salvar alterações" />
