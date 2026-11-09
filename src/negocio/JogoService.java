@@ -40,23 +40,33 @@ public class JogoService {
 
     public Jogo salvar(Jogo jogo) {
         if (jogo == null) {
-            throw new IllegalArgumentException("O jogo não pode ser vazio e deve possuir id.");
+            throw new IllegalArgumentException("O jogo é obrigatório.");
         }
-        if (jogo.getTitulo() == null || jogo.getTitulo().trim().isEmpty()) {
-            throw new IllegalArgumentException("O jogo não pode ser vazio e deve possuir um título.");
-        }
-       return repositorioJogos.salvar(jogo);
-
+        validar(jogo);
+        return repositorioJogos.salvar(jogo);
     }
 
     public void atualizar(Jogo jogo) {
-         if (jogo == null || jogo.getId() == null) {
+        if (jogo == null || jogo.getId() == null) {
             throw new IllegalArgumentException("O jogo não pode ser vazio e deve possuir id.");
         }
-        if (jogo == null || jogo.getTitulo().trim().isEmpty()) {
-            throw new IllegalArgumentException("O jogo não pode ser vazaio e deve possuir um título.");
-        }
+        validar(jogo);
         repositorioJogos.atualizar(jogo);
+    }
+
+    private void validar(Jogo jogo) {
+        if (jogo.getTitulo() == null || jogo.getTitulo().trim().isEmpty()) {
+            throw new IllegalArgumentException("O título do jogo é obrigatório.");
+        }
+        if (jogo.getGenero() == null || jogo.getGenero().trim().isEmpty()) {
+            throw new IllegalArgumentException("O gênero do jogo é obrigatório.");
+        }
+        if (jogo.getPreco() == null || jogo.getPreco() < 0) {
+            throw new IllegalArgumentException("O preço do jogo não pode ser negativo.");
+        }
+        if (jogo.getPrecoLocacaoDiaria() == null || jogo.getPrecoLocacaoDiaria() < 0) {
+            throw new IllegalArgumentException("A locação por dia não pode ser negativa.");
+        }
     }
 
     /**

@@ -12,12 +12,15 @@ public class AppFX extends Application {
     public void start(Stage palco) throws Exception {
 
         Contexto.get().getAuthService().garantirAdministradorPadrao();
+        DadosExemplo.carregar();
 
         Parent raiz = FXMLLoader.load(
                 getClass().getResource("/gui/view/Login.fxml")
         );
 
-        palco.setScene(new Scene(raiz, 900, 600));
+        Scene cena = new Scene(raiz, 900, 600);
+        Temas.aplicar(cena);
+        palco.setScene(cena);
         palco.setTitle("GameVault");
         palco.setMaximized(true);
         palco.show();

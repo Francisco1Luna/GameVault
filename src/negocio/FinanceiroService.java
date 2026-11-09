@@ -162,6 +162,21 @@ public class FinanceiroService {
     return !consultarPendencias(cliente).isEmpty();
   }
 
+  /** Registra o pagamento de uma multa. Não deixa pagar duas vezes a mesma multa. */
+  public synchronized void pagarMulta(Penalidade penalidade, LocalDate dataPagamento) {
+    if (penalidade == null) {
+      throw new IllegalArgumentException("A multa é obrigatória.");
+    }
+    if (dataPagamento == null) {
+      throw new IllegalArgumentException("A data de pagamento é obrigatória.");
+    }
+    if (penalidade.isPaga()) {
+      throw new IllegalStateException("Esta multa já foi paga.");
+    }
+    penalidade.setPaga(true);
+    penalidade.setDataPagamento(dataPagamento);
+  }
+
   //apoio
 
   private static void exigirCliente(Cliente cliente) {

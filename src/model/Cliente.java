@@ -6,7 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public abstract class Cliente {
-
+  private boolean administrador;
   private Long id;
   private String nome;
   private String cpf;
@@ -27,8 +27,6 @@ public abstract class Cliente {
     this.telefone = telefone;
     this.limiteAluguelSimultaneo = limiteAluguelSimultaneo;
   }
-
-  private boolean administrador;
 
   public boolean isAdministrador() {
     return administrador;

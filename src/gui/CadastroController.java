@@ -47,7 +47,7 @@ public class CadastroController {
                     checkAssinante.isSelected());
             auth.login(campoCpf.getText(), campoSenha.getText()); // entra direto depois de criar a conta
             Telas.trocar(campoNome, "/gui/view/Principal.fxml");
-        } catch (IllegalArgumentException e) {
+        } catch (IllegalArgumentException | IllegalStateException e) {
             Telas.erro(e.getMessage());
         }
     }

@@ -58,8 +58,7 @@ public class PlataformasController {
             campoFabricante.clear();
             atualizar();
         } catch (IllegalArgumentException | IllegalStateException e) {
-            new Alert(Alert.AlertType.WARNING, e.getMessage()).showAndWait();
-        }
+            Alertas.avisar(e.getMessage());        }
     }
 
     @FXML
@@ -98,8 +97,7 @@ public class PlataformasController {
             campoFabricante.clear();
             atualizar();
         } catch (IllegalArgumentException | IllegalStateException e) {
-            new Alert(Alert.AlertType.WARNING, e.getMessage()).showAndWait();
-        }
+            Alertas.avisar(e.getMessage());        }
     }
 
     @FXML
@@ -119,7 +117,6 @@ public class PlataformasController {
             }
             atualizar();
         } catch (IllegalStateException | IllegalArgumentException e) {
-            new Alert(Alert.AlertType.WARNING, e.getMessage()).showAndWait();
-        }
+            Alertas.avisar(e.getMessage());        }
     }
 }

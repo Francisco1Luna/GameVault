@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-
+<?import javafx.scene.layout.HBox?>
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
@@ -12,23 +12,30 @@
    <children>
       <BorderPane fx:id="painelPrincipal" prefHeight="400.0" prefWidth="600.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
          <top>
-            <HBox alignment="CENTER_LEFT" spacing="12.0" BorderPane.alignment="CENTER">
-               <padding>
-                  <Insets bottom="6.0" left="10.0" right="10.0" top="6.0" />
-               </padding>
+            <HBox alignment="CENTER_LEFT" spacing="12.0" styleClass="barra-topo" BorderPane.alignment="CENTER">
                <children>
                   <Label fx:id="rotuloUsuario" maxWidth="Infinity" text="Usuário" HBox.hgrow="ALWAYS" />
+                  <HBox fx:id="caixaData" alignment="CENTER_LEFT" spacing="8.0">
+                     <children>
+                        <Label fx:id="rotuloData" text="Data do sistema" />
+                        <Button mnemonicParsing="false" onAction="#avancarUmDia" text="+1 dia" />
+                        <Button mnemonicParsing="false" onAction="#avancarCincoDias" text="+5 dias" />
+                        <Button mnemonicParsing="false" onAction="#reiniciarData" text="Data real" />
+                     </children>
+                  </HBox>
+                  <Button mnemonicParsing="false" onAction="#alternarTema" text="Alternar tema" />
                   <Button mnemonicParsing="false" onAction="#sair" text="Sair" />
                </children>
             </HBox>
          </top>
          <left>
-            <VBox prefWidth="110.0" BorderPane.alignment="CENTER">
+            <VBox prefWidth="150.0" styleClass="menu-lateral" BorderPane.alignment="CENTER">
                <children>
                   <Button maxWidth="Infinity" mnemonicParsing="false" onAction="#abrirLoja" text="Loja" />
                   <Button fx:id="botaoPlataformas" maxWidth="Infinity" mnemonicParsing="false" onAction="#abrirPlataformas" text="Plataformas" />
                   <Button fx:id="botaoJogos" maxWidth="Infinity" mnemonicParsing="false" onAction="#abrirJogos" text="Jogos" />
                   <Button fx:id="botaoClientes" maxWidth="Infinity" mnemonicParsing="false" onAction="#abrirClientes" text="Clientes" />
+                  <Button fx:id="botaoMultas" maxWidth="Infinity" mnemonicParsing="false" onAction="#abrirMultas" text="Multas" />
                </children>
             </VBox>
          </left>

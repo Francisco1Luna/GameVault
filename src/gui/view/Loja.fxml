@@ -37,6 +37,9 @@
                         <TableColumn fx:id="colDiaria" prefWidth="90.0" text="Locação/dia" />
                         <TableColumn fx:id="colEstoque" prefWidth="70.0" text="Estoque" />
                      </columns>
+                     <columnResizePolicy>
+                        <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
+                     </columnResizePolicy>
                   </TableView>
                </center>
                <bottom>
@@ -49,7 +52,7 @@
                            <children>
                               <Label text="Quantidade:" />
                               <Spinner fx:id="spinnerQuantidade" editable="true" prefWidth="80.0" />
-                              <Button fx:id="botaoComprar" mnemonicParsing="false" onAction="#aoComprar" text="Comprar" />
+                              <Button fx:id="botaoComprar" mnemonicParsing="false" onAction="#aoComprar" styleClass="primario" text="Comprar" />
                               <Label fx:id="rotuloTotalCompra" text="Total da compra: -" />
                            </children>
                         </HBox>
@@ -57,7 +60,7 @@
                            <children>
                               <Label text="Dias de locação:" />
                               <Spinner fx:id="spinnerDias" editable="true" prefWidth="80.0" />
-                              <Button fx:id="botaoAlugar" mnemonicParsing="false" onAction="#aoAlugar" text="Alugar" />
+                              <Button fx:id="botaoAlugar" mnemonicParsing="false" onAction="#aoAlugar" styleClass="primario" text="Alugar" />
                               <Label fx:id="rotuloTotalLocacao" text="Total da locação: -" />
                            </children>
                         </HBox>
@@ -75,6 +78,9 @@
                   <TableColumn fx:id="colCompraItens" prefWidth="330.0" text="Itens" />
                   <TableColumn fx:id="colCompraTotal" prefWidth="100.0" text="Total" />
                </columns>
+               <columnResizePolicy>
+                  <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
+               </columnResizePolicy>
             </TableView>
          </content>
       </Tab>
@@ -92,6 +98,9 @@
                         <TableColumn fx:id="colLocValor" prefWidth="75.0" text="Valor" />
                         <TableColumn fx:id="colLocMulta" prefWidth="75.0" text="Multa" />
                      </columns>
+                     <columnResizePolicy>
+                        <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
+                     </columnResizePolicy>
                   </TableView>
                </center>
                <bottom>
