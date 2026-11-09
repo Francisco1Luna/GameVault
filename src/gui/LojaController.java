@@ -24,7 +24,8 @@ import negocio.JogoService;
 import negocio.AluguelService;
 import negocio.VendaService;
 import negocio.excecoes.ValidacaoException;
-
+import javafx.scene.control.ButtonType;
+import negocio.Relogio;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -48,17 +49,6 @@ public class LojaController {
     private final VendaService vendaService = Contexto.get().getVendaService();
     private final AluguelService aluguelService = Contexto.get().getAluguelService();
     private final DevolucaoService devolucaoService = Contexto.get().getDevolucaoService();
-
-    /** Uma linha do catálogo: um jogo em uma plataforma. */
-    private static final class ItemCatalogo {
-        final Jogo jogo;
-        final Plataforma plataforma;
-
-        ItemCatalogo(Jogo jogo, Plataforma plataforma) {
-            this.jogo = jogo;
-            this.plataforma = plataforma;
-        }
-    }
 
     @FXML private Label rotuloConta;
     @FXML private TableView<ItemCatalogo> tabelaCatalogo;
@@ -112,7 +102,12 @@ public class LojaController {
         colLocPlataforma.setCellValueFactory(c -> new SimpleStringProperty(c.getValue().getPlataforma().getNome()));
         colLocInicio.setCellValueFactory(c -> new SimpleStringProperty(c.getValue().getDataInicio().format(DATA)));
         colLocPrazo.setCellValueFactory(c -> new SimpleStringProperty(c.getValue().getDataDevolucaoPrevista().format(DATA)));
-        colLocStatus.setCellValueFactory(c -> new SimpleStringProperty(String.valueOf(c.getValue().getStatus())));
+        colLocStatus.setCellValueFactory(c -> {
+            Aluguel a = c.getValue();
+            boolean vencido = a.getStatus() == model.enums.StatusAluguel.ATIVO
+                    && Relogio.hoje().isAfter(a.getDataDevolucaoPrevista());
+            return new SimpleStringProperty(vencido ? "ATRASADO" : String.valueOf(a.getStatus()));
+        });
         colLocValor.setCellValueFactory(c -> new SimpleStringProperty(dinheiro(c.getValue().getValorLocacao())));
         colLocMulta.setCellValueFactory(c -> new SimpleStringProperty(c.getValue().getPenalidade() == null
                 ? "-" : dinheiro(c.getValue().getPenalidade().getValor())));
@@ -159,10 +154,16 @@ public class LojaController {
             return;
         }
         try {
-            ItemVenda pedido = new ItemVenda(item.jogo, item.plataforma, spinnerQuantidade.getValue(), 0.0);
-            Venda venda = vendaService.registrarVenda(List.of(pedido), LocalDate.now());
+            int quantidade = spinnerQuantidade.getValue();
+            double total = financeiroService.calcularPrecoVenda(item.jogo, auth.exigirUsuarioAtual()) * quantidade;
+            if (!confirmar("Confirmar compra?", item.jogo.getTitulo() + " (" + item.plataforma.getNome()
+                    + ") x" + quantidade + "\nTotal: " + dinheiro(total))) {
+                return;
+            }
+            ItemVenda pedido = new ItemVenda(item.jogo, item.plataforma, quantidade, 0.0);
+            Venda venda = vendaService.registrarVenda(List.of(pedido), Relogio.hoje());
             informar("Compra realizada: " + item.jogo.getTitulo() + " (" + item.plataforma.getNome() + ") x"
-                    + spinnerQuantidade.getValue() + "\nTotal: " + dinheiro(venda.getValorTotal()));
+                    + quantidade + "\nTotal: " + dinheiro(venda.getValorTotal()));
         } catch (IllegalArgumentException | IllegalStateException e) {
             avisar(e.getMessage());
         }
@@ -176,9 +177,14 @@ public class LojaController {
             return;
         }
         try {
-            LocalDate hoje = LocalDate.now();
-            Aluguel aluguel = aluguelService.realizarLocacao(item.jogo, item.plataforma, hoje,
-                    hoje.plusDays(spinnerDias.getValue()));
+            LocalDate hoje = Relogio.hoje();
+            LocalDate prazo = hoje.plusDays(spinnerDias.getValue());
+            double valor = financeiroService.calcularValorLocacao(item.jogo, hoje, prazo);
+            if (!confirmar("Confirmar aluguel?", item.jogo.getTitulo() + " (" + item.plataforma.getNome()
+                    + ")\nDevolver até " + prazo.format(DATA) + "\nValor: " + dinheiro(valor))) {
+                return;
+            }
+            Aluguel aluguel = aluguelService.realizarLocacao(item.jogo, item.plataforma, hoje, prazo);
             informar("Locação feita: " + item.jogo.getTitulo() + " (" + item.plataforma.getNome() + ")\nDevolver até "
                     + aluguel.getDataDevolucaoPrevista().format(DATA) + "\nValor: " + dinheiro(aluguel.getValorLocacao()));
         } catch (ValidacaoException | IllegalArgumentException | IllegalStateException e) {
@@ -194,7 +200,7 @@ public class LojaController {
             return;
         }
         try {
-            devolucaoService.devolver(aluguel, LocalDate.now());
+            devolucaoService.devolver(aluguel, Relogio.hoje());
             String multa = aluguel.getPenalidade() == null ? "" : "\nMulta por atraso: " + dinheiro(aluguel.getPenalidade().getValor());
             informar("Devolução registrada: " + aluguel.getJogo().getTitulo() + multa);
         } catch (ValidacaoException | IllegalArgumentException | IllegalStateException e) {
@@ -249,11 +255,22 @@ public class LojaController {
             rotuloTotalCompra.setText("Total da compra: indisponível (" + e.getMessage() + ")");
         }
         try {
-            LocalDate hoje = LocalDate.now();
+            LocalDate hoje = Relogio.hoje();
             rotuloTotalLocacao.setText("Total da locação: " + dinheiro(
                     financeiroService.calcularValorLocacao(item.jogo, hoje, hoje.plusDays(spinnerDias.getValue()))));
         } catch (IllegalArgumentException e) {
             rotuloTotalLocacao.setText("Total da locação: indisponível (" + e.getMessage() + ")");
+        }
+    }
+
+    /** Uma linha do catálogo: um jogo em uma plataforma. */
+    private static final class ItemCatalogo {
+        final Jogo jogo;
+        final Plataforma plataforma;
+
+        ItemCatalogo(Jogo jogo, Plataforma plataforma) {
+            this.jogo = jogo;
+            this.plataforma = plataforma;
         }
     }
 
@@ -277,11 +294,16 @@ public class LojaController {
         return valor == null ? "-" : String.format(BR, "R$ %.2f", valor);
     }
 
+    private static boolean confirmar(String titulo, String mensagem) {
+        return Alertas.confirmar(titulo, mensagem);
+    }
+
     private static void informar(String mensagem) {
-        new Alert(Alert.AlertType.INFORMATION, mensagem).showAndWait();
+        Alertas.informar(mensagem);
     }
 
     private static void avisar(String mensagem) {
-        new Alert(Alert.AlertType.WARNING, mensagem).showAndWait();
+        Alertas.avisar(mensagem);
     }
 }
+

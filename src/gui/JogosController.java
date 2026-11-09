@@ -20,55 +20,28 @@ import java.util.Map;
 
 public class JogosController {
 
+    // ---------------------------------------------------------------- campos
+
     private final JogoService jogoService = Contexto.get().getJogoService();
     private final EstoqueService estoqueService = Contexto.get().getEstoqueService();
     private final PlataformaService plataformaService = Contexto.get().getPlataformaService();
 
-    private void atualizar() {
-        tabelaJogos.getItems().setAll(jogoService.listar());
-    }
+    @FXML private TableView<Jogo> tabelaJogos;
+    @FXML private TableColumn<Jogo, Long> colId;
+    @FXML private TableColumn<Jogo, String> colTitulo;
+    @FXML private TableColumn<Jogo, String> colGenero;
+    @FXML private TableColumn<Jogo, Double> colPreco;
+    @FXML private TableColumn<Jogo, Double> colLocacao;
+    @FXML private TableColumn<Jogo, String> colPlataformas;
+    @FXML private TextField campoTitulo;
+    @FXML private TextField campoGenero;
+    @FXML private TextField campoPreco;
+    @FXML private TextField campoLocacao;
+    @FXML private TextField campoEstoque;
+    @FXML private ComboBox<ClassificacaoIndicativa> comboClassificacao;
+    @FXML private ListView<Plataforma> listaPlataformas;
 
-    @FXML
-    private TableColumn<Jogo, Long> colId;
-
-    @FXML
-    private TableColumn<Jogo, String> colTitulo;
-
-    @FXML
-    private TableColumn<Jogo, String> colGenero;
-
-    @FXML
-    private TableColumn<Jogo, Double> colPreco;
-
-    @FXML
-    private TableColumn<Jogo, Double> colLocacao;
-
-    @FXML
-    private TableColumn<Jogo, String> colPlataformas;
-
-    @FXML
-    private TableView<Jogo> tabelaJogos;
-
-    @FXML
-    private TextField campoTitulo;
-
-    @FXML
-    private TextField campoGenero;
-
-    @FXML
-    private TextField campoPreco;
-
-    @FXML
-    private TextField campoLocacao;
-
-    @FXML
-    private ComboBox<ClassificacaoIndicativa> comboClassificacao;
-
-    @FXML
-    private ListView<Plataforma> listaPlataformas;
-
-    @FXML
-    private TextField campoEstoque;
+    // ------------------------------------------------------------ initialize
 
     @FXML
     public void initialize() {
@@ -121,6 +94,8 @@ public class JogosController {
         atualizar();
     }
 
+    // --------------------------------------------------------------- handlers
+
     @FXML
     private void aoAdicionar() {
         try {
@@ -151,60 +126,8 @@ public class JogosController {
                         + "comprado ou alugado depois de ter plataforma e estoque.").showAndWait();
             }
         } catch (IllegalArgumentException | IllegalStateException e) {
-            new Alert(Alert.AlertType.WARNING, e.getMessage()).showAndWait();
+            Alertas.avisar(e.getMessage());
         }
-    }
-
-    /**
-     * Lê um campo numérico não negativo. Aceita vírgula ou ponto como separador decimal.
-     * Qualquer problema vira IllegalArgumentException com mensagem amigável.
-     */
-    private double lerValor(TextField campo, String nomeDoCampo) {
-        String texto = campo.getText() == null ? "" : campo.getText().trim();
-        if (texto.isEmpty()) {
-            throw new IllegalArgumentException("O campo " + nomeDoCampo + " é obrigatório.");
-        }
-        double valor;
-        try {
-            valor = Double.parseDouble(texto.replace(',', '.'));
-        } catch (NumberFormatException e) {
-            throw new IllegalArgumentException("O campo " + nomeDoCampo + " deve ser um número.");
-        }
-        if (Double.isNaN(valor) || Double.isInfinite(valor)) {
-            throw new IllegalArgumentException("O campo " + nomeDoCampo + " deve ser um número.");
-        }
-        if (valor < 0) {
-            throw new IllegalArgumentException("O campo " + nomeDoCampo + " não pode ser negativo.");
-        }
-        return valor;
-    }
-
-    /**
-     * Estoque vazio vale 0; texto que não é número inteiro não negativo vira aviso.
-     */
-    private int lerEstoque() {
-        String texto = campoEstoque.getText() == null ? "" : campoEstoque.getText().trim();
-        if (texto.isEmpty()) {
-            return 0;
-        }
-        try {
-            int quantidade = Integer.parseInt(texto);
-            if (quantidade < 0) {
-                throw new IllegalArgumentException("O estoque não pode ser negativo.");
-            }
-            return quantidade;
-        } catch (NumberFormatException e) {
-            throw new IllegalArgumentException("O estoque deve ser um número inteiro.");
-        }
-    }
-
-    private void limparCampos() {
-        campoTitulo.clear();
-        campoGenero.clear();
-        campoPreco.clear();
-        campoLocacao.clear();
-        campoEstoque.clear();
-        listaPlataformas.getSelectionModel().clearSelection();
     }
 
     @FXML
@@ -225,7 +148,7 @@ public class JogosController {
             }
             atualizar();
         } catch (IllegalArgumentException | IllegalStateException e) {
-            new Alert(Alert.AlertType.WARNING, e.getMessage()).showAndWait();
+            Alertas.avisar(e.getMessage());
         }
     }
 
@@ -261,31 +184,53 @@ public class JogosController {
                 return;
             }
 
-            // 4. APLICAR
-            selecionado.setTitulo(titulo);
-            selecionado.setGenero(genero);
-            selecionado.setPreco(preco);
-            selecionado.setPrecoLocacaoDiaria(locacao);
-            selecionado.setClassificacaoIndicativa(comboClassificacao.getValue());
-            selecionado.setPlataformas(plataformas);
+            // guarda os valores antigos para desfazer se algo falhar no meio
+            String tituloAntigo = selecionado.getTitulo();
+            String generoAntigo = selecionado.getGenero();
+            Double precoAntigo = selecionado.getPreco();
+            Double locacaoAntiga = selecionado.getPrecoLocacaoDiaria();
+            ClassificacaoIndicativa classificacaoAntiga = selecionado.getClassificacaoIndicativa();
+            List<Plataforma> plataformasAntigas = selecionado.getPlataformas();
+            Map<Plataforma, Integer> estoqueAntigo = selecionado.getEstoquePorPlataforma() == null
+                    ? null : new HashMap<>(selecionado.getEstoquePorPlataforma());
 
-            // remove do mapa o estoque de plataformas que foram desmarcadas
-            if (selecionado.getEstoquePorPlataforma() != null) {
-                selecionado.getEstoquePorPlataforma().keySet().removeIf(chave ->
-                        plataformas.stream().noneMatch(p -> p.getId() != null && p.getId().equals(chave.getId())));
-            }
-            // se o campo Estoque foi preenchido, vale para todas as plataformas marcadas
-            if (mudarEstoque) {
-                for (Plataforma p : plataformas) {
-                    estoqueService.definirEstoque(selecionado, p, estoque);
+            // 4. APLICAR (se falhar, volta tudo como estava)
+            try {
+                selecionado.setTitulo(titulo);
+                selecionado.setGenero(genero);
+                selecionado.setPreco(preco);
+                selecionado.setPrecoLocacaoDiaria(locacao);
+                selecionado.setClassificacaoIndicativa(comboClassificacao.getValue());
+                selecionado.setPlataformas(plataformas);
+
+                // remove do mapa o estoque de plataformas que foram desmarcadas
+                if (selecionado.getEstoquePorPlataforma() != null) {
+                    selecionado.getEstoquePorPlataforma().keySet().removeIf(chave ->
+                            plataformas.stream().noneMatch(p -> p.getId() != null && p.getId().equals(chave.getId())));
                 }
+                // se o campo Estoque foi preenchido, vale para todas as plataformas marcadas
+                if (mudarEstoque) {
+                    for (Plataforma p : plataformas) {
+                        estoqueService.definirEstoque(selecionado, p, estoque);
+                    }
+                }
+                jogoService.atualizar(selecionado);
+            } catch (IllegalArgumentException | IllegalStateException e) {
+                selecionado.setTitulo(tituloAntigo);
+                selecionado.setGenero(generoAntigo);
+                selecionado.setPreco(precoAntigo);
+                selecionado.setPrecoLocacaoDiaria(locacaoAntiga);
+                selecionado.setClassificacaoIndicativa(classificacaoAntiga);
+                selecionado.setPlataformas(plataformasAntigas);
+                selecionado.setEstoquePorPlataforma(estoqueAntigo);
+                throw e; // o catch de fora mostra o aviso
             }
 
             jogoService.atualizar(selecionado);
             atualizar();
             limparCampos();
         } catch (IllegalArgumentException | IllegalStateException e) {
-            new Alert(Alert.AlertType.WARNING, e.getMessage()).showAndWait();
+            Alertas.avisar(e.getMessage());
         }
     }
 
@@ -340,7 +285,63 @@ public class JogosController {
             }
             atualizar();
         } catch (IllegalArgumentException | IllegalStateException e) {
-            new Alert(Alert.AlertType.WARNING, e.getMessage()).showAndWait();
+            Alertas.avisar(e.getMessage());
+        }
+    }
+
+    // -------------------------------------------------------------- auxiliares
+
+    private void atualizar() {
+        tabelaJogos.getItems().setAll(jogoService.listar());
+    }
+
+    private void limparCampos() {
+        campoTitulo.clear();
+        campoGenero.clear();
+        campoPreco.clear();
+        campoLocacao.clear();
+        campoEstoque.clear();
+        listaPlataformas.getSelectionModel().clearSelection();
+    }
+
+    /**
+     * Lê um campo numérico não negativo. Aceita vírgula ou ponto como separador decimal.
+     * Qualquer problema vira IllegalArgumentException com mensagem amigável.
+     */
+    private double lerValor(TextField campo, String nomeDoCampo) {
+        String texto = campo.getText() == null ? "" : campo.getText().trim();
+        if (texto.isEmpty()) {
+            throw new IllegalArgumentException("O campo " + nomeDoCampo + " é obrigatório.");
+        }
+        double valor;
+        try {
+            valor = Double.parseDouble(texto.replace(',', '.'));
+        } catch (NumberFormatException e) {
+            throw new IllegalArgumentException("O campo " + nomeDoCampo + " deve ser um número.");
+        }
+        if (Double.isNaN(valor) || Double.isInfinite(valor)) {
+            throw new IllegalArgumentException("O campo " + nomeDoCampo + " deve ser um número.");
+        }
+        if (valor < 0) {
+            throw new IllegalArgumentException("O campo " + nomeDoCampo + " não pode ser negativo.");
+        }
+        return valor;
+    }
+
+    /** Estoque vazio vale 0; texto que não é número inteiro não negativo vira aviso. */
+    private int lerEstoque() {
+        String texto = campoEstoque.getText() == null ? "" : campoEstoque.getText().trim();
+        if (texto.isEmpty()) {
+            return 0;
+        }
+        try {
+            int quantidade = Integer.parseInt(texto);
+            if (quantidade < 0) {
+                throw new IllegalArgumentException("O estoque não pode ser negativo.");
+            }
+            return quantidade;
+        } catch (NumberFormatException e) {
+            throw new IllegalArgumentException("O estoque deve ser um número inteiro.");
         }
     }
 

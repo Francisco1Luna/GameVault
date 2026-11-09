@@ -10,10 +10,21 @@ import model.Cliente;
 import model.ClienteAssinante;
 import negocio.AuthService;
 import javafx.scene.layout.BorderPane;
+import java.time.format.DateTimeFormatter;
+import javafx.scene.Node;
+import negocio.Relogio;
+import javafx.scene.layout.HBox;
 
 import java.io.IOException;
 
 public class PrincipalController {
+
+    @FXML
+    private HBox caixaData;
+
+    @FXML
+    private Label rotuloData;
+
     @FXML
     private BorderPane painelPrincipal;
 
@@ -29,6 +40,9 @@ public class PrincipalController {
     @FXML
     private Button botaoClientes;
 
+    @FXML
+    private Button botaoMultas;
+
     private final AuthService auth = Contexto.get().getAuthService();
 
     @FXML
@@ -41,11 +55,14 @@ public class PrincipalController {
         mostrar(botaoPlataformas, admin);
         mostrar(botaoJogos, admin);
         mostrar(botaoClientes, admin);
+        mostrar(botaoMultas, admin);
+        mostrar(caixaData, admin);
+        atualizarRotuloData();
     }
 
-    private static void mostrar(Button botao, boolean visivel) {
-        botao.setVisible(visivel);
-        botao.setManaged(visivel); // managed=false tira o espaço do botão no VBox
+    private static void mostrar(Node no, boolean visivel) {
+        no.setVisible(visivel);
+        no.setManaged(visivel);
     }
 
     private static String descrever(Cliente cliente) {
@@ -92,5 +109,36 @@ public class PrincipalController {
     @FXML
     private void abrirClientes() {
         carregarTela("/gui/view/Clientes.fxml");
+    }
+
+    @FXML
+    private void abrirMultas() {
+        carregarTela("/gui/view/Multas.fxml");
+    }
+    @FXML
+    private void avancarUmDia() {
+        Relogio.avancarDias(1);
+        atualizarRotuloData();
+    }
+
+    @FXML
+    private void avancarCincoDias() {
+        Relogio.avancarDias(5);
+        atualizarRotuloData();
+    }
+
+    @FXML
+    private void reiniciarData() {
+        Relogio.reiniciar();
+        atualizarRotuloData();
+    }
+
+    private void atualizarRotuloData() {
+        rotuloData.setText("Data do sistema: " + Relogio.hoje().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")));
+    }
+
+    @FXML
+    private void alternarTema() {
+        Temas.alternar(painelPrincipal.getScene());
     }
 }

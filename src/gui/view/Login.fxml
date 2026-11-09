@@ -5,20 +5,30 @@
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.PasswordField?>
 <?import javafx.scene.control.TextField?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
 
-<VBox alignment="CENTER" spacing="12.0" xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml/1" fx:controller="gui.LoginController">
-   <padding>
-      <Insets bottom="24.0" left="24.0" right="24.0" top="24.0" />
-   </padding>
+<StackPane xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml/1" fx:controller="gui.LoginController">
    <children>
-      <Label text="GameVault">
-         <style>-fx-font-size: 28px; -fx-font-weight: bold;</style>
-      </Label>
-      <Label text="Entre com seu CPF e senha" />
-      <TextField fx:id="campoCpf" maxWidth="280.0" promptText="CPF" />
-      <PasswordField fx:id="campoSenha" maxWidth="280.0" onAction="#aoEntrar" promptText="Senha" />
-      <Button defaultButton="true" maxWidth="280.0" mnemonicParsing="false" onAction="#aoEntrar" text="Entrar" />
-      <Button maxWidth="280.0" mnemonicParsing="false" onAction="#aoCriarConta" text="Criar conta" />
+      <ImageView fitHeight="350.0" opacity="1.0" pickOnBounds="true" preserveRatio="true" translateY="-200.0">
+         <image>
+            <Image url="@/gui/img/controle.png" backgroundLoading="false" />
+         </image>
+      </ImageView>
+      <VBox alignment="CENTER" spacing="12.0">
+         <padding>
+            <Insets bottom="24.0" left="24.0" right="24.0" top="24.0" />
+         </padding>
+         <children>
+            <Label styleClass="titulo" text="GameVault" />
+            <Label text="Entre com seu CPF e senha" />
+            <TextField fx:id="campoCpf" maxWidth="280.0" promptText="CPF" />
+            <PasswordField fx:id="campoSenha" maxWidth="280.0" onAction="#aoEntrar" promptText="Senha" />
+            <Button defaultButton="true" maxWidth="280.0" mnemonicParsing="false" onAction="#aoEntrar" styleClass="primario" text="Entrar" />
+            <Button maxWidth="280.0" mnemonicParsing="false" onAction="#aoCriarConta" text="Criar conta" />
+         </children>
+      </VBox>
    </children>
-</VBox>
+</StackPane>

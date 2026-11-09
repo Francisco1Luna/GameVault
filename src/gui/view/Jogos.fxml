@@ -3,13 +3,15 @@
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.Label?>
 <?import javafx.scene.control.ListView?>
 <?import javafx.scene.control.TableColumn?>
 <?import javafx.scene.control.TableView?>
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
 <?import javafx.scene.layout.HBox?>
-<?import javafx.scene.layout.VBox?>
 
 <BorderPane prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/26" xmlns:fx="http://javafx.com/fxml/1" fx:controller="gui.JogosController">
     <center>
@@ -28,35 +30,44 @@
         </TableView>
     </center>
     <bottom>
-        <VBox spacing="8.0" BorderPane.alignment="CENTER">
+        <GridPane hgap="10.0" vgap="8.0" BorderPane.alignment="CENTER">
             <padding>
-                <Insets bottom="8.0" left="8.0" right="8.0" top="8.0" />
+                <Insets bottom="12.0" left="12.0" right="12.0" top="12.0" />
             </padding>
+            <columnConstraints>
+                <ColumnConstraints hgrow="NEVER" minWidth="90.0" />
+                <ColumnConstraints hgrow="ALWAYS" />
+                <ColumnConstraints hgrow="NEVER" minWidth="90.0" />
+                <ColumnConstraints hgrow="ALWAYS" />
+            </columnConstraints>
             <children>
-                <HBox spacing="8.0">
+                <Label text="Título" GridPane.columnIndex="0" GridPane.rowIndex="0" />
+                <TextField fx:id="campoTitulo" maxWidth="Infinity" promptText="Título do jogo" GridPane.columnIndex="1" GridPane.rowIndex="0" />
+                <Label text="Gênero" GridPane.columnIndex="2" GridPane.rowIndex="0" />
+                <TextField fx:id="campoGenero" maxWidth="Infinity" promptText="Gênero" GridPane.columnIndex="3" GridPane.rowIndex="0" />
+
+                <Label text="Preço" GridPane.columnIndex="0" GridPane.rowIndex="1" />
+                <TextField fx:id="campoPreco" maxWidth="Infinity" promptText="Ex.: 199,90" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                <Label text="Locação/dia" GridPane.columnIndex="2" GridPane.rowIndex="1" />
+                <TextField fx:id="campoLocacao" maxWidth="Infinity" promptText="Ex.: 9,90" GridPane.columnIndex="3" GridPane.rowIndex="1" />
+
+                <Label text="Classificação" GridPane.columnIndex="0" GridPane.rowIndex="2" />
+                <ComboBox fx:id="comboClassificacao" maxWidth="Infinity" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+                <Label text="Estoque" GridPane.columnIndex="2" GridPane.rowIndex="2" />
+                <TextField fx:id="campoEstoque" maxWidth="Infinity" promptText="Vazio = manter" GridPane.columnIndex="3" GridPane.rowIndex="2" />
+
+                <Label text="Plataformas" GridPane.columnIndex="0" GridPane.rowIndex="3" />
+                <ListView fx:id="listaPlataformas" prefHeight="90.0" GridPane.columnIndex="1" GridPane.columnSpan="3" GridPane.rowIndex="3" />
+
+                <HBox spacing="8.0" GridPane.columnIndex="1" GridPane.columnSpan="3" GridPane.rowIndex="4">
                     <children>
-                        <TextField fx:id="campoTitulo" promptText="Título" HBox.hgrow="ALWAYS" />
-                        <TextField fx:id="campoGenero" promptText="Gênero" HBox.hgrow="ALWAYS" />
-                    </children>
-                </HBox>
-                <HBox spacing="8.0">
-                    <children>
-                        <ComboBox fx:id="comboClassificacao" prefWidth="160.0" promptText="Classificação" />
-                        <ListView fx:id="listaPlataformas" prefHeight="80.0" prefWidth="200.0" />
-                        <TextField fx:id="campoEstoque" promptText="Estoque (vazio = manter)" HBox.hgrow="ALWAYS" />
-                    </children>
-                </HBox>
-                <HBox spacing="8.0">
-                    <children>
-                        <TextField fx:id="campoPreco" promptText="Preço" HBox.hgrow="ALWAYS" />
-                        <TextField fx:id="campoLocacao" promptText="Locação por dia" HBox.hgrow="ALWAYS" />
-                        <Button mnemonicParsing="false" onAction="#aoAdicionar" text="Adicionar" />
-                        <Button mnemonicParsing="false" onAction="#aoRemover" text="Remover" />
+                        <Button mnemonicParsing="false" onAction="#aoAdicionar" styleClass="primario" text="Adicionar" />
                         <Button mnemonicParsing="false" onAction="#aoEditar" text="Salvar alterações" />
                         <Button mnemonicParsing="false" onAction="#aoAjustarEstoque" text="Ajustar estoque" />
+                        <Button mnemonicParsing="false" onAction="#aoRemover" styleClass="perigo" text="Remover" />
                     </children>
                 </HBox>
             </children>
-        </VBox>
+        </GridPane>
     </bottom>
 </BorderPane>

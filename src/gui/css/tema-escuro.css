@@ -1,0 +1,15 @@
+.root {
+    -fx-base: #2b2d31;
+    -fx-background: #1e1f22;
+    -fx-control-inner-background: #2b2d31;
+    -fx-accent: #8b6cff;
+    -fx-focus-color: #8b6cff;
+    -fx-text-base-color: #e6e6e9;
+
+    -cor-barra: #25272b;
+    -cor-menu: #25272b;
+    -cor-borda: #3a3d44;
+    -cor-destaque: #8b6cff;
+    -cor-texto-destaque: #ffffff;
+    -cor-suave: #9aa0aa;
+}
