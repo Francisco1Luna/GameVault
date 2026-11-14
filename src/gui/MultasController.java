@@ -28,6 +28,7 @@ public class MultasController {
     @FXML private TableColumn<Penalidade, String> colJogo;
     @FXML private TableColumn<Penalidade, String> colGeracao;
     @FXML private TableColumn<Penalidade, String> colValor;
+    @FXML private TableColumn<Penalidade, String> colSituacao;
     @FXML private Label rotuloTotal;
 
     @FXML
@@ -41,19 +42,22 @@ public class MultasController {
         colGeracao.setCellValueFactory(c -> new SimpleStringProperty(
                 c.getValue().getDataGeracao() == null ? "-" : c.getValue().getDataGeracao().format(DATA)));
         colValor.setCellValueFactory(c -> new SimpleStringProperty(dinheiro(c.getValue().getValor())));
+        colSituacao.setCellValueFactory(c -> new SimpleStringProperty(!c.getValue().isPaga() ? "Pendente"
+                : c.getValue().getDataPagamento() == null ? "Paga"
+                : "Paga em " + c.getValue().getDataPagamento().format(DATA)));
         atualizar();
     }
 
     private void atualizar() {
-        List<Penalidade> pendentes = new ArrayList<>();
+        List<Penalidade> multas = new ArrayList<>();
         double total = 0.0;
         for (Cliente cliente : clienteService.listar()) {
-            for (Penalidade p : financeiroService.consultarPendencias(cliente)) {
-                pendentes.add(p);
-                total += p.getValor() == null ? 0.0 : p.getValor();
+            for (Penalidade p : financeiroService.listarMultas(cliente)) {
+                multas.add(p); // multas pagas continuam na lista, só mudam de situação
+                if (!p.isPaga()) total += p.getValor() == null ? 0.0 : p.getValor();
             }
         }
-        tabelaMultas.getItems().setAll(pendentes);
+        tabelaMultas.getItems().setAll(multas);
         rotuloTotal.setText("Total pendente: " + dinheiro(Math.round(total * 100.0) / 100.0));
     }
 

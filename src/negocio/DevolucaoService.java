@@ -58,13 +58,11 @@ public class DevolucaoService {
       throw new IllegalArgumentException("O aluguel não está cadastrado.");
     }
 
-    long diasDeAtraso = financeiroService.calcularDiasDeAtraso(aluguel, dataDevolucao);
     estoqueService.adicionarExemplares(aluguel.getJogo(), aluguel.getPlataforma(), 1);
     aluguel.setDataDevolucaoEfetiva(dataDevolucao);
     aluguel.setStatus(StatusAluguel.DEVOLVIDO);
-    if (diasDeAtraso > 0) {
-      financeiroService.registrarMulta(aluguel);
-    }
+    // sempre chamado: fecha o valor da multa que já corria, ou a remove se a devolução ficou no prazo
+    financeiroService.registrarMulta(aluguel);
     repositorioAlugueis.atualizar(aluguel);
   }
 }

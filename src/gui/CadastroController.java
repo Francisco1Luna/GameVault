@@ -39,6 +39,7 @@ public class CadastroController {
     public void initialize() {
         Formatadores.cpf(campoCpf);
         Formatadores.telefone(campoTelefone);
+        Formatadores.data(campoNascimento);
     }
 
     @FXML

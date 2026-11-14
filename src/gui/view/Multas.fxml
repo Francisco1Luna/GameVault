@@ -20,6 +20,7 @@
                 <TableColumn fx:id="colJogo" prefWidth="180.0" text="Jogo" />
                 <TableColumn fx:id="colGeracao" prefWidth="100.0" text="Gerada em" />
                 <TableColumn fx:id="colValor" prefWidth="90.0" text="Valor" />
+                <TableColumn fx:id="colSituacao" prefWidth="120.0" text="Situação" />
             </columns>
         </TableView>
     </center>

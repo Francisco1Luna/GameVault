@@ -241,6 +241,7 @@ public class LojaController {
         }
         auth.getUsuarioAtual().ifPresent(usuario -> {
             tabelaCompras.getItems().setAll(vendaService.listarDoUsuarioAtual());
+            Contexto.get().getFinanceiroService().listarMultas(usuario); // atualiza multas de aluguéis atrasados
             tabelaLocacoes.getItems().setAll(usuario.getAlugueis() == null ? new ArrayList<>() : usuario.getAlugueis());
         });
         atualizarTotais();

@@ -82,10 +82,13 @@ public class PrincipalController {
         Telas.trocar(painelPrincipal, "/gui/view/Login.fxml");
     }
 
+    private String telaAtual;
+
     private void carregarTela(String caminho) {
         try {
             Parent raiz = FXMLLoader.load(getClass().getResource(caminho));
             painelPrincipal.setCenter(raiz);
+            telaAtual = caminho;
         } catch (IOException e) {
             new Alert(Alert.AlertType.ERROR, e.getMessage()).showAndWait();
         }
@@ -135,6 +138,8 @@ public class PrincipalController {
 
     private void atualizarRotuloData() {
         rotuloData.setText("Data do sistema: " + Relogio.hoje().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")));
+        // a data mudou: recarrega a tela aberta para refletir atrasos e multas do novo dia
+        if (telaAtual != null) carregarTela(telaAtual);
     }
 
     @FXML

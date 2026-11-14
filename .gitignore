@@ -30,3 +30,11 @@ Thumbs.db
 # Maven e Gradle
 target/
 .gradle/
+
+# Ferramentas locais
+.vscode/
+graphify-out/
+.claude/
+CLAUDE.md
+hs_err_pid*.log
+core.*
