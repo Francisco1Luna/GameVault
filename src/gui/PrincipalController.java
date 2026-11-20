@@ -43,6 +43,9 @@ public class PrincipalController {
     @FXML
     private Button botaoMultas;
 
+    @FXML
+    private Button botaoRelatorios;
+
     private final AuthService auth = Contexto.get().getAuthService();
 
     @FXML
@@ -56,6 +59,7 @@ public class PrincipalController {
         mostrar(botaoJogos, admin);
         mostrar(botaoClientes, admin);
         mostrar(botaoMultas, admin);
+        mostrar(botaoRelatorios, admin);
         mostrar(caixaData, admin);
         atualizarRotuloData();
     }
@@ -117,6 +121,11 @@ public class PrincipalController {
     @FXML
     private void abrirMultas() {
         carregarTela("/gui/view/Multas.fxml");
+    }
+
+    @FXML
+    private void abrirRelatorios() {
+        carregarTela("/gui/view/Relatorios.fxml");
     }
     @FXML
     private void avancarUmDia() {
