@@ -37,8 +37,9 @@ public class EstoqueService {
 
   // ------------------------------------------------------------------ REQ06
 
-  /** Define o saldo exato (cadastro inicial ou correção de inventário). */
+  /** Define o saldo exato (cadastro inicial ou correção de inventário). Só administrador. */
   public synchronized void definirEstoque(Jogo jogo, Plataforma plataforma, int quantidade) {
+    Sessao.exigirAdministrador();
     if (quantidade < 0) {
       throw new IllegalArgumentException("O estoque não pode ser negativo.");
     }
@@ -48,11 +49,15 @@ public class EstoqueService {
     repositorioJogos.atualizar(atual);
   }
 
-  /** Soma exemplares/licenças ao saldo (compra de novas unidades, devolução de locação). */
+  /**
+   * Soma exemplares/licenças ao saldo (compra de novas unidades, devolução de locação). Aceita uma
+   * plataforma que o jogo já não lista (foi desmarcada na edição enquanto havia locação em
+   * andamento): senão a devolução desse exemplar ficaria travada para sempre.
+   */
   public synchronized int adicionarExemplares(Jogo jogo, Plataforma plataforma, int quantidade) {
     exigirPositivo(quantidade);
     Jogo atual = carregar(jogo);
-    Plataforma chave = localizarChave(atual, plataforma);
+    Plataforma chave = localizarChave(atual, plataforma, false);
     Map<Plataforma, Integer> estoque = estoqueDe(atual);
     int novoSaldo = estoque.getOrDefault(chave, 0) + quantidade;
     estoque.put(chave, novoSaldo);
@@ -134,6 +139,11 @@ public class EstoqueService {
 
   /** Confirma que a plataforma pertence ao jogo e devolve a chave já usada no mapa (compara por id). */
   private Plataforma localizarChave(Jogo jogo, Plataforma plataforma) {
+    return localizarChave(jogo, plataforma, true);
+  }
+
+  /** Com {@code exigirNoJogo} false, uma plataforma fora da lista do jogo é aceita (usa a própria). */
+  private Plataforma localizarChave(Jogo jogo, Plataforma plataforma, boolean exigirNoJogo) {
     if (plataforma == null) {
       throw new IllegalArgumentException("A plataforma é obrigatória.");
     }
@@ -147,8 +157,11 @@ public class EstoqueService {
       }
     }
     if (canonica == null) {
-      throw new IllegalArgumentException("O jogo \"" + jogo.getTitulo()
-          + "\" não está disponível para a plataforma " + plataforma.getNome() + ".");
+      if (exigirNoJogo) {
+        throw new IllegalArgumentException("O jogo \"" + jogo.getTitulo()
+            + "\" não está disponível para a plataforma " + plataforma.getNome() + ".");
+      }
+      canonica = plataforma;
     }
     for (Plataforma chave : estoqueDe(jogo).keySet()) {
       if (mesmaPlataforma(chave, canonica)) {

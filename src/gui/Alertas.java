@@ -23,7 +23,9 @@ public final class Alertas {
     }
 
     private static Alert criar(Alert.AlertType tipo, String titulo, String mensagem) {
-        Alert alerta = new Alert(tipo, mensagem);
+        // getMessage() de uma exceção pode ser null: nunca mostra um alerta vazio ou "null"
+        String texto = mensagem == null || mensagem.trim().isEmpty() ? "Ocorreu um erro inesperado." : mensagem;
+        Alert alerta = new Alert(tipo, texto);
         alerta.setTitle("GameVault");
         alerta.setHeaderText(titulo);
         // copia o CSS da janela principal para o alerta

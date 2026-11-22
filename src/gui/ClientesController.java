@@ -1,8 +1,5 @@
 package gui;
 
-import java.time.LocalDate;
-import java.util.Optional;
-
 import javafx.beans.property.SimpleStringProperty;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
@@ -89,45 +86,19 @@ public class ClientesController {
             return;
         }
         try {
-            // 1. LER (sem alterar o objeto)
-            String nome = campoNome.getText();
-            String cpf = somenteDigitos(campoCpf.getText());
-            LocalDate nascimento = campoNascimento.getValue();
-            String email = vazioParaNulo(campoEmail.getText());
-            String telefone = vazioParaNulo(campoTelefone.getText());
+            // 1. CONFIRMAR
 
-            // 2. VALIDAR tudo antes de qualquer set
-            if (nome == null || nome.trim().isEmpty()) {
-                throw new IllegalArgumentException("O nome não pode ficar vazio.");
-            }
-            if (cpf.length() != 11) {
-                throw new IllegalArgumentException("O CPF deve ter 11 dígitos.");
-            }
-            if (nascimento == null) {
-                throw new IllegalArgumentException("A data de nascimento é obrigatória.");
-            }
-            if (nascimento.isAfter(LocalDate.now())) {
-                throw new IllegalArgumentException("A data de nascimento não pode ser futura.");
-            }
-            Optional<Cliente> existente = clienteService.buscarPorCpf(cpf);
-            if (existente.isPresent() && !existente.get().getId().equals(selecionado.getId())) {
-                throw new IllegalArgumentException("Já existe outro cliente com este CPF.");
-            }
-
-            // 3. CONFIRMAR
             Alert confirmacao = new Alert(Alert.AlertType.CONFIRMATION,
                     "Salvar as alterações em \"" + selecionado.getNome() + "\"?");
             if (confirmacao.showAndWait().orElse(ButtonType.CANCEL) != ButtonType.OK) {
                 return;
             }
 
-            // 4. APLICAR
-            selecionado.setNome(nome.trim());
-            selecionado.setCpf(cpf);
-            selecionado.setDataNascimento(nascimento);
-            selecionado.setEmail(email);
-            selecionado.setTelefone(telefone);
-            clienteService.atualizar(selecionado);
+            // 2. APLICAR: o service valida tudo antes de alterar (dados, tipo Padrão/Assinante e, se o
+            // campo senha estiver preenchido, a nova senha); se algo for inválido nada muda
+            authService.editarCliente(selecionado.getId(), campoNome.getText(), campoCpf.getText(),
+                    campoNascimento.getValue(), campoEmail.getText(), campoTelefone.getText(),
+                    checkAssinante.isSelected(), campoSenha.getText());
 
             limparCampos();
             atualizar();
@@ -169,12 +140,4 @@ public class ClientesController {
         checkAssinante.setSelected(false);
     }
 
-    /** Tira pontos, traços e espaços: o AuthService guarda o CPF só com dígitos. */
-    private static String somenteDigitos(String texto) {
-        return texto == null ? "" : texto.replaceAll("\\D", "");
-    }
-
-    private static String vazioParaNulo(String texto) {
-        return texto == null || texto.trim().isEmpty() ? null : texto.trim();
-    }
 }

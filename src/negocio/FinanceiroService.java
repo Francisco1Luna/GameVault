@@ -192,8 +192,9 @@ public class FinanceiroService {
     return !consultarPendencias(cliente).isEmpty();
   }
 
-  /** Registra o pagamento de uma multa. Não deixa pagar duas vezes a mesma multa. */
+  /** Registra o pagamento de uma multa (só administrador). Não deixa pagar duas vezes a mesma multa. */
   public synchronized void pagarMulta(Penalidade penalidade, LocalDate dataPagamento) {
+    Sessao.exigirAdministrador();
     if (penalidade == null) {
       throw new IllegalArgumentException("A multa é obrigatória.");
     }

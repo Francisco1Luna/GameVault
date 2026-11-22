@@ -56,6 +56,16 @@ Como diferencial, o cadastro de jogos é enriquecido automaticamente com dados r
 
 ## Possíveis APIs/Bibliotecas
 
-JavaFX, FreeToGame API (https://www.freetogame.com/api/games — pública, sem chave), `java.net.http.HttpClient`, Jackson/Gson, Java Time API, JUnit.
+JavaFX, FreeToGame API (https://www.freetogame.com/api/games — pública, sem chave), `java.net.http.HttpClient` e Java Time API. O JSON da API é lido por um leitor próprio (sem Jackson/Gson). O repositório ainda não tem testes automatizados.
 
 **Requisito bônus (opcional, fora da contagem oficial):** gerar uma página HTML estática com o "ranking" dos jogos mais locados do mês (tabela + capa/thumbnail vindos da API), aberta automaticamente no navegador via `Desktop.getDesktop().browse()`.
+
+## Como executar
+
+O projeto usa apenas Maven (`pom.xml`). Com JDK 17+:
+
+```
+mvn javafx:run
+```
+
+No IntelliJ, importe como projeto Maven e rode a classe `gui.Launcher` (rodar `AppFX` direto dá o erro "JavaFX runtime components are missing"). Login do administrador de demonstração: CPF `000.000.000-00`, senha `admin123`; clientes de teste (senha `teste123`): `529.982.247-25` (padrão) e `111.444.777-35` (assinante).

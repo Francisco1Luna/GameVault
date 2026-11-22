@@ -90,8 +90,7 @@ public class LojaController {
                 c.getValue().plataforma == null ? "(sem plataforma)" : c.getValue().plataforma.getNome()));
         colPreco.setCellValueFactory(c -> new SimpleStringProperty(textoPreco(c.getValue().jogo)));
         colDiaria.setCellValueFactory(c -> new SimpleStringProperty(dinheiro(c.getValue().jogo.getPrecoLocacaoDiaria())));
-        colEstoque.setCellValueFactory(c -> new SimpleStringProperty(c.getValue().plataforma == null
-                ? "-" : String.valueOf(estoqueService.consultarQuantidade(c.getValue().jogo, c.getValue().plataforma))));
+        colEstoque.setCellValueFactory(c -> new SimpleStringProperty(textoEstoque(c.getValue())));
 
         colCompraData.setCellValueFactory(c -> new SimpleStringProperty(c.getValue().getDataVenda().format(DATA)));
         colCompraItens.setCellValueFactory(c -> new SimpleStringProperty(c.getValue().getItens().stream()
@@ -103,12 +102,8 @@ public class LojaController {
         colLocPlataforma.setCellValueFactory(c -> new SimpleStringProperty(c.getValue().getPlataforma().getNome()));
         colLocInicio.setCellValueFactory(c -> new SimpleStringProperty(c.getValue().getDataInicio().format(DATA)));
         colLocPrazo.setCellValueFactory(c -> new SimpleStringProperty(c.getValue().getDataDevolucaoPrevista().format(DATA)));
-        colLocStatus.setCellValueFactory(c -> {
-            Aluguel a = c.getValue();
-            boolean vencido = a.getStatus() == model.enums.StatusAluguel.ATIVO
-                    && Relogio.hoje().isAfter(a.getDataDevolucaoPrevista());
-            return new SimpleStringProperty(vencido ? "ATRASADO" : String.valueOf(a.getStatus()));
-        });
+        // o status ATRASADO é gravado pelo AluguelService.atualizarAtrasos() (chamado em atualizarTudo)
+        colLocStatus.setCellValueFactory(c -> new SimpleStringProperty(String.valueOf(c.getValue().getStatus())));
         colLocValor.setCellValueFactory(c -> new SimpleStringProperty(dinheiro(c.getValue().getValorLocacao())));
         colLocMulta.setCellValueFactory(c -> new SimpleStringProperty(c.getValue().getPenalidade() == null
                 ? "-" : dinheiro(c.getValue().getPenalidade().getValor())));
@@ -138,7 +133,20 @@ public class LojaController {
 
     private boolean semPlataformaMarcada() {
         ItemCatalogo item = tabelaCatalogo.getSelectionModel().getSelectedItem();
-        return item == null || item.plataforma == null;
+        // jogo importado e ainda incompleto (sem preço/classificação) também não pode ser comprado nem alugado
+        return item == null || item.plataforma == null || !jogoService.estaCompleto(item.jogo);
+    }
+
+    /** Estoque da linha. Nunca lança dentro da célula da tabela: qualquer problema vira "-". */
+    private String textoEstoque(ItemCatalogo item) {
+        if (item.plataforma == null) {
+            return "-";
+        }
+        try {
+            return String.valueOf(estoqueService.consultarQuantidade(item.jogo, item.plataforma));
+        } catch (RuntimeException e) {
+            return "-";
+        }
     }
 
     // ---- ações ----
@@ -213,6 +221,7 @@ public class LojaController {
     // ---- atualização das tabelas ----
 
     private void atualizarTudo() {
+        aluguelService.atualizarAtrasos(); // grava ATRASADO nas locações vencidas na data do sistema
         // atualizar a tabela limpa a seleção; guarda qual linha estava marcada para marcar de novo
         ItemCatalogo marcado = tabelaCatalogo.getSelectionModel().getSelectedItem();
         List<ItemCatalogo> linhas = new ArrayList<>();
@@ -251,6 +260,11 @@ public class LojaController {
         if (item == null || usuario == null || item.plataforma == null) {
             rotuloTotalCompra.setText("Total da compra: -");
             rotuloTotalLocacao.setText("Total da locação: -");
+            return;
+        }
+        if (!jogoService.estaCompleto(item.jogo)) {
+            rotuloTotalCompra.setText("Total da compra: indisponível (cadastro do jogo incompleto)");
+            rotuloTotalLocacao.setText("Total da locação: indisponível (cadastro do jogo incompleto)");
             return;
         }
         try {

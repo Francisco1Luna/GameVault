@@ -8,6 +8,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import model.Cliente;
 import model.ClienteAssinante;
+import negocio.AluguelService;
 import negocio.AuthService;
 import javafx.scene.layout.BorderPane;
 import java.time.format.DateTimeFormatter;
@@ -47,6 +48,7 @@ public class PrincipalController {
     private Button botaoRelatorios;
 
     private final AuthService auth = Contexto.get().getAuthService();
+    private final AluguelService aluguelService = Contexto.get().getAluguelService();
 
     @FXML
     public void initialize() {
@@ -146,6 +148,7 @@ public class PrincipalController {
     }
 
     private void atualizarRotuloData() {
+        aluguelService.atualizarAtrasos(); // a data do sistema mudou: reavalia quais locações venceram
         rotuloData.setText("Data do sistema: " + Relogio.hoje().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")));
         // a data mudou: recarrega a tela aberta para refletir atrasos e multas do novo dia
         if (telaAtual != null) carregarTela(telaAtual);
