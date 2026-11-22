@@ -36,6 +36,7 @@
                   <Button fx:id="botaoJogos" maxWidth="Infinity" mnemonicParsing="false" onAction="#abrirJogos" text="Jogos" />
                   <Button fx:id="botaoClientes" maxWidth="Infinity" mnemonicParsing="false" onAction="#abrirClientes" text="Clientes" />
                   <Button fx:id="botaoMultas" maxWidth="Infinity" mnemonicParsing="false" onAction="#abrirMultas" text="Multas" />
+                  <Button fx:id="botaoRelatorios" maxWidth="Infinity" mnemonicParsing="false" onAction="#abrirRelatorios" text="Relatórios" />
                </children>
             </VBox>
          </left>

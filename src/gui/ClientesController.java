@@ -32,6 +32,7 @@ public class ClientesController {
     public void initialize() {
         Formatadores.cpf(campoCpf);
         Formatadores.telefone(campoTelefone);
+        Formatadores.data(campoNascimento);
         colId.setCellValueFactory(new PropertyValueFactory<>("id"));
         colNome.setCellValueFactory(new PropertyValueFactory<>("nome"));
         colCpf.setCellValueFactory(c -> new SimpleStringProperty(Formatadores.formatarCpf(c.getValue().getCpf())));

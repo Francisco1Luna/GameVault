@@ -3,7 +3,6 @@ package gui;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.fxml.FXML;
-import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.Spinner;
@@ -25,7 +24,6 @@ import negocio.JogoService;
 import negocio.AluguelService;
 import negocio.VendaService;
 import negocio.excecoes.ValidacaoException;
-import javafx.scene.control.ButtonType;
 import negocio.Relogio;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -250,6 +248,7 @@ public class LojaController {
         }
         auth.getUsuarioAtual().ifPresent(usuario -> {
             tabelaCompras.getItems().setAll(vendaService.listarDoUsuarioAtual());
+            Contexto.get().getFinanceiroService().listarMultas(usuario); // atualiza multas de aluguéis atrasados
             tabelaLocacoes.getItems().setAll(usuario.getAlugueis() == null ? new ArrayList<>() : usuario.getAlugueis());
         });
         atualizarTotais();

@@ -44,6 +44,9 @@ public class PrincipalController {
     @FXML
     private Button botaoMultas;
 
+    @FXML
+    private Button botaoRelatorios;
+
     private final AuthService auth = Contexto.get().getAuthService();
     private final AluguelService aluguelService = Contexto.get().getAluguelService();
 
@@ -58,6 +61,7 @@ public class PrincipalController {
         mostrar(botaoJogos, admin);
         mostrar(botaoClientes, admin);
         mostrar(botaoMultas, admin);
+        mostrar(botaoRelatorios, admin);
         mostrar(caixaData, admin);
         atualizarRotuloData();
     }
@@ -84,10 +88,13 @@ public class PrincipalController {
         Telas.trocar(painelPrincipal, "/gui/view/Login.fxml");
     }
 
+    private String telaAtual;
+
     private void carregarTela(String caminho) {
         try {
             Parent raiz = FXMLLoader.load(getClass().getResource(caminho));
             painelPrincipal.setCenter(raiz);
+            telaAtual = caminho;
         } catch (IOException e) {
             new Alert(Alert.AlertType.ERROR, e.getMessage()).showAndWait();
         }
@@ -117,6 +124,11 @@ public class PrincipalController {
     private void abrirMultas() {
         carregarTela("/gui/view/Multas.fxml");
     }
+
+    @FXML
+    private void abrirRelatorios() {
+        carregarTela("/gui/view/Relatorios.fxml");
+    }
     @FXML
     private void avancarUmDia() {
         Relogio.avancarDias(1);
@@ -138,6 +150,8 @@ public class PrincipalController {
     private void atualizarRotuloData() {
         aluguelService.atualizarAtrasos(); // a data do sistema mudou: reavalia quais locações venceram
         rotuloData.setText("Data do sistema: " + Relogio.hoje().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")));
+        // a data mudou: recarrega a tela aberta para refletir atrasos e multas do novo dia
+        if (telaAtual != null) carregarTela(telaAtual);
     }
 
     @FXML

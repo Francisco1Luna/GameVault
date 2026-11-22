@@ -119,31 +119,61 @@ public class FinanceiroService {
     if (aluguel.getDataDevolucaoEfetiva() == null) {
       throw new IllegalStateException("A multa só pode ser registrada depois da devolução.");
     }
-    if (aluguel.getPenalidade() != null) {
+    if (aluguel.getPenalidade() != null && aluguel.getPenalidade().isPaga()) {
       throw new IllegalStateException("Já existe multa registrada para este aluguel.");
     }
-    double valor = calcularMulta(aluguel, null);
-    if (valor <= 0) {
-      return Optional.empty();
+    atualizarMulta(aluguel, null); // fecha o valor da multa que já corria durante o atraso
+    return Optional.ofNullable(aluguel.getPenalidade());
+  }
+
+  /**
+   * Mantém a multa do aluguel em dia: assim que passa do prazo ela já existe (pendente) e cresce a
+   * cada dia de atraso até a devolução. Multa paga não muda mais.
+   */
+  public synchronized void atualizarMulta(Aluguel aluguel, LocalDate hoje) {
+    if (aluguel == null || aluguel.getDataDevolucaoPrevista() == null) {
+      return;
     }
-    // a penalidade é 1:1 com o aluguel, então reaproveita o id dele
-    Penalidade penalidade = new Penalidade(aluguel.getId(), aluguel, valor, aluguel.getDataDevolucaoEfetiva(), false, null);
-    aluguel.setPenalidade(penalidade); // a penalidade fica no aluguel, não no cliente
-    return Optional.of(penalidade);
+    Penalidade penalidade = aluguel.getPenalidade();
+    if (penalidade != null && penalidade.isPaga()) {
+      return;
+    }
+    double valor = calcularMulta(aluguel, hoje);
+    if (valor <= 0) {
+      aluguel.setPenalidade(null); // sem atraso (ex.: o relógio do sistema foi reiniciado)
+    } else if (penalidade == null) {
+      // a penalidade é 1:1 com o aluguel, então reaproveita o id dele; gerada no 1º dia de atraso
+      aluguel.setPenalidade(new Penalidade(aluguel.getId(), aluguel, valor,
+          aluguel.getDataDevolucaoPrevista().plusDays(1), false, null));
+    } else {
+      penalidade.setValor(valor);
+    }
   }
 
   //  REQ13
 
-  /** Multas ainda não pagas do cliente: percorre os aluguéis dele e pega a penalidade de cada um. */
-  public List<Penalidade> consultarPendencias(Cliente cliente) {
+  /** Todas as multas do cliente (pagas e pendentes), com as de aluguéis em atraso já atualizadas. */
+  public List<Penalidade> listarMultas(Cliente cliente) {
     exigirCliente(cliente);
-    List<Penalidade> pendentes = new ArrayList<>();
+    List<Penalidade> multas = new ArrayList<>();
     if (cliente.getAlugueis() != null) {
+      LocalDate hoje = Relogio.hoje();
       for (Aluguel aluguel : cliente.getAlugueis()) {
-        Penalidade p = aluguel == null ? null : aluguel.getPenalidade();
-        if (p != null && !p.isPaga()) {
-          pendentes.add(p);
+        atualizarMulta(aluguel, hoje);
+        if (aluguel != null && aluguel.getPenalidade() != null) {
+          multas.add(aluguel.getPenalidade());
         }
+      }
+    }
+    return multas;
+  }
+
+  /** Multas ainda não pagas do cliente, incluindo as que ainda correm em aluguéis atrasados. */
+  public List<Penalidade> consultarPendencias(Cliente cliente) {
+    List<Penalidade> pendentes = new ArrayList<>();
+    for (Penalidade p : listarMultas(cliente)) {
+      if (!p.isPaga()) {
+        pendentes.add(p);
       }
     }
     return pendentes;
@@ -173,6 +203,10 @@ public class FinanceiroService {
     }
     if (penalidade.isPaga()) {
       throw new IllegalStateException("Esta multa já foi paga.");
+    }
+    if (penalidade.getAluguelOrigem() != null && penalidade.getAluguelOrigem().getDataDevolucaoEfetiva() == null) {
+      throw new IllegalStateException("O jogo ainda não foi devolvido: a multa continua crescendo a cada dia de atraso. "
+          + "Registre a devolução antes de quitar.");
     }
     penalidade.setPaga(true);
     penalidade.setDataPagamento(dataPagamento);

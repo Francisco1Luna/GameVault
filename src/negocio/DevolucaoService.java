@@ -67,7 +67,6 @@ public class DevolucaoService {
       throw new ValidacaoException("A devolução não pode ser anterior ao início da locação.");
     }
 
-    long diasDeAtraso = financeiroService.calcularDiasDeAtraso(aluguel, dataDevolucao);
     StatusAluguel statusAnterior = aluguel.getStatus();
     Penalidade penalidadeAnterior = aluguel.getPenalidade();
     boolean estoqueDevolvido = false;
@@ -76,9 +75,8 @@ public class DevolucaoService {
       estoqueDevolvido = true;
       aluguel.setDataDevolucaoEfetiva(dataDevolucao);
       aluguel.setStatus(StatusAluguel.DEVOLVIDO);
-      if (diasDeAtraso > 0) {
-        financeiroService.registrarMulta(aluguel);
-      }
+      // sempre chamado: fecha o valor da multa que já corria, ou a remove se a devolução ficou no prazo
+      financeiroService.registrarMulta(aluguel);
       repositorioAlugueis.atualizar(aluguel);
     } catch (RuntimeException e) {
       // desfaz tudo, para a locação continuar em aberto e poder ser devolvida de novo
