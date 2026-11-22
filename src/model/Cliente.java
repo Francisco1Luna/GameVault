@@ -108,8 +108,8 @@ public abstract class Cliente {
     this.senhaHash = senhaHash;
   }
 
-  public int getIdade(){
-    LocalDate dataAtual = LocalDate.now();
-    return Period.between(dataNascimento, dataAtual).getYears();
+  /** Idade na data de referência (quem chama passa a data do sistema, Relogio.hoje()). */
+  public int getIdade(LocalDate dataReferencia) {
+    return Period.between(dataNascimento, dataReferencia).getYears();
   }
 }

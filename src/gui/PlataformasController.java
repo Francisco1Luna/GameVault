@@ -79,25 +79,16 @@ public class PlataformasController {
             String nome = campoNome.getText();
             String fabricante = campoFabricante.getText();
 
-            // 2. VALIDAR antes de qualquer set (o objeto selecionado é o mesmo guardado no repositório)
-            if (nome == null || nome.trim().isEmpty()) {
-                throw new IllegalArgumentException("O nome da plataforma não pode ficar vazio.");
-            }
-            if (fabricante == null || fabricante.trim().isEmpty()) {
-                throw new IllegalArgumentException("O fabricante não pode ficar vazio.");
-            }
-
-            // 3. CONFIRMAR
+            // 2. CONFIRMAR (quem valida é o service)
             Alert confirmacao = new Alert(Alert.AlertType.CONFIRMATION,
                     "Salvar as alterações em \"" + selecionada.getNome() + "\"?");
             if (confirmacao.showAndWait().orElse(ButtonType.CANCEL) != ButtonType.OK) {
                 return;
             }
 
-            // 4. APLICAR no MESMO objeto: os jogos que usam esta plataforma enxergam o novo nome
-            selecionada.setNome(nome.trim());
-            selecionada.setFabricante(fabricante.trim());
-            service.atualizar(selecionada);
+            // 3. APLICAR: o service valida o objeto novo e só então copia para a plataforma guardada
+            // (a mesma que os jogos referenciam, então eles enxergam o novo nome)
+            service.atualizar(new Plataforma(selecionada.getId(), nome, fabricante));
 
             campoNome.clear();
             campoFabricante.clear();

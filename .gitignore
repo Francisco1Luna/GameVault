@@ -30,3 +30,7 @@ Thumbs.db
 # Maven e Gradle
 target/
 .gradle/
+
+# Arquivos do git/atalhos que não pertencem ao projeto
+FETCH_HEAD
+*.url

@@ -5,6 +5,7 @@ import java.time.LocalDate;
 
 import dados.IRepositorioAlugueis;
 import model.Aluguel;
+import model.Penalidade;
 import model.enums.StatusAluguel;
 import negocio.excecoes.ValidacaoException;
 
@@ -42,6 +43,10 @@ public class DevolucaoService {
     this.financeiroService = financeiroService;
   }
 
+  /**
+   * Registra a devolução: devolve o exemplar ao estoque, finaliza o aluguel e gera a multa se
+   * houve atraso. É tudo ou nada: se qualquer passo falhar, o estoque e o aluguel voltam ao que eram.
+   */
   public synchronized void devolver(Aluguel aluguel, LocalDate dataDevolucao)
       throws ValidacaoException {
     if (aluguel == null) {
@@ -58,13 +63,36 @@ public class DevolucaoService {
       throw new IllegalArgumentException("O aluguel não está cadastrado.");
     }
 
-    long diasDeAtraso = financeiroService.calcularDiasDeAtraso(aluguel, dataDevolucao);
-    estoqueService.adicionarExemplares(aluguel.getJogo(), aluguel.getPlataforma(), 1);
-    aluguel.setDataDevolucaoEfetiva(dataDevolucao);
-    aluguel.setStatus(StatusAluguel.DEVOLVIDO);
-    if (diasDeAtraso > 0) {
-      financeiroService.registrarMulta(aluguel);
+    if (aluguel.getDataInicio() != null && dataDevolucao.isBefore(aluguel.getDataInicio())) {
+      throw new ValidacaoException("A devolução não pode ser anterior ao início da locação.");
     }
-    repositorioAlugueis.atualizar(aluguel);
+
+    long diasDeAtraso = financeiroService.calcularDiasDeAtraso(aluguel, dataDevolucao);
+    StatusAluguel statusAnterior = aluguel.getStatus();
+    Penalidade penalidadeAnterior = aluguel.getPenalidade();
+    boolean estoqueDevolvido = false;
+    try {
+      estoqueService.adicionarExemplares(aluguel.getJogo(), aluguel.getPlataforma(), 1);
+      estoqueDevolvido = true;
+      aluguel.setDataDevolucaoEfetiva(dataDevolucao);
+      aluguel.setStatus(StatusAluguel.DEVOLVIDO);
+      if (diasDeAtraso > 0) {
+        financeiroService.registrarMulta(aluguel);
+      }
+      repositorioAlugueis.atualizar(aluguel);
+    } catch (RuntimeException e) {
+      // desfaz tudo, para a locação continuar em aberto e poder ser devolvida de novo
+      aluguel.setDataDevolucaoEfetiva(null);
+      aluguel.setStatus(statusAnterior);
+      aluguel.setPenalidade(penalidadeAnterior);
+      if (estoqueDevolvido) {
+        try {
+          estoqueService.removerExemplares(aluguel.getJogo(), aluguel.getPlataforma(), 1);
+        } catch (RuntimeException ignorada) {
+          // o saldo recém-somado não some sozinho; se falhar não há mais o que desfazer
+        }
+      }
+      throw e;
+    }
   }
 }

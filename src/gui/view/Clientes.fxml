@@ -54,9 +54,9 @@
                 <Label text="Telefone" GridPane.columnIndex="0" GridPane.rowIndex="2" />
                 <TextField fx:id="campoTelefone" maxWidth="Infinity" promptText="Opcional" GridPane.columnIndex="1" GridPane.rowIndex="2" />
                 <Label text="Senha" GridPane.columnIndex="2" GridPane.rowIndex="2" />
-                <PasswordField fx:id="campoSenha" maxWidth="Infinity" promptText="Só ao adicionar" GridPane.columnIndex="3" GridPane.rowIndex="2" />
+                <PasswordField fx:id="campoSenha" maxWidth="Infinity" promptText="Vazio = manter a senha" GridPane.columnIndex="3" GridPane.rowIndex="2" />
 
-                <CheckBox fx:id="checkAssinante" mnemonicParsing="false" text="Assinante (só ao adicionar)" GridPane.columnIndex="1" GridPane.columnSpan="3" GridPane.rowIndex="3" />
+                <CheckBox fx:id="checkAssinante" mnemonicParsing="false" text="Assinante" GridPane.columnIndex="1" GridPane.columnSpan="3" GridPane.rowIndex="3" />
 
                 <HBox spacing="8.0" GridPane.columnIndex="1" GridPane.columnSpan="3" GridPane.rowIndex="4">
                     <children>

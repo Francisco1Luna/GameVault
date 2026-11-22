@@ -39,7 +39,6 @@ public class AuthService {
 
   private final ClienteService clienteService;
   private final SecureRandom aleatorio = new SecureRandom();
-  private Long idUsuarioAtual; // protegido por synchronized
 
   private AuthService(ClienteService clienteService) {
     if (clienteService == null) {
@@ -57,14 +56,17 @@ public class AuthService {
     if (nome == null || nome.trim().isEmpty()) {
       throw new IllegalArgumentException("O nome é obrigatório.");
     }
-    String cpfNormalizado = normalizarCpf(cpf);
+    String cpfNormalizado = Cpf.normalizar(cpf);
     if (cpfNormalizado.length() != 11) {
       throw new IllegalArgumentException("O CPF deve ter 11 dígitos.");
+    }
+    if (!Cpf.ehValido(cpfNormalizado)) {
+      throw new IllegalArgumentException("CPF inválido: confira os dígitos.");
     }
     if (dataNascimento == null) {
       throw new IllegalArgumentException("A data de nascimento é obrigatória.");
     }
-    if (dataNascimento.isAfter(LocalDate.now())) {
+    if (dataNascimento.isAfter(Relogio.hoje())) {
       throw new IllegalArgumentException("A data de nascimento não pode ser futura.");
     }
     if (senha == null || senha.length() < TAMANHO_MINIMO_SENHA) {
@@ -79,7 +81,7 @@ public class AuthService {
     Cliente cliente;
     if (assinante) {
       cliente = new ClienteAssinante(null, nome.trim(), cpfNormalizado, dataNascimento, emailLimpo,
-          telefoneLimpo, PERCENTUAL_DESCONTO_ASSINANTE, LocalDate.now());
+          telefoneLimpo, PERCENTUAL_DESCONTO_ASSINANTE, Relogio.hoje());
     } else {
       cliente = new ClientePadrao(null, nome.trim(), cpfNormalizado, dataNascimento, emailLimpo, telefoneLimpo);
     }
@@ -92,26 +94,27 @@ public class AuthService {
     if (cpf == null || cpf.trim().isEmpty() || senha == null || senha.isEmpty()) {
       throw new IllegalArgumentException("Informe CPF e senha.");
     }
-    Optional<Cliente> encontrado = clienteService.buscarPorCpf(normalizarCpf(cpf));
+    Optional<Cliente> encontrado = clienteService.buscarPorCpf(cpf);
     if (!encontrado.isPresent() || !confere(senha, encontrado.get().getSenhaHash())) {
       throw new IllegalArgumentException("CPF ou senha inválidos.");
     }
-    idUsuarioAtual = encontrado.get().getId();
+    Sessao.entrar(encontrado.get().getId(), encontrado.get().isAdministrador());
     return encontrado.get();
   }
 
   public synchronized void logout() {
-    idUsuarioAtual = null;
+    Sessao.sair();
   }
 
   /** O cliente logado, ou vazio se ninguém fez login (ou se ele foi removido depois do login). */
   public synchronized Optional<Cliente> getUsuarioAtual() {
-    if (idUsuarioAtual == null) {
+    Long id = Sessao.idUsuarioAtual();
+    if (id == null) {
       return Optional.empty();
     }
-    Optional<Cliente> atual = clienteService.buscarPorId(idUsuarioAtual);
+    Optional<Cliente> atual = clienteService.buscarPorId(id);
     if (!atual.isPresent()) {
-      idUsuarioAtual = null;
+      Sessao.sair();
     }
     return atual;
   }
@@ -134,15 +137,40 @@ public class AuthService {
     return getUsuarioAtual().map(Cliente::isAdministrador).orElse(false);
   }
 
-  /** Cria o administrador de demonstração (CPF 00000000000, senha admin123) se ainda não existir. */
+  /**
+   * Cria o administrador de demonstração (CPF 00000000000, senha admin123) se ainda não existir.
+   * Os dados são fixos no código de propósito (é um projeto acadêmico). O CPF 00000000000 é
+   * reservado: só um cliente administrador pode usá-lo (ver ClienteService).
+   */
   public synchronized void garantirAdministradorPadrao() {
-    String cpf = "00000000000";
-    if (clienteService.buscarPorCpf(cpf).isPresent()) {
+    if (clienteService.buscarPorCpf(Cpf.RESERVADO_ADMINISTRADOR).isPresent()) {
       return;
     }
-    Cliente admin = cadastrar("Administrador", cpf, LocalDate.of(1990, 1, 1), null, null, "admin123", false);
+    Cliente admin = new ClientePadrao(null, "Administrador", Cpf.RESERVADO_ADMINISTRADOR,
+        LocalDate.of(1990, 1, 1), null, null);
     admin.setAdministrador(true);
-    clienteService.atualizar(admin);
+    admin.setSenhaHash(gerarHash("admin123"));
+    Sessao.executarComoSistema(() -> clienteService.salvar(admin));
+  }
+
+  /**
+   * Edita um cliente pela tela de administração (só administrador): dados, tipo (Padrão ou
+   * Assinante) e, se {@code novaSenha} não for vazia, redefine a senha. Tudo é validado antes de
+   * alterar qualquer coisa. Devolve o cliente resultante (pode ser outro objeto se o tipo mudou).
+   */
+  public synchronized Cliente editarCliente(Long id, String nome, String cpf, LocalDate dataNascimento,
+      String email, String telefone, boolean assinante, String novaSenha) {
+    Sessao.exigirAdministrador();
+    boolean trocarSenha = novaSenha != null && !novaSenha.isEmpty();
+    if (trocarSenha && novaSenha.length() < TAMANHO_MINIMO_SENHA) {
+      throw new IllegalArgumentException("A senha deve ter pelo menos " + TAMANHO_MINIMO_SENHA + " caracteres.");
+    }
+    String novoHash = trocarSenha ? gerarHash(novaSenha) : null; // não falha depois de editar
+    Cliente editado = clienteService.editar(id, nome, cpf, dataNascimento, email, telefone, assinante);
+    if (novoHash != null) {
+      editado.setSenhaHash(novoHash);
+    }
+    return editado;
   }
 
   // ---- senha ----
@@ -177,10 +205,6 @@ public class AuthService {
     } catch (GeneralSecurityException e) {
       throw new IllegalStateException("Não foi possível processar a senha.", e);
     }
-  }
-
-  private static String normalizarCpf(String cpf) {
-    return cpf == null ? "" : cpf.replaceAll("\\D", "");
   }
 
   private static String vazioParaNulo(String texto) {

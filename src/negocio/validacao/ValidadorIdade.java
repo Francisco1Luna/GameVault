@@ -3,6 +3,7 @@ package negocio.validacao;
 import model.Aluguel;
 import model.Cliente;
 import model.Jogo;
+import negocio.Relogio;
 import negocio.excecoes.ValidacaoException;
 
 import java.util.List;
@@ -17,7 +18,7 @@ public class ValidadorIdade implements IValidadorLocacao{
             throw new ValidacaoException("Jogo não possui classificação indicativa.");
         }
 
-        int idade = cliente.getIdade();
+        int idade = cliente.getIdade(Relogio.hoje());
         int idadeMinima;
         switch (jogo.getClassificacaoIndicativa()) {
             case LIVRE:
