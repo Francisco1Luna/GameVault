@@ -65,6 +65,7 @@ public class AluguelService {
   public synchronized Aluguel realizarLocacao(Jogo jogo, Plataforma plataforma,
       LocalDate dataInicio, LocalDate dataDevolucaoPrevista) throws ValidacaoException {
     Cliente cliente = authService.exigirUsuarioAtual();
+    atualizarAtrasos();
     exigirDadosLocacao(cliente, jogo, plataforma, dataInicio, dataDevolucaoPrevista);
 
     List<Aluguel> alugueis = cliente.getAlugueis();
@@ -93,6 +94,30 @@ public class AluguelService {
     }
     alugueis.add(aluguel);
     return aluguel;
+  }
+
+  /**
+   * Marca como ATRASADO as locações em aberto cujo prazo já passou na data do sistema (Relogio) e
+   * volta para ATIVO as que deixaram de estar vencidas (ex.: a data do sistema foi reiniciada).
+   * Devolve quantas mudaram de status. É chamado ao locar e quando as telas atualizam.
+   */
+  public synchronized int atualizarAtrasos() {
+    LocalDate hoje = Relogio.hoje();
+    int alteradas = 0;
+    for (Aluguel aluguel : repositorioAlugueis.listar()) {
+      if (aluguel.getDataDevolucaoPrevista() == null) {
+        continue;
+      }
+      boolean vencido = hoje.isAfter(aluguel.getDataDevolucaoPrevista());
+      if (aluguel.getStatus() == StatusAluguel.ATIVO && vencido) {
+        aluguel.setStatus(StatusAluguel.ATRASADO);
+        alteradas++;
+      } else if (aluguel.getStatus() == StatusAluguel.ATRASADO && !vencido) {
+        aluguel.setStatus(StatusAluguel.ATIVO);
+        alteradas++;
+      }
+    }
+    return alteradas;
   }
 
   /** Locações ainda em andamento (ATIVO ou ATRASADO); o histórico completo fica no cliente. */

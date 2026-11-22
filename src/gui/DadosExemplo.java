@@ -11,13 +11,19 @@ import model.enums.ClassificacaoIndicativa;
 import negocio.EstoqueService;
 import negocio.JogoService;
 import negocio.PlataformaService;
+import negocio.Sessao;
 
 /** Cria plataformas, jogos e clientes de demonstração ao abrir o app (tudo é em memória). */
 public final class DadosExemplo {
 
     private DadosExemplo() { }
 
+    /** Carga do sistema: roda sem login (os services exigem administrador, a não ser no modo sistema). */
     public static void carregar() {
+        Sessao.executarComoSistema(DadosExemplo::carregarDados);
+    }
+
+    private static void carregarDados() {
         PlataformaService plataformaService = Contexto.get().getPlataformaService();
         JogoService jogoService = Contexto.get().getJogoService();
         EstoqueService estoqueService = Contexto.get().getEstoqueService();
@@ -39,9 +45,9 @@ public final class DadosExemplo {
                 ClassificacaoIndicativa.DEZOITO_ANOS, 249.90, 12.00, 2, ps5);
 
         // clientes de teste (senha: teste123)
-        Contexto.get().getAuthService().cadastrar("Henrique Pad.", "11111111111",
+        Contexto.get().getAuthService().cadastrar("Henrique Pad.", "52998224725",
                 LocalDate.of(2000, 3, 15), null, null, "teste123", false);
-        Contexto.get().getAuthService().cadastrar("Caio Ass.", "22222222222",
+        Contexto.get().getAuthService().cadastrar("Caio Ass.", "11144477735",
                 LocalDate.of(1995, 7, 20), null, null, "teste123", true);
     }
 

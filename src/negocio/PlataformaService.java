@@ -7,9 +7,11 @@ import dados.IRepositorioPlataformas;
 import model.Jogo;
 import model.Plataforma;
 
+import java.text.Normalizer;
 import java.util.List;
 import java.util.Optional;
 
+/** Cadastro de plataformas. Criar, editar e remover é restrito ao administrador (ver {@link Sessao}). */
 public class PlataformaService {
 
     // Singleton: uma única instância em memória; use PlataformaService.getInstance().
@@ -34,30 +36,47 @@ public class PlataformaService {
         this.repositorioJogos = repositorioJogos;
     }
 
-    public Plataforma cadastrar(Plataforma plataforma) {
-        if (plataforma == null) {
-            throw new IllegalArgumentException("A plataforma é obrigatória.");
-        }
-        if (plataforma.getNome() == null || plataforma.getNome().trim().isEmpty()) {
-            throw new IllegalArgumentException("O nome da plataforma é obrigatório.");
-        }
-        if (plataforma.getFabricante() == null || plataforma.getFabricante().trim().isEmpty()) { //poderia substituir por um metodo privado mas ficaria mais "complexo"
-            throw new IllegalArgumentException("O Fabricante da plataforma é obrigatório.");
-        }
+    public synchronized Plataforma cadastrar(Plataforma plataforma) {
+        Sessao.exigirAdministrador();
+        validar(plataforma, "A plataforma é obrigatória.", "O nome da plataforma é obrigatório.");
         return repositorioPlataformas.salvar(plataforma);
     }
 
-    public void atualizar(Plataforma plataforma) {
+    /**
+     * Devolve a plataforma com esse nome (sem diferenciar maiúsculas e acentos) ou a cadastra se
+     * ainda não existir. É uma operação só, sob o mesmo bloqueio, para duas importações ao mesmo
+     * tempo não criarem a mesma plataforma duas vezes.
+     */
+    public synchronized Plataforma obterOuCadastrar(String nome, String fabricante) {
+        Sessao.exigirAdministrador();
+        if (nome == null || nome.trim().isEmpty()) {
+            throw new IllegalArgumentException("O nome da plataforma é obrigatório.");
+        }
+        String chave = normalizar(nome);
+        for (Plataforma existente : repositorioPlataformas.listar()) {
+            if (existente.getNome() != null && normalizar(existente.getNome()).equals(chave)) {
+                return existente;
+            }
+        }
+        return cadastrar(new Plataforma(null, nome.trim(), fabricante));
+    }
+
+    /**
+     * Atualiza nome e fabricante da plataforma de mesmo id. O objeto recebido só carrega os novos
+     * valores: eles são validados primeiro e só então copiados para a plataforma guardada (a mesma
+     * que os jogos referenciam, então todos enxergam o novo nome). Se algo é inválido, nada muda.
+     */
+    public synchronized void atualizar(Plataforma plataforma) {
+        Sessao.exigirAdministrador();
         if (plataforma == null || plataforma.getId() == null) {
             throw new IllegalArgumentException("Plataforma inválida para atualização.");
         }
-        if (plataforma.getNome() == null || plataforma.getNome().trim().isEmpty()) {
-           throw new IllegalArgumentException("O nome da plataforma não pode ser vazio");
-        }
-        if (plataforma.getFabricante() == null || plataforma.getFabricante().trim().isEmpty()) { //poderia substituir por um metodo privado mas ficaria mais "complexo"
-            throw new IllegalArgumentException("O Fabricante da plataforma é obrigatório.");
-        }
-        repositorioPlataformas.atualizar(plataforma);
+        validar(plataforma, "Plataforma inválida para atualização.", "O nome da plataforma não pode ser vazio");
+        Plataforma guardada = repositorioPlataformas.buscarPorId(plataforma.getId()).orElseThrow(
+            () -> new IllegalArgumentException("Plataforma não encontrada: id " + plataforma.getId() + "."));
+        guardada.setNome(plataforma.getNome().trim());
+        guardada.setFabricante(plataforma.getFabricante().trim());
+        repositorioPlataformas.atualizar(guardada);
     }
 
     /**
@@ -65,6 +84,7 @@ public class PlataformaService {
      * apontando para uma plataforma que não existe mais. Devolve false se o id não existe.
      */
     public synchronized boolean remover(Long id) {
+        Sessao.exigirAdministrador();
         if (id == null) {
             throw new IllegalArgumentException("O id da plataforma é obrigatório.");
         }
@@ -95,5 +115,21 @@ public class PlataformaService {
 
     public List<Plataforma> listar() {
         return repositorioPlataformas.listar();
+    }
+
+    private static void validar(Plataforma plataforma, String mensagemNula, String mensagemNome) {
+        if (plataforma == null) {
+            throw new IllegalArgumentException(mensagemNula);
+        }
+        if (plataforma.getNome() == null || plataforma.getNome().trim().isEmpty()) {
+            throw new IllegalArgumentException(mensagemNome);
+        }
+        if (plataforma.getFabricante() == null || plataforma.getFabricante().trim().isEmpty()) {
+            throw new IllegalArgumentException("O Fabricante da plataforma é obrigatório.");
+        }
+    }
+
+    private static String normalizar(String texto) {
+        return Normalizer.normalize(texto.trim(), Normalizer.Form.NFD).replaceAll("\\p{M}", "").toLowerCase();
     }
 }

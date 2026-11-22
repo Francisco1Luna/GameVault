@@ -1,3 +1,0 @@
-# Scripts do wrapper precisam manter as quebras de linha corretas em qualquer SO
-gradlew text eol=lf
-*.bat text eol=crlf
