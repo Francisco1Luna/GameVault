@@ -55,7 +55,9 @@ public class JogoService {
             throw new IllegalArgumentException("O jogo é obrigatório.");
         }
         validar(jogo);
-        return repositorioJogos.salvar(jogo);
+        Jogo salvo = repositorioJogos.salvar(jogo);
+        EstoqueService.getInstance().notificarMudanca();
+        return salvo;
     }
 
     /**
@@ -94,6 +96,7 @@ public class JogoService {
             guardado.getEstoquePorPlataforma().keySet().removeIf(chave -> !contem(plataformas, chave));
         }
         repositorioJogos.atualizar(guardado);
+        EstoqueService.getInstance().notificarMudanca(); // tirar plataforma descarta o estoque dela
     }
 
     /**
@@ -136,6 +139,7 @@ public class JogoService {
             }
             throw e;
         }
+        EstoqueService.getInstance().notificarMudanca();
         return criados.size();
     }
 
@@ -214,7 +218,9 @@ public class JogoService {
                         + "\": existe aluguel em andamento.");
             }
         }
-        return repositorioJogos.remover(id);
+        boolean removido = repositorioJogos.remover(id);
+        EstoqueService.getInstance().notificarMudanca();
+        return removido;
     }
 
     /** Jogos cujo título contém o texto (sem diferenciar maiúsculas, minúsculas e acentos). */

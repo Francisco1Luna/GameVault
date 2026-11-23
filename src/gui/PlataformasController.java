@@ -48,8 +48,8 @@ public class PlataformasController {
     private void atualizar() {
         String pesquisa = campoPesquisa.getText() == null ? "" : campoPesquisa.getText().trim().toLowerCase();
         tabelaPlataformas.getItems().setAll(service.listar().stream()
-                .filter(plataforma -> plataforma.getNome().toLowerCase().contains(pesquisa)
-                        || plataforma.getFabricante().toLowerCase().contains(pesquisa))
+                .filter(plataforma -> contem(plataforma.getNome(), pesquisa)
+                        || contem(plataforma.getFabricante(), pesquisa))
                 .collect(java.util.stream.Collectors.toList()));
     }
 
@@ -71,7 +71,7 @@ public class PlataformasController {
     private void aoEditar() {
         Plataforma selecionada = tabelaPlataformas.getSelectionModel().getSelectedItem();
         if (selecionada == null) {
-            new Alert(Alert.AlertType.WARNING, "Selecione uma plataforma para editar.").showAndWait();
+            Alertas.avisar("Selecione uma plataforma para editar.");
             return;
         }
         try {
@@ -80,9 +80,7 @@ public class PlataformasController {
             String fabricante = campoFabricante.getText();
 
             // 2. CONFIRMAR (quem valida é o service)
-            Alert confirmacao = new Alert(Alert.AlertType.CONFIRMATION,
-                    "Salvar as alterações em \"" + selecionada.getNome() + "\"?");
-            if (confirmacao.showAndWait().orElse(ButtonType.CANCEL) != ButtonType.OK) {
+            if (!Alertas.confirmar("Salvar alterações", "Salvar as alterações em \"" + selecionada.getNome() + "\"?")) {
                 return;
             }
 
@@ -101,19 +99,23 @@ public class PlataformasController {
     private void aoRemover() {
         Plataforma linha = tabelaPlataformas.getSelectionModel().getSelectedItem();
         if (linha == null) {
-            new Alert(Alert.AlertType.INFORMATION, "Selecione uma plataforma.").showAndWait();
+            Alertas.avisar("Selecione uma plataforma para remover.");
             return;
         }
-        Alert confirmacao = new Alert(Alert.AlertType.CONFIRMATION, "Remover a plataforma \"" + linha.getNome() + "\"?");
-        if (confirmacao.showAndWait().orElse(ButtonType.CANCEL) != ButtonType.OK) {
+        if (!Alertas.confirmar("Remover plataforma", "Remover a plataforma \"" + linha.getNome() + "\"?")) {
             return;
         }
         try {
             if (!service.remover(linha.getId())) {
-                new Alert(Alert.AlertType.WARNING, "A plataforma nao foi encontrada.").showAndWait();
+                Alertas.avisar("A plataforma não foi encontrada.");
             }
             atualizar();
         } catch (IllegalStateException | IllegalArgumentException e) {
             Alertas.avisar(e.getMessage());        }
+    }
+
+    /** Pesquisa sem quebrar quando o campo é nulo (ex.: plataforma sem fabricante). */
+    private static boolean contem(String texto, String pesquisa) {
+        return texto != null && texto.toLowerCase().contains(pesquisa);
     }
 }

@@ -3,7 +3,6 @@ package gui;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
-import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import model.Cliente;
@@ -31,6 +30,9 @@ public class PrincipalController {
 
     @FXML
     private Label rotuloUsuario;
+
+    @FXML
+    private Button botaoLoja;
 
     @FXML
     private Button botaoPlataformas;
@@ -64,6 +66,7 @@ public class PrincipalController {
         mostrar(botaoRelatorios, admin);
         mostrar(caixaData, admin);
         atualizarRotuloData();
+        abrirLoja(); // abre a Loja ao entrar, em vez de deixar a área central vazia
     }
 
     private static void mostrar(Node no, boolean visivel) {
@@ -73,7 +76,9 @@ public class PrincipalController {
 
     private static String descrever(Cliente cliente) {
         if (cliente.isAdministrador()) {
-            return "Olá, " + cliente.getNome() + " - Administrador";
+            // evita "Olá, Administrador - Administrador" quando o nome do usuário já é esse
+            return "Administrador".equalsIgnoreCase(cliente.getNome())
+                    ? "Olá, Administrador" : "Olá, " + cliente.getNome() + " · Administrador";
         }
         if (cliente instanceof ClienteAssinante) {
             double desconto = ((ClienteAssinante) cliente).getPercentualDesconto();
@@ -95,8 +100,21 @@ public class PrincipalController {
             Parent raiz = FXMLLoader.load(getClass().getResource(caminho));
             painelPrincipal.setCenter(raiz);
             telaAtual = caminho;
+            marcarMenuAtivo(caminho);
         } catch (IOException e) {
-            new Alert(Alert.AlertType.ERROR, e.getMessage()).showAndWait();
+            Alertas.erro("Não foi possível abrir a tela: " + e.getMessage());
+        }
+    }
+
+    /** Destaca no menu lateral o botão da tela aberta (classe CSS "ativo", definida no base.css). */
+    private void marcarMenuAtivo(String caminho) {
+        Button[] botoes = {botaoLoja, botaoPlataformas, botaoJogos, botaoClientes, botaoMultas, botaoRelatorios};
+        String[] telas = {"Loja", "Plataformas", "Jogos", "Clientes", "Multas", "Relatorios"};
+        for (int i = 0; i < botoes.length; i++) {
+            botoes[i].getStyleClass().remove("ativo");
+            if (caminho.endsWith("/" + telas[i] + ".fxml")) {
+                botoes[i].getStyleClass().add("ativo");
+            }
         }
     }
 
@@ -158,4 +176,4 @@ public class PrincipalController {
     private void alternarTema() {
         Temas.alternar(painelPrincipal.getScene());
     }
-}
+}

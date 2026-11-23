@@ -5,82 +5,129 @@
 <?import javafx.scene.control.ComboBox?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.ListView?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.Separator?>
 <?import javafx.scene.control.TableColumn?>
 <?import javafx.scene.control.TableView?>
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.BorderPane?>
-<?import javafx.scene.layout.ColumnConstraints?>
-<?import javafx.scene.layout.GridPane?>
 <?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
 
-<BorderPane prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/26" xmlns:fx="http://javafx.com/fxml/1" fx:controller="gui.JogosController">
+<!-- Layout: cabeçalho + pesquisa em cima, tabela no centro, formulário em card à direita -->
+<BorderPane styleClass="tela" xmlns="http://javafx.com/javafx/26" xmlns:fx="http://javafx.com/fxml/1" fx:controller="gui.JogosController">
     <top>
-        <HBox spacing="8.0">
+        <HBox alignment="CENTER_LEFT" spacing="12.0">
+            <BorderPane.margin><Insets bottom="16.0" /></BorderPane.margin>
             <children>
-                <TextField fx:id="campoPesquisa" promptText="Pesquisar por título ou gênero" HBox.hgrow="ALWAYS" />
+                <VBox styleClass="cabecalho-tela" HBox.hgrow="ALWAYS">
+                    <children>
+                        <Label styleClass="titulo-tela" text="Jogos" />
+                        <Label styleClass="subtitulo-tela" text="Cadastre jogos, preços e estoque por plataforma" />
+                    </children>
+                </VBox>
+                <TextField fx:id="campoPesquisa" prefWidth="320.0" promptText="Pesquisar por título ou gênero" />
+                <Button fx:id="botaoImportar" mnemonicParsing="false" onAction="#aoImportarCatalogo" text="Importar catálogo" />
             </children>
-            <padding><Insets bottom="8.0" left="12.0" right="12.0" top="8.0" /></padding>
         </HBox>
     </top>
     <center>
         <TableView fx:id="tabelaJogos" BorderPane.alignment="CENTER">
+            <placeholder><Label text="Nenhum jogo encontrado" /></placeholder>
             <columnResizePolicy>
                 <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
             </columnResizePolicy>
             <columns>
-                <TableColumn fx:id="colId" maxWidth="60.0" minWidth="35.0" prefWidth="38.0" text="ID" />
-                <TableColumn fx:id="colTitulo" prefWidth="144.0" text="Título" />
-                <TableColumn fx:id="colGenero" prefWidth="120.0" text="Gênero" />
-                <TableColumn fx:id="colPreco" prefWidth="80.0" text="Preço" />
-                <TableColumn fx:id="colLocacao" prefWidth="90.0" text="Locação/dia" />
-                <TableColumn fx:id="colPlataformas" prefWidth="140.0" text="Plataformas" />
+                <TableColumn fx:id="colId" maxWidth="60.0" minWidth="45.0" prefWidth="45.0" reorderable="false" text="ID" />
+                <TableColumn fx:id="colTitulo" minWidth="60.0" prefWidth="230.0" reorderable="false" text="Título" />
+                <TableColumn fx:id="colGenero" minWidth="60.0" prefWidth="130.0" reorderable="false" text="Gênero" />
+                <TableColumn fx:id="colPreco" maxWidth="140.0" minWidth="60.0" prefWidth="100.0" reorderable="false" text="Preço" />
+                <TableColumn fx:id="colLocacao" maxWidth="140.0" minWidth="60.0" prefWidth="100.0" reorderable="false" text="Locação/dia" />
+                <TableColumn fx:id="colEstoque" maxWidth="110.0" minWidth="60.0" prefWidth="80.0" reorderable="false" text="Estoque" />
+                <TableColumn fx:id="colPlataformas" minWidth="60.0" prefWidth="230.0" reorderable="false" text="Plataformas" />
             </columns>
         </TableView>
     </center>
-    <bottom>
-        <GridPane hgap="10.0" vgap="8.0" BorderPane.alignment="CENTER">
-            <padding>
-                <Insets bottom="12.0" left="12.0" right="12.0" top="12.0" />
-            </padding>
-            <columnConstraints>
-                <ColumnConstraints hgrow="NEVER" minWidth="90.0" />
-                <ColumnConstraints hgrow="ALWAYS" />
-                <ColumnConstraints hgrow="NEVER" minWidth="90.0" />
-                <ColumnConstraints hgrow="ALWAYS" />
-            </columnConstraints>
-            <children>
-                <Label text="Título" GridPane.columnIndex="0" GridPane.rowIndex="0" />
-                <TextField fx:id="campoTitulo" maxWidth="Infinity" promptText="Título do jogo" GridPane.columnIndex="1" GridPane.rowIndex="0" />
-                <Button mnemonicParsing="false" onAction="#aoBuscarDados" text="Buscar dados" GridPane.columnIndex="2" GridPane.rowIndex="0" />
-                <Button mnemonicParsing="false" onAction="#aoImportarCatalogo" text="Importar catálogo" GridPane.columnIndex="3" GridPane.rowIndex="0" />
-                <Label text="Gênero" GridPane.columnIndex="0" GridPane.rowIndex="1" />
-                <TextField fx:id="campoGenero" maxWidth="Infinity" promptText="Gênero" GridPane.columnIndex="1" GridPane.rowIndex="1" />
-
-                <Label text="Preço" GridPane.columnIndex="2" GridPane.rowIndex="1" />
-                <TextField fx:id="campoPreco" maxWidth="Infinity" promptText="Ex.: 199,90" GridPane.columnIndex="3" GridPane.rowIndex="1" />
-                <Label text="Locação/dia" GridPane.columnIndex="0" GridPane.rowIndex="2" />
-                <TextField fx:id="campoLocacao" maxWidth="Infinity" promptText="Ex.: 9,90" GridPane.columnIndex="1" GridPane.rowIndex="2" />
-
-                <Label text="Classificação" GridPane.columnIndex="2" GridPane.rowIndex="2" />
-                <ComboBox fx:id="comboClassificacao" maxWidth="Infinity" GridPane.columnIndex="3" GridPane.rowIndex="2" />
-                <Label text="Estoque" GridPane.columnIndex="0" GridPane.rowIndex="3" />
-                <TextField fx:id="campoEstoque" maxWidth="Infinity" promptText="Vazio = manter" GridPane.columnIndex="1" GridPane.rowIndex="3" />
-                <TextField fx:id="campoDesenvolvedora" editable="false" maxWidth="Infinity" promptText="Desenvolvedora (API)" GridPane.columnIndex="2" GridPane.columnSpan="2" GridPane.rowIndex="3" />
-
-                <TextField fx:id="campoPublicadora" editable="false" maxWidth="Infinity" promptText="Publicadora (API)" GridPane.columnIndex="0" GridPane.columnSpan="2" GridPane.rowIndex="4" />
-                <TextField fx:id="campoLink" editable="false" maxWidth="Infinity" promptText="Link do jogo (API)" GridPane.columnIndex="2" GridPane.columnSpan="2" GridPane.rowIndex="4" />
-                <Label text="Plataformas" GridPane.columnIndex="0" GridPane.rowIndex="5" />
-                <ListView fx:id="listaPlataformas" prefHeight="90.0" GridPane.columnIndex="1" GridPane.columnSpan="3" GridPane.rowIndex="5" />
-
-                <HBox spacing="8.0" GridPane.columnIndex="1" GridPane.columnSpan="3" GridPane.rowIndex="6">
+    <right>
+        <ScrollPane fitToWidth="true" hbarPolicy="NEVER" prefWidth="400.0" styleClass="painel-rolagem" BorderPane.alignment="TOP_CENTER">
+            <BorderPane.margin><Insets left="16.0" /></BorderPane.margin>
+            <content>
+                <VBox styleClass="card">
                     <children>
-                        <Button mnemonicParsing="false" onAction="#aoAdicionar" styleClass="primario" text="Adicionar" />
-                        <Button mnemonicParsing="false" onAction="#aoEditar" text="Salvar alterações" />
-                        <Button mnemonicParsing="false" onAction="#aoAjustarEstoque" text="Ajustar estoque" />
-                        <Button mnemonicParsing="false" onAction="#aoRemover" styleClass="perigo" text="Remover" />
+                        <Label styleClass="titulo-card" text="Dados do jogo" />
+                        <Label styleClass="dica" text="Selecione uma linha da tabela para editar." wrapText="true" />
+
+                        <Label styleClass="rotulo-campo" text="Título" />
+                        <HBox spacing="8.0">
+                            <children>
+                                <TextField fx:id="campoTitulo" maxWidth="Infinity" promptText="Título do jogo" HBox.hgrow="ALWAYS" />
+                                <Button mnemonicParsing="false" onAction="#aoBuscarDados" text="Buscar dados" />
+                            </children>
+                        </HBox>
+
+                        <Label styleClass="rotulo-campo" text="Gênero" />
+                        <TextField fx:id="campoGenero" maxWidth="Infinity" promptText="Gênero" />
+
+                        <HBox spacing="10.0">
+                            <children>
+                                <VBox spacing="4.0" HBox.hgrow="ALWAYS">
+                                    <children>
+                                        <Label styleClass="rotulo-campo" text="Preço" />
+                                        <TextField fx:id="campoPreco" maxWidth="Infinity" promptText="Ex.: 199,90" />
+                                    </children>
+                                </VBox>
+                                <VBox spacing="4.0" HBox.hgrow="ALWAYS">
+                                    <children>
+                                        <Label styleClass="rotulo-campo" text="Locação/dia" />
+                                        <TextField fx:id="campoLocacao" maxWidth="Infinity" promptText="Ex.: 9,90" />
+                                    </children>
+                                </VBox>
+                            </children>
+                        </HBox>
+
+                        <HBox spacing="10.0">
+                            <children>
+                                <VBox spacing="4.0" HBox.hgrow="ALWAYS">
+                                    <children>
+                                        <Label styleClass="rotulo-campo" text="Classificação" />
+                                        <ComboBox fx:id="comboClassificacao" maxWidth="Infinity" />
+                                    </children>
+                                </VBox>
+                                <VBox spacing="4.0" HBox.hgrow="ALWAYS">
+                                    <children>
+                                        <Label styleClass="rotulo-campo" text="Estoque" />
+                                        <TextField fx:id="campoEstoque" maxWidth="Infinity" promptText="Vazio = manter" />
+                                    </children>
+                                </VBox>
+                            </children>
+                        </HBox>
+
+                        <Label styleClass="rotulo-campo" text="Plataformas" />
+                        <ListView fx:id="listaPlataformas" prefHeight="110.0" />
+                        <Label styleClass="dica" text="Segure Ctrl para marcar mais de uma." />
+
+                        <Separator />
+                        <Label styleClass="rotulo-campo" text="Dados da API (preenchidos por &quot;Buscar dados&quot;)" wrapText="true" />
+                        <TextField fx:id="campoDesenvolvedora" editable="false" maxWidth="Infinity" promptText="Desenvolvedora (API)" />
+                        <TextField fx:id="campoPublicadora" editable="false" maxWidth="Infinity" promptText="Publicadora (API)" />
+                        <TextField fx:id="campoLink" editable="false" maxWidth="Infinity" promptText="Link do jogo (API)" />
+
+                        <HBox spacing="8.0">
+                            <VBox.margin><Insets top="8.0" /></VBox.margin>
+                            <children>
+                                <Button maxWidth="Infinity" mnemonicParsing="false" onAction="#aoAdicionar" styleClass="primario" text="Adicionar" HBox.hgrow="ALWAYS" />
+                                <Button maxWidth="Infinity" mnemonicParsing="false" onAction="#aoEditar" text="Salvar alterações" HBox.hgrow="ALWAYS" />
+                            </children>
+                        </HBox>
+                        <HBox spacing="8.0">
+                            <children>
+                                <Button maxWidth="Infinity" mnemonicParsing="false" onAction="#aoAjustarEstoque" text="Ajustar estoque" HBox.hgrow="ALWAYS" />
+                                <Button maxWidth="Infinity" mnemonicParsing="false" onAction="#aoRemover" styleClass="perigo" text="Remover" HBox.hgrow="ALWAYS" />
+                            </children>
+                        </HBox>
                     </children>
-                </HBox>
-            </children>
-        </GridPane>
-    </bottom>
+                </VBox>
+            </content>
+        </ScrollPane>
+    </right>
 </BorderPane>

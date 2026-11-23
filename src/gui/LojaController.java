@@ -6,6 +6,7 @@ import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.Spinner;
+import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
@@ -16,6 +17,7 @@ import model.ItemVenda;
 import model.Jogo;
 import model.Plataforma;
 import model.Venda;
+import model.enums.StatusAluguel;
 import negocio.AuthService;
 import negocio.DevolucaoService;
 import negocio.EstoqueService;
@@ -91,28 +93,55 @@ public class LojaController {
         colPreco.setCellValueFactory(c -> new SimpleStringProperty(textoPreco(c.getValue().jogo)));
         colDiaria.setCellValueFactory(c -> new SimpleStringProperty(dinheiro(c.getValue().jogo.getPrecoLocacaoDiaria())));
         colEstoque.setCellValueFactory(c -> new SimpleStringProperty(textoEstoque(c.getValue())));
+        // colunas de texto formatado: ordenar pelo valor, não alfabeticamente (ver Ordenacao)
+        colPreco.setComparator(Ordenacao.DINHEIRO);
+        colDiaria.setComparator(Ordenacao.DINHEIRO);
+        colEstoque.setComparator(Ordenacao.NUMERO);
 
         colCompraData.setCellValueFactory(c -> new SimpleStringProperty(c.getValue().getDataVenda().format(DATA)));
         colCompraItens.setCellValueFactory(c -> new SimpleStringProperty(c.getValue().getItens().stream()
                 .map(i -> i.getJogo().getTitulo() + " (" + i.getPlataforma().getNome() + ") x" + i.getQuantidade())
                 .collect(Collectors.joining(", "))));
         colCompraTotal.setCellValueFactory(c -> new SimpleStringProperty(dinheiro(c.getValue().getValorTotal())));
+        colCompraData.setComparator(Ordenacao.DATA_BR);
+        colCompraTotal.setComparator(Ordenacao.DINHEIRO);
 
         colLocJogo.setCellValueFactory(c -> new SimpleStringProperty(c.getValue().getJogo().getTitulo()));
         colLocPlataforma.setCellValueFactory(c -> new SimpleStringProperty(c.getValue().getPlataforma().getNome()));
         colLocInicio.setCellValueFactory(c -> new SimpleStringProperty(c.getValue().getDataInicio().format(DATA)));
         colLocPrazo.setCellValueFactory(c -> new SimpleStringProperty(c.getValue().getDataDevolucaoPrevista().format(DATA)));
         // o status ATRASADO é gravado pelo AluguelService.atualizarAtrasos() (chamado em atualizarTudo)
-        colLocStatus.setCellValueFactory(c -> new SimpleStringProperty(String.valueOf(c.getValue().getStatus())));
+        // status em português e como etiqueta colorida (antes aparecia o nome do enum: ATIVO, ATRASADO...)
+        colLocStatus.setCellValueFactory(c -> new SimpleStringProperty(textoStatus(c.getValue().getStatus())));
+        colLocStatus.setCellFactory(coluna -> new CelulaEtiqueta());
         colLocValor.setCellValueFactory(c -> new SimpleStringProperty(dinheiro(c.getValue().getValorLocacao())));
         colLocMulta.setCellValueFactory(c -> new SimpleStringProperty(c.getValue().getPenalidade() == null
                 ? "-" : dinheiro(c.getValue().getPenalidade().getValor())));
+        colLocInicio.setComparator(Ordenacao.DATA_BR);
+        colLocPrazo.setComparator(Ordenacao.DATA_BR);
+        colLocValor.setComparator(Ordenacao.DINHEIRO);
+        colLocMulta.setComparator(Ordenacao.DINHEIRO);
 
         // só dá para comprar/alugar uma linha marcada que tenha plataforma
+        // linha que não pode ser comprada/alugada (sem plataforma, cadastro incompleto ou sem estoque) fica apagada
+        tabelaCatalogo.setRowFactory(tabela -> new javafx.scene.control.TableRow<ItemCatalogo>() {
+            @Override
+            protected void updateItem(ItemCatalogo item, boolean vazio) {
+                super.updateItem(item, vazio);
+                getStyleClass().remove("linha-indisponivel");
+                if (!vazio && item != null && !disponivel(item)) {
+                    getStyleClass().add("linha-indisponivel");
+                }
+            }
+        });
         botaoComprar.disableProperty().bind(Bindings.createBooleanBinding(this::semPlataformaMarcada,
                 tabelaCatalogo.getSelectionModel().selectedItemProperty()));
         botaoAlugar.disableProperty().bind(botaoComprar.disableProperty());
-        botaoDevolver.disableProperty().bind(tabelaLocacoes.getSelectionModel().selectedItemProperty().isNull());
+        // só dá para devolver uma locação que ainda está em andamento
+        botaoDevolver.disableProperty().bind(Bindings.createBooleanBinding(() -> {
+            Aluguel marcado = tabelaLocacoes.getSelectionModel().getSelectedItem();
+            return marcado == null || marcado.getStatus() == StatusAluguel.DEVOLVIDO;
+        }, tabelaLocacoes.getSelectionModel().selectedItemProperty()));
         tabelaCatalogo.getSelectionModel().selectedItemProperty().addListener((o, a, b) -> atualizarTotais());
         spinnerQuantidade.valueProperty().addListener((o, a, b) -> atualizarTotais());
         spinnerDias.valueProperty().addListener((o, a, b) -> atualizarTotais());
@@ -135,6 +164,16 @@ public class LojaController {
         ItemCatalogo item = tabelaCatalogo.getSelectionModel().getSelectedItem();
         // jogo importado e ainda incompleto (sem preço/classificação) também não pode ser comprado nem alugado
         return item == null || item.plataforma == null || !jogoService.estaCompleto(item.jogo);
+    }
+
+    /** A linha pode ser comprada/alugada agora? Nunca lança (é usada ao desenhar a tabela). */
+    private boolean disponivel(ItemCatalogo item) {
+        try {
+            return item.plataforma != null && jogoService.estaCompleto(item.jogo)
+                    && estoqueService.consultarQuantidade(item.jogo, item.plataforma) > 0;
+        } catch (RuntimeException e) {
+            return false;
+        }
     }
 
     /** Estoque da linha. Nunca lança dentro da célula da tabela: qualquer problema vira "-". */
@@ -208,8 +247,16 @@ public class LojaController {
         if (aluguel == null) {
             return;
         }
+        if (!confirmar("Confirmar devolução?", aluguel.getJogo().getTitulo() + " ("
+                + aluguel.getPlataforma().getNome() + ")")) {
+            return;
+        }
         try {
-            devolucaoService.devolver(aluguel, Relogio.hoje());
+            // se a data do sistema foi voltada ("Data real") para antes da retirada, devolve no próprio
+            // dia da retirada; senão o service recusa ("a devolução não pode ser anterior ao início")
+            LocalDate dataDevolucao = aluguel.getDataInicio() != null && Relogio.hoje().isBefore(aluguel.getDataInicio())
+                    ? aluguel.getDataInicio() : Relogio.hoje();
+            devolucaoService.devolver(aluguel, dataDevolucao);
             String multa = aluguel.getPenalidade() == null ? "" : "\nMulta por atraso: " + dinheiro(aluguel.getPenalidade().getValor());
             informar("Devolução registrada: " + aluguel.getJogo().getTitulo() + multa);
         } catch (ValidacaoException | IllegalArgumentException | IllegalStateException e) {
@@ -279,6 +326,36 @@ public class LojaController {
                     financeiroService.calcularValorLocacao(item.jogo, hoje, hoje.plusDays(spinnerDias.getValue()))));
         } catch (IllegalArgumentException e) {
             rotuloTotalLocacao.setText("Total da locação: indisponível (" + e.getMessage() + ")");
+        }
+    }
+
+    private static String textoStatus(StatusAluguel status) {
+        if (status == null) {
+            return "-";
+        }
+        switch (status) {
+            case ATIVO: return "Em dia";
+            case ATRASADO: return "Atrasada";
+            case DEVOLVIDO: return "Devolvida";
+            default: return status.toString();
+        }
+    }
+
+    /** Célula que mostra o texto do status como etiqueta colorida (cores em base.css: .etiqueta-*). */
+    private static final class CelulaEtiqueta extends TableCell<Aluguel, String> {
+        @Override
+        protected void updateItem(String texto, boolean vazio) {
+            super.updateItem(texto, vazio);
+            setText(null);
+            if (vazio || texto == null) {
+                setGraphic(null);
+                return;
+            }
+            Label etiqueta = new Label(texto);
+            etiqueta.getStyleClass().add("etiqueta");
+            etiqueta.getStyleClass().add(texto.equals("Atrasada") ? "etiqueta-alerta"
+                    : texto.equals("Em dia") ? "etiqueta-ok" : "etiqueta-neutra");
+            setGraphic(etiqueta);
         }
     }
 

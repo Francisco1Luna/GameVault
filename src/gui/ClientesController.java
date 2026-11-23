@@ -37,7 +37,8 @@ public class ClientesController {
         colNome.setCellValueFactory(new PropertyValueFactory<>("nome"));
         colCpf.setCellValueFactory(c -> new SimpleStringProperty(Formatadores.formatarCpf(c.getValue().getCpf())));
         colTipo.setCellValueFactory(c -> new SimpleStringProperty(
-                c.getValue() instanceof ClienteAssinante ? "Assinante" : "Padrão"));
+                c.getValue().isAdministrador() ? "Administrador"
+                        : c.getValue() instanceof ClienteAssinante ? "Assinante" : "Padrão"));
         campoPesquisa.textProperty().addListener((obs, antigo, novo) -> atualizar());
 
         // ao clicar numa linha, preenche os campos para editar
@@ -82,15 +83,13 @@ public class ClientesController {
     private void aoEditar() {
         Cliente selecionado = tabelaClientes.getSelectionModel().getSelectedItem();
         if (selecionado == null) {
-            new Alert(Alert.AlertType.WARNING, "Selecione um cliente para editar.").showAndWait();
+            Alertas.avisar("Selecione um cliente para editar.");
             return;
         }
         try {
             // 1. CONFIRMAR
 
-            Alert confirmacao = new Alert(Alert.AlertType.CONFIRMATION,
-                    "Salvar as alterações em \"" + selecionado.getNome() + "\"?");
-            if (confirmacao.showAndWait().orElse(ButtonType.CANCEL) != ButtonType.OK) {
+            if (!Alertas.confirmar("Salvar alterações", "Salvar as alterações em \"" + selecionado.getNome() + "\"?")) {
                 return;
             }
 
@@ -111,18 +110,16 @@ public class ClientesController {
     private void aoRemover() {
         Cliente selecionado = tabelaClientes.getSelectionModel().getSelectedItem();
         if (selecionado == null) {
-            new Alert(Alert.AlertType.WARNING, "Selecione um cliente para remover.").showAndWait();
+            Alertas.avisar("Selecione um cliente para remover.");
             return;
         }
-        Alert confirmacao = new Alert(Alert.AlertType.CONFIRMATION,
-                "Remover o cliente \"" + selecionado.getNome() + "\"?");
-        if (confirmacao.showAndWait().orElse(ButtonType.CANCEL) != ButtonType.OK) {
+        if (!Alertas.confirmar("Remover cliente", "Remover o cliente \"" + selecionado.getNome() + "\"?")) {
             return;
         }
         try {
             boolean removido = clienteService.remover(selecionado.getId());
             if (!removido) {
-                new Alert(Alert.AlertType.WARNING, "O cliente não foi encontrado.").showAndWait();
+                Alertas.avisar("O cliente não foi encontrado.");
             }
             atualizar();
         } catch (IllegalArgumentException | IllegalStateException e) {

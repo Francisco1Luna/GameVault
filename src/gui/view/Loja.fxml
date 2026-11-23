@@ -11,112 +11,134 @@
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.VBox?>
 
-<TabPane tabClosingPolicy="UNAVAILABLE" xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml/1" fx:controller="gui.LojaController">
-   <tabs>
-      <Tab text="Loja">
-         <content>
-            <BorderPane>
-               <top>
-                  <HBox alignment="CENTER_LEFT" spacing="10.0" BorderPane.alignment="CENTER">
-                     <padding>
-                        <Insets bottom="8.0" left="10.0" right="10.0" top="8.0" />
-                     </padding>
-                     <children>
-                        <Label fx:id="rotuloConta" maxWidth="Infinity" text="Conta" HBox.hgrow="ALWAYS" />
-                        <TextField fx:id="campoPesquisaCatalogo" prefWidth="210.0" promptText="Pesquisar jogo ou plataforma" />
-                        <Button mnemonicParsing="false" onAction="#aoAtualizar" text="Atualizar" />
-                     </children>
-                  </HBox>
-               </top>
-               <center>
-                  <TableView fx:id="tabelaCatalogo">
+<!-- Cabeçalho da tela + abas. Na aba Loja, compra e locação ficam em dois cards lado a lado. -->
+<VBox spacing="12.0" styleClass="tela" xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml/1" fx:controller="gui.LojaController">
+   <children>
+      <VBox styleClass="cabecalho-tela">
+         <children>
+            <Label styleClass="titulo-tela" text="Loja" />
+            <Label fx:id="rotuloConta" styleClass="subtitulo-tela" text="Conta" />
+         </children>
+      </VBox>
+      <TabPane tabClosingPolicy="UNAVAILABLE" VBox.vgrow="ALWAYS">
+         <tabs>
+            <Tab text="Catálogo">
+               <content>
+                  <BorderPane>
+                     <top>
+                        <HBox alignment="CENTER_LEFT" spacing="10.0" BorderPane.alignment="CENTER">
+                           <BorderPane.margin><Insets bottom="12.0" /></BorderPane.margin>
+                           <children>
+                              <TextField fx:id="campoPesquisaCatalogo" HBox.hgrow="ALWAYS" maxWidth="420.0" promptText="Pesquisar jogo ou plataforma" />
+                              <Button mnemonicParsing="false" onAction="#aoAtualizar" text="Atualizar" />
+                           </children>
+                        </HBox>
+                     </top>
+                     <center>
+                        <TableView fx:id="tabelaCatalogo">
+                           <placeholder><Label text="Nenhum jogo disponível" /></placeholder>
+                           <columns>
+                              <TableColumn fx:id="colJogo" minWidth="60.0" prefWidth="240.0" reorderable="false" text="Jogo" />
+                              <TableColumn fx:id="colPlataforma" minWidth="60.0" prefWidth="150.0" reorderable="false" text="Plataforma" />
+                              <TableColumn fx:id="colPreco" minWidth="60.0" prefWidth="200.0" reorderable="false" text="Seu preço (compra)" />
+                              <TableColumn fx:id="colDiaria" maxWidth="150.0" minWidth="60.0" prefWidth="110.0" reorderable="false" text="Locação/dia" />
+                              <TableColumn fx:id="colEstoque" maxWidth="110.0" minWidth="60.0" prefWidth="80.0" reorderable="false" text="Estoque" />
+                           </columns>
+                           <columnResizePolicy>
+                              <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
+                           </columnResizePolicy>
+                        </TableView>
+                     </center>
+                     <bottom>
+                        <HBox spacing="16.0" BorderPane.alignment="CENTER">
+                           <BorderPane.margin><Insets top="16.0" /></BorderPane.margin>
+                           <children>
+                              <!-- card de compra -->
+                              <VBox styleClass="card" HBox.hgrow="ALWAYS">
+                                 <children>
+                                    <Label styleClass="titulo-card" text="Comprar" />
+                                    <HBox alignment="CENTER_LEFT" spacing="10.0">
+                                       <children>
+                                          <Label styleClass="rotulo-campo" text="Quantidade" />
+                                          <Spinner fx:id="spinnerQuantidade" editable="true" prefWidth="90.0" />
+                                          <Region HBox.hgrow="ALWAYS" />
+                                          <Label fx:id="rotuloTotalCompra" styleClass="resumo-valor" text="Total da compra: -" />
+                                          <Button fx:id="botaoComprar" mnemonicParsing="false" onAction="#aoComprar" styleClass="primario" text="Comprar" />
+                                       </children>
+                                    </HBox>
+                                 </children>
+                              </VBox>
+                              <!-- card de locação -->
+                              <VBox styleClass="card" HBox.hgrow="ALWAYS">
+                                 <children>
+                                    <Label styleClass="titulo-card" text="Alugar" />
+                                    <HBox alignment="CENTER_LEFT" spacing="10.0">
+                                       <children>
+                                          <Label styleClass="rotulo-campo" text="Dias de locação" />
+                                          <Spinner fx:id="spinnerDias" editable="true" prefWidth="90.0" />
+                                          <Region HBox.hgrow="ALWAYS" />
+                                          <Label fx:id="rotuloTotalLocacao" styleClass="resumo-valor" text="Total da locação: -" />
+                                          <Button fx:id="botaoAlugar" mnemonicParsing="false" onAction="#aoAlugar" styleClass="primario" text="Alugar" />
+                                       </children>
+                                    </HBox>
+                                 </children>
+                              </VBox>
+                           </children>
+                        </HBox>
+                     </bottom>
+                  </BorderPane>
+               </content>
+            </Tab>
+            <Tab text="Minhas compras">
+               <content>
+                  <TableView fx:id="tabelaCompras">
+                     <placeholder><Label text="Você ainda não fez nenhuma compra" /></placeholder>
                      <columns>
-                        <TableColumn fx:id="colJogo" prefWidth="170.0" text="Jogo" />
-                        <TableColumn fx:id="colPlataforma" prefWidth="100.0" text="Plataforma" />
-                        <TableColumn fx:id="colPreco" prefWidth="170.0" text="Seu preço (compra)" />
-                        <TableColumn fx:id="colDiaria" prefWidth="90.0" text="Locação/dia" />
-                        <TableColumn fx:id="colEstoque" prefWidth="70.0" text="Estoque" />
+                        <TableColumn fx:id="colCompraData" maxWidth="130.0" minWidth="60.0" prefWidth="100.0" reorderable="false" text="Data" />
+                        <TableColumn fx:id="colCompraItens" minWidth="60.0" prefWidth="500.0" reorderable="false" text="Itens" />
+                        <TableColumn fx:id="colCompraTotal" maxWidth="160.0" minWidth="60.0" prefWidth="120.0" reorderable="false" text="Total" />
                      </columns>
                      <columnResizePolicy>
                         <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
                      </columnResizePolicy>
                   </TableView>
-               </center>
-               <bottom>
-                  <VBox spacing="8.0" BorderPane.alignment="CENTER">
-                     <padding>
-                        <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
-                     </padding>
-                     <children>
-                        <HBox alignment="CENTER_LEFT" spacing="8.0">
+               </content>
+            </Tab>
+            <Tab text="Minhas locações">
+               <content>
+                  <BorderPane>
+                     <center>
+                        <TableView fx:id="tabelaLocacoes">
+                           <placeholder><Label text="Você não tem locações" /></placeholder>
+                           <columns>
+                              <TableColumn fx:id="colLocJogo" minWidth="60.0" prefWidth="220.0" reorderable="false" text="Jogo" />
+                              <TableColumn fx:id="colLocPlataforma" minWidth="60.0" prefWidth="140.0" reorderable="false" text="Plataforma" />
+                              <TableColumn fx:id="colLocInicio" maxWidth="140.0" minWidth="60.0" prefWidth="110.0" reorderable="false" text="Retirada" />
+                              <TableColumn fx:id="colLocPrazo" maxWidth="140.0" minWidth="60.0" prefWidth="110.0" reorderable="false" text="Devolver até" />
+                              <TableColumn fx:id="colLocStatus" maxWidth="150.0" minWidth="60.0" prefWidth="110.0" reorderable="false" text="Status" />
+                              <TableColumn fx:id="colLocValor" maxWidth="140.0" minWidth="60.0" prefWidth="100.0" reorderable="false" text="Valor" />
+                              <TableColumn fx:id="colLocMulta" maxWidth="140.0" minWidth="60.0" prefWidth="100.0" reorderable="false" text="Multa" />
+                           </columns>
+                           <columnResizePolicy>
+                              <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
+                           </columnResizePolicy>
+                        </TableView>
+                     </center>
+                     <bottom>
+                        <HBox alignment="CENTER_RIGHT" spacing="8.0" BorderPane.alignment="CENTER">
+                           <BorderPane.margin><Insets top="12.0" /></BorderPane.margin>
                            <children>
-                              <Label text="Quantidade:" />
-                              <Spinner fx:id="spinnerQuantidade" editable="true" prefWidth="80.0" />
-                              <Button fx:id="botaoComprar" mnemonicParsing="false" onAction="#aoComprar" styleClass="primario" text="Comprar" />
-                              <Label fx:id="rotuloTotalCompra" text="Total da compra: -" />
+                              <Button fx:id="botaoDevolver" mnemonicParsing="false" onAction="#aoDevolver" styleClass="primario" text="Devolver selecionada" />
                            </children>
                         </HBox>
-                        <HBox alignment="CENTER_LEFT" spacing="8.0">
-                           <children>
-                              <Label text="Dias de locação:" />
-                              <Spinner fx:id="spinnerDias" editable="true" prefWidth="80.0" />
-                              <Button fx:id="botaoAlugar" mnemonicParsing="false" onAction="#aoAlugar" styleClass="primario" text="Alugar" />
-                              <Label fx:id="rotuloTotalLocacao" text="Total da locação: -" />
-                           </children>
-                        </HBox>
-                     </children>
-                  </VBox>
-               </bottom>
-            </BorderPane>
-         </content>
-      </Tab>
-      <Tab text="Minhas compras">
-         <content>
-            <TableView fx:id="tabelaCompras">
-               <columns>
-                  <TableColumn fx:id="colCompraData" prefWidth="90.0" text="Data" />
-                  <TableColumn fx:id="colCompraItens" prefWidth="330.0" text="Itens" />
-                  <TableColumn fx:id="colCompraTotal" prefWidth="100.0" text="Total" />
-               </columns>
-               <columnResizePolicy>
-                  <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
-               </columnResizePolicy>
-            </TableView>
-         </content>
-      </Tab>
-      <Tab text="Minhas locações">
-         <content>
-            <BorderPane>
-               <center>
-                  <TableView fx:id="tabelaLocacoes">
-                     <columns>
-                        <TableColumn fx:id="colLocJogo" prefWidth="130.0" text="Jogo" />
-                        <TableColumn fx:id="colLocPlataforma" prefWidth="90.0" text="Plataforma" />
-                        <TableColumn fx:id="colLocInicio" prefWidth="85.0" text="Retirada" />
-                        <TableColumn fx:id="colLocPrazo" prefWidth="85.0" text="Devolver até" />
-                        <TableColumn fx:id="colLocStatus" prefWidth="80.0" text="Status" />
-                        <TableColumn fx:id="colLocValor" prefWidth="75.0" text="Valor" />
-                        <TableColumn fx:id="colLocMulta" prefWidth="75.0" text="Multa" />
-                     </columns>
-                     <columnResizePolicy>
-                        <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
-                     </columnResizePolicy>
-                  </TableView>
-               </center>
-               <bottom>
-                  <HBox spacing="8.0" BorderPane.alignment="CENTER">
-                     <padding>
-                        <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
-                     </padding>
-                     <children>
-                        <Button fx:id="botaoDevolver" mnemonicParsing="false" onAction="#aoDevolver" text="Devolver selecionada" />
-                     </children>
-                  </HBox>
-               </bottom>
-            </BorderPane>
-         </content>
-      </Tab>
-   </tabs>
-</TabPane>
+                     </bottom>
+                  </BorderPane>
+               </content>
+            </Tab>
+         </tabs>
+      </TabPane>
+   </children>
+</VBox>

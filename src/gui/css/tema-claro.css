@@ -1,15 +1,31 @@
+/* Tema claro: só define as cores. O visual (formas, espaçamentos) fica no base.css. */
 .root {
     -fx-base: #f4f5f7;
     -fx-background: #f4f5f7;
     -fx-control-inner-background: #ffffff;
     -fx-accent: #6c47ff;
     -fx-focus-color: #6c47ff;
+    -fx-faint-focus-color: transparent;
     -fx-text-base-color: #1f2430;
 
+    -cor-fundo: #f4f5f7;
+    -cor-card: #ffffff;
     -cor-barra: #ffffff;
-    -cor-menu: #ece9ff;
-    -cor-borda: #d9dce3;
-    -cor-destaque: #6c47ff;
-    -cor-texto-destaque: #ffffff;
+    -cor-menu: #ffffff;
+    -cor-borda: #e3e5ea;
+    -cor-linha: #f0f1f4;
+    -cor-cabecalho-tabela: #f8f9fb;
+    -cor-texto: #1f2430;
     -cor-suave: #6b7280;
+    -cor-hover: #f3f0ff;
+    -cor-selecao: #e8e2ff;
+    -cor-destaque: #6c47ff;
+    -cor-destaque-hover: #5a35f0;
+    -cor-texto-destaque: #ffffff;
+    -cor-perigo: #d93025;
+    -cor-perigo-fundo: #fdecea;
+    -cor-gradiente: #e9e3ff;
+    -cor-ok: #1e8e3e;
+    -cor-ok-fundo: #e6f4ea;
+    -cor-neutra-fundo: #eceef2;
 }

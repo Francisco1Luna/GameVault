@@ -1,64 +1,279 @@
+/* =====================================================================
+   GameVault - estilo base (vale para os dois temas).
+   As cores vêm das variáveis (-cor-*) definidas em tema-claro.css e
+   tema-escuro.css; aqui ficam só formas, espaçamentos e estados.
+   ===================================================================== */
+
 .root {
     -fx-font-family: "Segoe UI", "System";
     -fx-font-size: 13px;
+    -fx-background-color: -cor-fundo;
 }
 
-/* botões */
+.label { -fx-text-fill: -cor-texto; }
+
+/* ------------------------------------------------------------ botões */
 .button {
+    -fx-background-color: -cor-card;
     -fx-background-radius: 8;
+    -fx-background-insets: 0;
+    -fx-border-color: -cor-borda;
     -fx-border-radius: 8;
+    -fx-text-fill: -cor-texto;
     -fx-padding: 7 16 7 16;
     -fx-cursor: hand;
 }
+.button:hover   { -fx-background-color: -cor-hover; }
+.button:pressed { -fx-background-color: -cor-selecao; }
+.button:focused { -fx-border-color: -cor-destaque; }
+
 .button.primario {
     -fx-background-color: -cor-destaque;
+    -fx-border-color: -cor-destaque;
     -fx-text-fill: -cor-texto-destaque;
     -fx-font-weight: bold;
 }
-.button.primario:hover { -fx-opacity: 0.88; }
-.button.perigo { -fx-text-fill: #d93025; -fx-font-weight: bold; }
+.button.primario:hover { -fx-background-color: -cor-destaque-hover; }
 
-/* campos */
-.text-field, .password-field {
-    -fx-background-color: -fx-control-inner-background;
+.button.perigo {
+    -fx-text-fill: -cor-perigo;
+    -fx-border-color: -cor-perigo;
+    -fx-font-weight: bold;
+}
+.button.perigo:hover { -fx-background-color: -cor-perigo-fundo; }
+
+/* botão sem borda (barra do topo) */
+.button.botao-leve {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+}
+.button.botao-leve:hover { -fx-background-color: -cor-hover; }
+
+/* ------------------------------------------------------------ campos */
+.text-field, .password-field, .combo-box, .date-picker, .spinner, .list-view {
+    -fx-background-color: -cor-card;
     -fx-background-radius: 8;
+    -fx-background-insets: 0;
     -fx-border-color: -cor-borda;
     -fx-border-radius: 8;
+    -fx-text-fill: -cor-texto;
+    -fx-prompt-text-fill: -cor-suave;
+}
+.text-field, .password-field { -fx-padding: 7 10 7 10; }
+.text-field:focused, .password-field:focused,
+.combo-box:focused, .date-picker:focused, .spinner:focused {
+    -fx-border-color: -cor-destaque;
+}
+.text-field:readonly { -fx-background-color: -cor-fundo; }
+
+/* campo de texto que fica DENTRO de DatePicker/Spinner/ComboBox: sem borda dupla */
+.date-picker > .text-field, .spinner > .text-field, .combo-box > .text-field {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+}
+.date-picker > .arrow-button, .combo-box > .arrow-button,
+.spinner .increment-arrow-button, .spinner .decrement-arrow-button {
+    -fx-background-color: transparent;
+}
+.combo-box .list-cell { -fx-text-fill: -cor-texto; -fx-padding: 5 8 5 8; }
+
+.list-view .list-cell {
+    -fx-background-color: -cor-card;
+    -fx-text-fill: -cor-texto;
     -fx-padding: 6 10 6 10;
 }
-.text-field:focused, .password-field:focused { -fx-border-color: -cor-destaque; }
+.list-view .list-cell:filled:hover    { -fx-background-color: -cor-hover; }
+.list-view .list-cell:filled:selected { -fx-background-color: -cor-selecao; -fx-text-fill: -cor-texto; }
 
-/* tabelas */
-.table-view {
-    -fx-background-radius: 10;
-    -fx-border-radius: 10;
+.check-box .box {
+    -fx-background-color: -cor-card;
     -fx-border-color: -cor-borda;
+    -fx-background-radius: 4;
+    -fx-border-radius: 4;
 }
-.table-view .column-header-background { -fx-background-radius: 10 10 0 0; }
+.check-box:selected .box  { -fx-background-color: -cor-destaque; -fx-border-color: -cor-destaque; }
+.check-box:selected .mark { -fx-background-color: -cor-texto-destaque; }
 
-/* estrutura */
+/* ------------------------------------------------------------ tabelas */
+.table-view {
+    -fx-background-color: -cor-card;
+    -fx-background-radius: 12;
+    -fx-background-insets: 0;
+    -fx-border-color: -cor-borda;
+    -fx-border-radius: 12;
+    -fx-padding: 0;
+    -fx-table-cell-border-color: transparent;
+}
+.table-view:focused { -fx-background-insets: 0; -fx-border-color: -cor-borda; }
+
+.table-view .column-header-background {
+    -fx-background-color: -cor-cabecalho-tabela;
+    -fx-background-radius: 12 12 0 0;
+}
+.table-view .column-header, .table-view .filler {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent transparent -cor-borda transparent;
+    -fx-border-width: 0 0 1 0;
+    -fx-size: 40;
+}
+.table-view .column-header .label {
+    -fx-text-fill: -cor-suave;
+    -fx-font-weight: bold;
+    -fx-alignment: CENTER_LEFT;
+    -fx-padding: 0 0 0 10;
+}
+.table-row-cell {
+    -fx-background-color: -cor-card;
+    -fx-background-insets: 0;
+    -fx-border-color: transparent transparent -cor-linha transparent;
+    -fx-border-width: 0 0 1 0;
+    -fx-cell-size: 38;
+}
+.table-row-cell:empty            { -fx-border-color: transparent; }
+.table-row-cell:filled:hover     { -fx-background-color: -cor-hover; }
+.table-row-cell:filled:selected  { -fx-background-color: -cor-selecao; }
+.table-cell {
+    -fx-text-fill: -cor-texto;
+    -fx-padding: 0 10 0 10;
+    -fx-alignment: CENTER_LEFT;
+}
+.table-view .placeholder .label { -fx-text-fill: -cor-suave; -fx-font-size: 14px; }
+
+/* ------------------------------------------------------------ abas */
+.tab-pane > .tab-header-area { -fx-padding: 0; }
+.tab-pane > .tab-header-area > .tab-header-background {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent transparent -cor-borda transparent;
+    -fx-border-width: 0 0 1 0;
+}
+.tab-pane .tab {
+    -fx-background-color: transparent;
+    -fx-background-insets: 0;
+    -fx-border-color: transparent;
+    -fx-border-width: 0 0 3 0;
+    -fx-padding: 8 18 8 18;
+    -fx-cursor: hand;
+}
+.tab-pane .tab .tab-label          { -fx-text-fill: -cor-suave; -fx-font-weight: bold; }
+.tab-pane .tab:hover .tab-label    { -fx-text-fill: -cor-texto; }
+.tab-pane .tab:selected            { -fx-border-color: transparent transparent -cor-destaque transparent; }
+.tab-pane .tab:selected .tab-label { -fx-text-fill: -cor-destaque; }
+.tab-pane .tab:selected .focus-indicator { -fx-border-color: transparent; }
+.tab-pane > .tab-content-area      { -fx-background-color: transparent; -fx-padding: 14 0 0 0; }
+
+/* ------------------------------------------------------------ rolagem */
+.scroll-bar { -fx-background-color: transparent; }
+.scroll-bar .thumb { -fx-background-color: -cor-borda; -fx-background-radius: 8; }
+.scroll-bar .increment-button, .scroll-bar .decrement-button { -fx-padding: 0; }
+.scroll-bar .increment-arrow, .scroll-bar .decrement-arrow { -fx-padding: 0; }
+.painel-rolagem, .painel-rolagem > .viewport {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+    -fx-padding: 0;
+}
+
+/* ------------------------------------------------------------ estrutura da janela */
 .barra-topo {
     -fx-background-color: -cor-barra;
     -fx-border-color: -cor-borda;
     -fx-border-width: 0 0 1 0;
-    -fx-padding: 8 12 8 12;
-    -fx-spacing: 10;
+    -fx-padding: 10 20 10 20;
+    -fx-spacing: 12;
 }
+.marca { -fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: -cor-destaque; }
+.usuario { -fx-text-fill: -cor-suave; }
+
+/* "pílula" com a data do sistema e os botões de avançar */
+.chip-data {
+    -fx-background-color: -cor-fundo;
+    -fx-background-radius: 20;
+    -fx-border-color: -cor-borda;
+    -fx-border-radius: 20;
+    -fx-padding: 3 4 3 14;
+    -fx-spacing: 4;
+}
+.chip-data .label { -fx-font-weight: bold; }
+.chip-data .button {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+    -fx-background-radius: 16;
+    -fx-padding: 4 10 4 10;
+}
+.chip-data .button:hover { -fx-background-color: -cor-hover; }
+
 .menu-lateral {
     -fx-background-color: -cor-menu;
-    -fx-padding: 12 8 12 8;
-    -fx-spacing: 6;
+    -fx-border-color: -cor-borda;
+    -fx-border-width: 0 1 0 0;
+    -fx-padding: 18 12 18 12;
+    -fx-spacing: 4;
+}
+.rotulo-secao {
+    -fx-text-fill: -cor-suave;
+    -fx-font-size: 11px;
+    -fx-font-weight: bold;
+    -fx-padding: 0 0 6 12;
 }
 .menu-lateral .button {
     -fx-background-color: transparent;
+    -fx-border-color: transparent;
     -fx-alignment: CENTER_LEFT;
+    -fx-font-size: 14px;
+    -fx-padding: 10 14 10 14;
+}
+.menu-lateral .button:hover { -fx-background-color: -cor-hover; }
+/* botão da tela aberta (classe colocada pelo PrincipalController) */
+.menu-lateral .button.ativo {
+    -fx-background-color: -cor-selecao;
+    -fx-text-fill: -cor-destaque;
     -fx-font-weight: bold;
 }
-.menu-lateral .button:hover {
-    -fx-background-color: -cor-destaque;
-    -fx-text-fill: -cor-texto-destaque;
-}
 
-/* textos */
-.titulo { -fx-font-size: 28px; -fx-font-weight: bold; }
+/* ------------------------------------------------------------ telas internas */
+.tela { -fx-padding: 20 24 20 24; }
+.cabecalho-tela { -fx-spacing: 2; }
+.titulo-tela    { -fx-font-size: 22px; -fx-font-weight: bold; }
+.subtitulo-tela { -fx-text-fill: -cor-suave; }
+
+.card {
+    -fx-background-color: -cor-card;
+    -fx-background-radius: 12;
+    -fx-border-color: -cor-borda;
+    -fx-border-radius: 12;
+    -fx-padding: 18;
+    -fx-spacing: 10;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.06), 12, 0, 0, 2);
+}
+.titulo-card  { -fx-font-size: 15px; -fx-font-weight: bold; }
+.rotulo-campo { -fx-text-fill: -cor-suave; -fx-font-size: 12px; -fx-font-weight: bold; }
+.dica         { -fx-text-fill: -cor-suave; -fx-font-size: 12px; }
+.resumo-valor { -fx-font-size: 15px; -fx-font-weight: bold; -fx-text-fill: -cor-destaque; }
+
+/* linha da Loja que não pode ser comprada/alugada agora */
+.table-row-cell.linha-indisponivel .table-cell { -fx-opacity: 0.45; }
+
+/* etiquetas coloridas (status da locação, em Loja > Minhas locações) */
+.etiqueta {
+    -fx-background-radius: 10;
+    -fx-padding: 2 10 2 10;
+    -fx-font-size: 12px;
+    -fx-font-weight: bold;
+}
+.etiqueta-ok      { -fx-background-color: -cor-ok-fundo;      -fx-text-fill: -cor-ok; }
+.etiqueta-alerta  { -fx-background-color: -cor-perigo-fundo;  -fx-text-fill: -cor-perigo; }
+.etiqueta-neutra  { -fx-background-color: -cor-neutra-fundo;  -fx-text-fill: -cor-suave; }
+
+/* ------------------------------------------------------------ login / cadastro */
+/* fundo gamer (imagem em src/gui/img, gerada por docs/gerar_fundo_gamer.py) */
+.fundo-login {
+    -fx-background-color: #0a021e;
+    -fx-background-image: url("../img/fundo-gamer.png");
+    -fx-background-size: cover;
+    -fx-background-position: center bottom;
+}
+.fundo-login .card-login { -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.55), 40, 0.2, 0, 8); }
+.card-login  { -fx-padding: 32; -fx-spacing: 12; }
+
+/* textos usados em mais de uma tela */
+.titulo    { -fx-font-size: 28px; -fx-font-weight: bold; }
 .subtitulo { -fx-text-fill: -cor-suave; }

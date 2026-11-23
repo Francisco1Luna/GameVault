@@ -3,7 +3,9 @@ package negocio;
 import dados.RepositorioJogosLista;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import dados.IRepositorioJogos;
 import model.Jogo;
@@ -26,13 +28,52 @@ public class EstoqueService {
     return INSTANCIA;
   }
 
+  /** Limite do ajuste manual por plataforma (evita digitar 999999999 por engano). */
+  public static final int ESTOQUE_MAXIMO = 99_999;
+
   private final IRepositorioJogos repositorioJogos;
+
+  /**
+   * Padrão Observer: quem quer saber quando o estoque muda (ex.: a tela de Jogos) se registra aqui
+   * e é avisado depois de cada venda, locação, devolução, ajuste manual ou alteração de jogo.
+   * CopyOnWriteArrayList: dá para adicionar/remover ouvinte enquanto a lista é percorrida.
+   */
+  private final List<Runnable> ouvintes = new CopyOnWriteArrayList<>();
 
   private EstoqueService(IRepositorioJogos repositorioJogos) {
     if (repositorioJogos == null) {
       throw new IllegalArgumentException("O repositório de jogos é obrigatório.");
     }
     this.repositorioJogos = repositorioJogos;
+  }
+
+  // ------------------------------------------------------------------ observadores
+
+  public void adicionarOuvinte(Runnable ouvinte) {
+    if (ouvinte != null) {
+      ouvintes.add(ouvinte);
+    }
+  }
+
+  public void removerOuvinte(Runnable ouvinte) {
+    ouvintes.remove(ouvinte);
+  }
+
+  /** Avisa os ouvintes que o estoque mudou. Também é chamado pelo JogoService (cadastro/remoção de jogo). */
+  public void notificarMudanca() {
+    for (Runnable ouvinte : ouvintes) {
+      ouvinte.run();
+    }
+  }
+
+  /** Soma dos exemplares disponíveis de um jogo em todas as plataformas (0 se não tiver estoque). */
+  public synchronized long quantidadeTotal(Jogo jogo) {
+    Jogo atual = carregar(jogo);
+    long total = 0; // long: a soma de várias plataformas não estoura o limite do int
+    for (Integer quantidade : estoqueDe(atual).values()) {
+      total += quantidade == null ? 0 : quantidade;
+    }
+    return total;
   }
 
   // ------------------------------------------------------------------ REQ06
@@ -43,10 +84,14 @@ public class EstoqueService {
     if (quantidade < 0) {
       throw new IllegalArgumentException("O estoque não pode ser negativo.");
     }
+    if (quantidade > ESTOQUE_MAXIMO) {
+      throw new IllegalArgumentException("O estoque máximo por plataforma é " + ESTOQUE_MAXIMO + " unidades.");
+    }
     Jogo atual = carregar(jogo);
     Plataforma chave = localizarChave(atual, plataforma);
     estoqueDe(atual).put(chave, quantidade);
     repositorioJogos.atualizar(atual);
+    notificarMudanca();
   }
 
   /**
@@ -59,9 +104,16 @@ public class EstoqueService {
     Jogo atual = carregar(jogo);
     Plataforma chave = localizarChave(atual, plataforma, false);
     Map<Plataforma, Integer> estoque = estoqueDe(atual);
-    int novoSaldo = estoque.getOrDefault(chave, 0) + quantidade;
+    // addExact: se a soma passar do limite do int, dá erro em vez de virar número negativo
+    int novoSaldo;
+    try {
+      novoSaldo = Math.addExact(estoque.getOrDefault(chave, 0), quantidade);
+    } catch (ArithmeticException e) {
+      throw new IllegalStateException("O estoque de \"" + atual.getTitulo() + "\" passaria do limite permitido.");
+    }
     estoque.put(chave, novoSaldo);
     repositorioJogos.atualizar(atual);
+    notificarMudanca();
     return novoSaldo;
   }
 
@@ -78,6 +130,7 @@ public class EstoqueService {
     }
     estoque.put(chave, saldo - quantidade);
     repositorioJogos.atualizar(atual);
+    notificarMudanca();
     return saldo - quantidade;
   }
 
