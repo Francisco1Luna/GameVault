@@ -37,6 +37,7 @@
                                         <DatePicker fx:id="campoFim" prefWidth="140.0" />
                                         <Button mnemonicParsing="false" onAction="#aoGerarMaisLocados" styleClass="primario" text="Gerar" />
                                         <Button mnemonicParsing="false" onAction="#aoExportarCsv" text="Exportar CSV" />
+                                        <Button mnemonicParsing="false" onAction="#aoAbrirRankingHtml" text="Abrir ranking HTML" />
                                     </children>
                                 </HBox>
                             </top>

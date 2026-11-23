@@ -3,6 +3,8 @@ package gui;
 import java.io.File;
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.awt.Desktop;
+import java.nio.file.Path;
 import java.time.LocalDate;
 import java.time.YearMonth;
 import java.time.format.DateTimeFormatter;
@@ -113,6 +115,21 @@ public class RelatoriosController {
             Alertas.informar("Relatório exportado para " + arquivo.getAbsolutePath());
         } catch (IllegalArgumentException | IOException e) {
             Alertas.avisar("Não foi possível exportar: " + e.getMessage());
+        }
+    }
+
+    @FXML
+    private void aoAbrirRankingHtml() {
+        try {
+            Path arquivo = Path.of(System.getProperty("user.home"), "GameVault", "ranking-jogos-mais-locados.html");
+            relatorioService.getMaisLocadosService().exportarHtmlRankingMensal(campoInicio.getValue(), campoFim.getValue(), arquivo);
+            if (!Desktop.isDesktopSupported()) {
+                Alertas.informar("Ranking HTML gerado em " + arquivo.toAbsolutePath());
+                return;
+            }
+            Desktop.getDesktop().browse(arquivo.toUri());
+        } catch (IllegalArgumentException | IOException | UnsupportedOperationException e) {
+            Alertas.avisar("Não foi possível gerar o ranking HTML: " + e.getMessage());
         }
     }
 
