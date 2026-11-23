@@ -1,5 +1,8 @@
 package gui;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -24,6 +27,17 @@ public class AppFX extends Application {
         palco.setTitle("GameVault");
         palco.setMaximized(true);
         palco.show();
+    }
+
+    @Override
+    public void stop() {
+        Path ranking = Path.of(System.getProperty("user.home"), "GameVault",
+                "ranking-jogos-mais-locados.html");
+        try {
+            Files.deleteIfExists(ranking);
+        } catch (IOException ignorada) {
+            // A limpeza é auxiliar e não deve impedir o encerramento do launcher.
+        }
     }
 
 }
