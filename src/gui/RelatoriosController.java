@@ -71,6 +71,10 @@ public class RelatoriosController {
         colReceitaLocacoes.setCellValueFactory(c -> new SimpleStringProperty(dinheiro(c.getValue().getValue().receitaLocacoes())));
         colReceitaVendas.setCellValueFactory(c -> new SimpleStringProperty(dinheiro(c.getValue().getValue().receitaVendas())));
         colReceitaTotal.setCellValueFactory(c -> new SimpleStringProperty(dinheiro(c.getValue().getValue().receitaTotal())));
+        colMes.setComparator(Ordenacao.MES_ANO);
+        colReceitaLocacoes.setComparator(Ordenacao.DINHEIRO);
+        colReceitaVendas.setComparator(Ordenacao.DINHEIRO);
+        colReceitaTotal.setComparator(Ordenacao.DINHEIRO);
         tabelaReceita.getItems().setAll(new ArrayList<>(relatorioService.resumoReceitaPorMes().entrySet()));
 
         // REQ16

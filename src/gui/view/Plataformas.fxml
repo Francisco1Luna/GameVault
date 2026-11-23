@@ -7,48 +7,57 @@
 <?import javafx.scene.control.TableView?>
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.BorderPane?>
-<?import javafx.scene.layout.ColumnConstraints?>
-<?import javafx.scene.layout.GridPane?>
 <?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
 
-<BorderPane prefHeight="489.0" prefWidth="512.0" xmlns="http://javafx.com/javafx/26" xmlns:fx="http://javafx.com/fxml/1" fx:controller="gui.PlataformasController">
-   <top><HBox spacing="8.0"><padding><Insets bottom="8.0" left="12.0" right="12.0" top="8.0" /></padding><children><TextField fx:id="campoPesquisa" promptText="Pesquisar plataforma ou fabricante" HBox.hgrow="ALWAYS" /></children></HBox></top>
+<!-- Layout: cabeçalho + pesquisa em cima, tabela no centro, formulário em card à direita -->
+<BorderPane styleClass="tela" xmlns="http://javafx.com/javafx/26" xmlns:fx="http://javafx.com/fxml/1" fx:controller="gui.PlataformasController">
+   <top>
+      <HBox alignment="CENTER_LEFT" spacing="16.0">
+         <BorderPane.margin><Insets bottom="16.0" /></BorderPane.margin>
+         <children>
+            <VBox styleClass="cabecalho-tela" HBox.hgrow="ALWAYS">
+               <children>
+                  <Label styleClass="titulo-tela" text="Plataformas" />
+                  <Label styleClass="subtitulo-tela" text="Consoles e plataformas disponíveis no catálogo" />
+               </children>
+            </VBox>
+            <TextField fx:id="campoPesquisa" prefWidth="320.0" promptText="Pesquisar plataforma ou fabricante" />
+         </children>
+      </HBox>
+   </top>
    <center>
       <TableView fx:id="tabelaPlataformas" BorderPane.alignment="CENTER">
+         <placeholder><Label text="Nenhuma plataforma encontrada" /></placeholder>
          <columnResizePolicy>
             <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
          </columnResizePolicy>
          <columns>
-            <TableColumn fx:id="colId" maxWidth="80.0" minWidth="40.0" prefWidth="58.0" text="ID" />
-            <TableColumn fx:id="colNome" prefWidth="222.0" text="Nome" />
-            <TableColumn fx:id="colFabricante" prefWidth="231.0" text="Fabricante" />
+            <TableColumn fx:id="colId" maxWidth="60.0" minWidth="45.0" prefWidth="45.0" reorderable="false" text="ID" />
+            <TableColumn fx:id="colNome" minWidth="60.0" prefWidth="250.0" reorderable="false" text="Nome" />
+            <TableColumn fx:id="colFabricante" minWidth="60.0" prefWidth="250.0" reorderable="false" text="Fabricante" />
          </columns>
       </TableView>
    </center>
-   <bottom>
-      <GridPane hgap="10.0" vgap="8.0" BorderPane.alignment="CENTER">
-         <padding>
-            <Insets bottom="12.0" left="12.0" right="12.0" top="12.0" />
-         </padding>
-         <columnConstraints>
-            <ColumnConstraints hgrow="NEVER" minWidth="80.0" />
-            <ColumnConstraints hgrow="ALWAYS" />
-         </columnConstraints>
+   <right>
+      <VBox maxHeight="-Infinity" prefWidth="360.0" styleClass="card" BorderPane.alignment="TOP_CENTER">
+         <BorderPane.margin><Insets left="16.0" /></BorderPane.margin>
          <children>
-            <Label text="Nome" GridPane.columnIndex="0" GridPane.rowIndex="0" />
-            <TextField fx:id="campoNome" maxWidth="Infinity" promptText="Nome da plataforma" GridPane.columnIndex="1" GridPane.rowIndex="0" />
-
-            <Label text="Fabricante" GridPane.columnIndex="0" GridPane.rowIndex="1" />
-            <TextField fx:id="campoFabricante" maxWidth="Infinity" promptText="Fabricante" GridPane.columnIndex="1" GridPane.rowIndex="1" />
-
-            <HBox spacing="8.0" GridPane.columnIndex="1" GridPane.rowIndex="2">
+            <Label styleClass="titulo-card" text="Dados da plataforma" />
+            <Label styleClass="dica" text="Selecione uma linha da tabela para editar." wrapText="true" />
+            <Label styleClass="rotulo-campo" text="Nome" />
+            <TextField fx:id="campoNome" maxWidth="Infinity" promptText="Nome da plataforma" />
+            <Label styleClass="rotulo-campo" text="Fabricante" />
+            <TextField fx:id="campoFabricante" maxWidth="Infinity" promptText="Fabricante" />
+            <HBox spacing="8.0">
+               <VBox.margin><Insets top="8.0" /></VBox.margin>
                <children>
-                  <Button mnemonicParsing="false" onAction="#aoAdicionar" styleClass="primario" text="Adicionar" />
-                  <Button mnemonicParsing="false" onAction="#aoEditar" text="Salvar alterações" />
-                  <Button mnemonicParsing="false" onAction="#aoRemover" styleClass="perigo" text="Remover" />
+                  <Button maxWidth="Infinity" mnemonicParsing="false" onAction="#aoAdicionar" styleClass="primario" text="Adicionar" HBox.hgrow="ALWAYS" />
+                  <Button maxWidth="Infinity" mnemonicParsing="false" onAction="#aoEditar" text="Salvar alterações" HBox.hgrow="ALWAYS" />
                </children>
             </HBox>
+            <Button maxWidth="Infinity" mnemonicParsing="false" onAction="#aoRemover" styleClass="perigo" text="Remover" />
          </children>
-      </GridPane>
-   </bottom>
+      </VBox>
+   </right>
 </BorderPane>

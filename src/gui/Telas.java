@@ -3,7 +3,6 @@ package gui;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
 import javafx.scene.Parent;
-import javafx.scene.control.Alert;
 
 import java.io.IOException;
 
@@ -23,6 +22,6 @@ public final class Telas {
     }
 
     public static void erro(String mensagem) {
-        new Alert(Alert.AlertType.ERROR, mensagem).showAndWait();
+        Alertas.erro(mensagem);
     }
 }

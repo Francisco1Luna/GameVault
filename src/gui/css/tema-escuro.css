@@ -1,15 +1,31 @@
+/* Tema escuro: só define as cores. O visual (formas, espaçamentos) fica no base.css. */
 .root {
     -fx-base: #2b2d31;
     -fx-background: #1e1f22;
     -fx-control-inner-background: #2b2d31;
     -fx-accent: #8b6cff;
     -fx-focus-color: #8b6cff;
+    -fx-faint-focus-color: transparent;
     -fx-text-base-color: #e6e6e9;
 
+    -cor-fundo: #1e1f22;
+    -cor-card: #2b2d31;
     -cor-barra: #25272b;
     -cor-menu: #25272b;
     -cor-borda: #3a3d44;
-    -cor-destaque: #8b6cff;
-    -cor-texto-destaque: #ffffff;
+    -cor-linha: #33363c;
+    -cor-cabecalho-tabela: #26282c;
+    -cor-texto: #e6e6e9;
     -cor-suave: #9aa0aa;
+    -cor-hover: #34363d;
+    -cor-selecao: #3d3566;
+    -cor-destaque: #8b6cff;
+    -cor-destaque-hover: #9d83ff;
+    -cor-texto-destaque: #ffffff;
+    -cor-perigo: #ff6b5e;
+    -cor-perigo-fundo: #3d2624;
+    -cor-gradiente: #2a2440;
+    -cor-ok: #5fd38a;
+    -cor-ok-fundo: #1f3528;
+    -cor-neutra-fundo: #363940;
 }

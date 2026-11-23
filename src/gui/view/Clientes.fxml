@@ -6,66 +6,76 @@
 <?import javafx.scene.control.DatePicker?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.PasswordField?>
+<?import javafx.scene.control.ScrollPane?>
 <?import javafx.scene.control.TableColumn?>
 <?import javafx.scene.control.TableView?>
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.BorderPane?>
-<?import javafx.scene.layout.ColumnConstraints?>
-<?import javafx.scene.layout.GridPane?>
 <?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
 
-<BorderPane prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/26" xmlns:fx="http://javafx.com/fxml/1" fx:controller="gui.ClientesController">
-    <top><HBox spacing="8.0"><padding><Insets bottom="8.0" left="12.0" right="12.0" top="8.0" /></padding><children><TextField fx:id="campoPesquisa" promptText="Pesquisar por nome ou CPF" HBox.hgrow="ALWAYS" /></children></HBox></top>
+<!-- Layout: cabeçalho + pesquisa em cima, tabela no centro, formulário em card à direita -->
+<BorderPane styleClass="tela" xmlns="http://javafx.com/javafx/26" xmlns:fx="http://javafx.com/fxml/1" fx:controller="gui.ClientesController">
+    <top>
+        <HBox alignment="CENTER_LEFT" spacing="16.0">
+            <BorderPane.margin><Insets bottom="16.0" /></BorderPane.margin>
+            <children>
+                <VBox styleClass="cabecalho-tela" HBox.hgrow="ALWAYS">
+                    <children>
+                        <Label styleClass="titulo-tela" text="Clientes" />
+                        <Label styleClass="subtitulo-tela" text="Cadastro de clientes padrão e assinantes" />
+                    </children>
+                </VBox>
+                <TextField fx:id="campoPesquisa" prefWidth="320.0" promptText="Pesquisar por nome ou CPF" />
+            </children>
+        </HBox>
+    </top>
     <center>
         <TableView fx:id="tabelaClientes" BorderPane.alignment="CENTER">
+            <placeholder><Label text="Nenhum cliente encontrado" /></placeholder>
             <columnResizePolicy>
                 <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
             </columnResizePolicy>
             <columns>
-                <TableColumn fx:id="colId" maxWidth="60.0" minWidth="35.0" prefWidth="40.0" text="ID" />
-                <TableColumn fx:id="colNome" prefWidth="220.0" text="Nome" />
-                <TableColumn fx:id="colCpf" prefWidth="130.0" text="CPF" />
-                <TableColumn fx:id="colTipo" prefWidth="100.0" text="Tipo" />
+                <TableColumn fx:id="colId" maxWidth="60.0" minWidth="45.0" prefWidth="45.0" reorderable="false" text="ID" />
+                <TableColumn fx:id="colNome" minWidth="60.0" prefWidth="260.0" reorderable="false" text="Nome" />
+                <TableColumn fx:id="colCpf" maxWidth="200.0" minWidth="60.0" prefWidth="150.0" reorderable="false" text="CPF" />
+                <TableColumn fx:id="colTipo" maxWidth="170.0" minWidth="60.0" prefWidth="120.0" reorderable="false" text="Tipo" />
             </columns>
         </TableView>
     </center>
-    <bottom>
-        <GridPane hgap="10.0" vgap="8.0" BorderPane.alignment="CENTER">
-            <padding>
-                <Insets bottom="12.0" left="12.0" right="12.0" top="12.0" />
-            </padding>
-            <columnConstraints>
-                <ColumnConstraints hgrow="NEVER" minWidth="90.0" />
-                <ColumnConstraints hgrow="ALWAYS" />
-                <ColumnConstraints hgrow="NEVER" minWidth="90.0" />
-                <ColumnConstraints hgrow="ALWAYS" />
-            </columnConstraints>
-            <children>
-                <Label text="Nome" GridPane.columnIndex="0" GridPane.rowIndex="0" />
-                <TextField fx:id="campoNome" maxWidth="Infinity" promptText="Nome completo" GridPane.columnIndex="1" GridPane.rowIndex="0" />
-                <Label text="CPF" GridPane.columnIndex="2" GridPane.rowIndex="0" />
-                <TextField fx:id="campoCpf" maxWidth="Infinity" promptText="11 dígitos" GridPane.columnIndex="3" GridPane.rowIndex="0" />
-
-                <Label text="Nascimento" GridPane.columnIndex="0" GridPane.rowIndex="1" />
-                <DatePicker fx:id="campoNascimento" maxWidth="Infinity" GridPane.columnIndex="1" GridPane.rowIndex="1" />
-                <Label text="E-mail" GridPane.columnIndex="2" GridPane.rowIndex="1" />
-                <TextField fx:id="campoEmail" maxWidth="Infinity" promptText="Opcional" GridPane.columnIndex="3" GridPane.rowIndex="1" />
-
-                <Label text="Telefone" GridPane.columnIndex="0" GridPane.rowIndex="2" />
-                <TextField fx:id="campoTelefone" maxWidth="Infinity" promptText="Opcional" GridPane.columnIndex="1" GridPane.rowIndex="2" />
-                <Label text="Senha" GridPane.columnIndex="2" GridPane.rowIndex="2" />
-                <PasswordField fx:id="campoSenha" maxWidth="Infinity" promptText="Vazio = manter a senha" GridPane.columnIndex="3" GridPane.rowIndex="2" />
-
-                <CheckBox fx:id="checkAssinante" mnemonicParsing="false" text="Assinante" GridPane.columnIndex="1" GridPane.columnSpan="3" GridPane.rowIndex="3" />
-
-                <HBox spacing="8.0" GridPane.columnIndex="1" GridPane.columnSpan="3" GridPane.rowIndex="4">
+    <right>
+        <ScrollPane fitToWidth="true" hbarPolicy="NEVER" prefWidth="380.0" styleClass="painel-rolagem" BorderPane.alignment="TOP_CENTER">
+            <BorderPane.margin><Insets left="16.0" /></BorderPane.margin>
+            <content>
+                <VBox styleClass="card">
                     <children>
-                        <Button mnemonicParsing="false" onAction="#aoAdicionar" styleClass="primario" text="Adicionar" />
-                        <Button mnemonicParsing="false" onAction="#aoEditar" text="Salvar alterações" />
-                        <Button mnemonicParsing="false" onAction="#aoRemover" styleClass="perigo" text="Remover" />
+                        <Label styleClass="titulo-card" text="Dados do cliente" />
+                        <Label styleClass="dica" text="Selecione uma linha da tabela para editar." wrapText="true" />
+                        <Label styleClass="rotulo-campo" text="Nome" />
+                        <TextField fx:id="campoNome" maxWidth="Infinity" promptText="Nome completo" />
+                        <Label styleClass="rotulo-campo" text="CPF" />
+                        <TextField fx:id="campoCpf" maxWidth="Infinity" promptText="11 dígitos" />
+                        <Label styleClass="rotulo-campo" text="Nascimento" />
+                        <DatePicker fx:id="campoNascimento" maxWidth="Infinity" />
+                        <Label styleClass="rotulo-campo" text="E-mail" />
+                        <TextField fx:id="campoEmail" maxWidth="Infinity" promptText="Opcional" />
+                        <Label styleClass="rotulo-campo" text="Telefone" />
+                        <TextField fx:id="campoTelefone" maxWidth="Infinity" promptText="Opcional" />
+                        <Label styleClass="rotulo-campo" text="Senha" />
+                        <PasswordField fx:id="campoSenha" maxWidth="Infinity" promptText="Vazio = manter a senha" />
+                        <CheckBox fx:id="checkAssinante" mnemonicParsing="false" text="Assinante" />
+                        <HBox spacing="8.0">
+                            <VBox.margin><Insets top="8.0" /></VBox.margin>
+                            <children>
+                                <Button maxWidth="Infinity" mnemonicParsing="false" onAction="#aoAdicionar" styleClass="primario" text="Adicionar" HBox.hgrow="ALWAYS" />
+                                <Button maxWidth="Infinity" mnemonicParsing="false" onAction="#aoEditar" text="Salvar alterações" HBox.hgrow="ALWAYS" />
+                            </children>
+                        </HBox>
+                        <Button maxWidth="Infinity" mnemonicParsing="false" onAction="#aoRemover" styleClass="perigo" text="Remover" />
                     </children>
-                </HBox>
-            </children>
-        </GridPane>
-    </bottom>
+                </VBox>
+            </content>
+        </ScrollPane>
+    </right>
 </BorderPane>

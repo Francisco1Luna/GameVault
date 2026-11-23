@@ -1,21 +1,31 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<?import javafx.scene.layout.HBox?>
-<?import javafx.geometry.Insets?>
+
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.VBox?>
 
-<AnchorPane prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/26" xmlns:fx="http://javafx.com/fxml/1" fx:controller="gui.PrincipalController">
+<AnchorPane prefHeight="600.0" prefWidth="900.0" xmlns="http://javafx.com/javafx/26" xmlns:fx="http://javafx.com/fxml/1" fx:controller="gui.PrincipalController">
    <children>
-      <BorderPane fx:id="painelPrincipal" prefHeight="400.0" prefWidth="600.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+      <BorderPane fx:id="painelPrincipal" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+         <!-- Barra do topo: marca | usuário | data do sistema | tema | sair -->
          <top>
-            <HBox alignment="CENTER_LEFT" spacing="12.0" styleClass="barra-topo" BorderPane.alignment="CENTER">
+            <HBox alignment="CENTER_LEFT" styleClass="barra-topo" BorderPane.alignment="CENTER">
                <children>
-                  <Label fx:id="rotuloUsuario" maxWidth="Infinity" text="Usuário" HBox.hgrow="ALWAYS" />
-                  <HBox fx:id="caixaData" alignment="CENTER_LEFT" spacing="8.0">
+                  <ImageView fitHeight="34.0" pickOnBounds="true" preserveRatio="true">
+                     <image>
+                        <Image url="@/gui/img/controle.png" />
+                     </image>
+                  </ImageView>
+                  <Label styleClass="marca" text="GameVault" />
+                  <Region HBox.hgrow="ALWAYS" />
+                  <Label fx:id="rotuloUsuario" styleClass="usuario" text="Usuário" />
+                  <HBox fx:id="caixaData" alignment="CENTER_LEFT" styleClass="chip-data">
                      <children>
                         <Label fx:id="rotuloData" text="Data do sistema" />
                         <Button mnemonicParsing="false" onAction="#avancarUmDia" text="+1 dia" />
@@ -23,15 +33,17 @@
                         <Button mnemonicParsing="false" onAction="#reiniciarData" text="Data real" />
                      </children>
                   </HBox>
-                  <Button mnemonicParsing="false" onAction="#alternarTema" text="Alternar tema" />
-                  <Button mnemonicParsing="false" onAction="#sair" text="Sair" />
+                  <Button mnemonicParsing="false" onAction="#alternarTema" styleClass="botao-leve" text="Alternar tema" />
+                  <Button mnemonicParsing="false" onAction="#sair" styleClass="perigo" text="Sair" />
                </children>
             </HBox>
          </top>
+         <!-- Menu lateral: o botão da tela aberta recebe a classe CSS "ativo" -->
          <left>
-            <VBox prefWidth="150.0" styleClass="menu-lateral" BorderPane.alignment="CENTER">
+            <VBox prefWidth="210.0" styleClass="menu-lateral" BorderPane.alignment="CENTER">
                <children>
-                  <Button maxWidth="Infinity" mnemonicParsing="false" onAction="#abrirLoja" text="Loja" />
+                  <Label styleClass="rotulo-secao" text="MENU" />
+                  <Button fx:id="botaoLoja" maxWidth="Infinity" mnemonicParsing="false" onAction="#abrirLoja" text="Loja" />
                   <Button fx:id="botaoPlataformas" maxWidth="Infinity" mnemonicParsing="false" onAction="#abrirPlataformas" text="Plataformas" />
                   <Button fx:id="botaoJogos" maxWidth="Infinity" mnemonicParsing="false" onAction="#abrirJogos" text="Jogos" />
                   <Button fx:id="botaoClientes" maxWidth="Infinity" mnemonicParsing="false" onAction="#abrirClientes" text="Clientes" />

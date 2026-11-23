@@ -11,80 +11,95 @@
 <?import javafx.scene.control.TableView?>
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
 
-<TabPane prefHeight="400.0" prefWidth="600.0" tabClosingPolicy="UNAVAILABLE" xmlns="http://javafx.com/javafx/26" xmlns:fx="http://javafx.com/fxml/1" fx:controller="gui.RelatoriosController">
-    <tabs>
-        <Tab text="Mais locados">
-            <content>
-                <BorderPane>
-                    <top>
-                        <HBox alignment="CENTER_LEFT" spacing="8.0">
-                            <padding><Insets bottom="8.0" left="8.0" right="8.0" top="8.0" /></padding>
-                            <children>
-                                <Label text="De" />
-                                <DatePicker fx:id="campoInicio" prefWidth="130.0" />
-                                <Label text="até" />
-                                <DatePicker fx:id="campoFim" prefWidth="130.0" />
-                                <Button mnemonicParsing="false" onAction="#aoGerarMaisLocados" text="Gerar" />
-                                <Button mnemonicParsing="false" onAction="#aoExportarCsv" text="Exportar CSV" />
-                            </children>
-                        </HBox>
-                    </top>
-                    <center>
-                        <TableView fx:id="tabelaMaisLocados">
-                            <columnResizePolicy><TableView fx:constant="CONSTRAINED_RESIZE_POLICY" /></columnResizePolicy>
-                            <columns>
-                                <TableColumn fx:id="colPosicao" prefWidth="50.0" text="#" />
-                                <TableColumn fx:id="colJogoLocado" prefWidth="250.0" text="Jogo" />
-                                <TableColumn fx:id="colGeneroLocado" prefWidth="150.0" text="Gênero" />
-                                <TableColumn fx:id="colQuantidade" prefWidth="100.0" text="Locações" />
-                            </columns>
-                        </TableView>
-                    </center>
-                </BorderPane>
-            </content>
-        </Tab>
-        <Tab text="Receita mensal">
-            <content>
-                <BorderPane>
-                    <center>
-                        <TableView fx:id="tabelaReceita">
-                            <columnResizePolicy><TableView fx:constant="CONSTRAINED_RESIZE_POLICY" /></columnResizePolicy>
-                            <columns>
-                                <TableColumn fx:id="colMes" prefWidth="100.0" text="Mês" />
-                                <TableColumn fx:id="colReceitaLocacoes" prefWidth="150.0" text="Locações" />
-                                <TableColumn fx:id="colReceitaVendas" prefWidth="150.0" text="Vendas" />
-                                <TableColumn fx:id="colReceitaTotal" prefWidth="150.0" text="Total" />
-                            </columns>
-                        </TableView>
-                    </center>
-                </BorderPane>
-            </content>
-        </Tab>
-        <Tab text="Importados por gênero">
-            <content>
-                <BorderPane>
-                    <top>
-                        <HBox alignment="CENTER_LEFT" spacing="8.0">
-                            <padding><Insets bottom="8.0" left="8.0" right="8.0" top="8.0" /></padding>
-                            <children>
-                                <Label text="Gênero" />
-                                <ComboBox fx:id="campoGenero" onAction="#aoFiltrarGenero" prefWidth="200.0" />
-                            </children>
-                        </HBox>
-                    </top>
-                    <center>
-                        <TableView fx:id="tabelaImportados">
-                            <columnResizePolicy><TableView fx:constant="CONSTRAINED_RESIZE_POLICY" /></columnResizePolicy>
-                            <columns>
-                                <TableColumn fx:id="colTitulo" prefWidth="250.0" text="Título" />
-                                <TableColumn fx:id="colGenero" prefWidth="150.0" text="Gênero" />
-                                <TableColumn fx:id="colDesenvolvedora" prefWidth="180.0" text="Desenvolvedora" />
-                            </columns>
-                        </TableView>
-                    </center>
-                </BorderPane>
-            </content>
-        </Tab>
-    </tabs>
-</TabPane>
+<!-- Cabeçalho da tela + abas de relatórios, com os filtros acima de cada tabela -->
+<VBox spacing="12.0" styleClass="tela" xmlns="http://javafx.com/javafx/26" xmlns:fx="http://javafx.com/fxml/1" fx:controller="gui.RelatoriosController">
+    <children>
+        <VBox styleClass="cabecalho-tela">
+            <children>
+                <Label styleClass="titulo-tela" text="Relatórios" />
+                <Label styleClass="subtitulo-tela" text="Jogos mais locados, receita por mês e catálogo importado" />
+            </children>
+        </VBox>
+        <TabPane tabClosingPolicy="UNAVAILABLE" VBox.vgrow="ALWAYS">
+            <tabs>
+                <Tab text="Mais locados">
+                    <content>
+                        <BorderPane>
+                            <top>
+                                <HBox alignment="CENTER_LEFT" spacing="8.0">
+                                    <BorderPane.margin><Insets bottom="12.0" /></BorderPane.margin>
+                                    <children>
+                                        <Label styleClass="rotulo-campo" text="De" />
+                                        <DatePicker fx:id="campoInicio" prefWidth="140.0" />
+                                        <Label styleClass="rotulo-campo" text="até" />
+                                        <DatePicker fx:id="campoFim" prefWidth="140.0" />
+                                        <Button mnemonicParsing="false" onAction="#aoGerarMaisLocados" styleClass="primario" text="Gerar" />
+                                        <Button mnemonicParsing="false" onAction="#aoExportarCsv" text="Exportar CSV" />
+                                    </children>
+                                </HBox>
+                            </top>
+                            <center>
+                                <TableView fx:id="tabelaMaisLocados">
+                                    <placeholder><Label text="Escolha o período e clique em Gerar" /></placeholder>
+                                    <columnResizePolicy><TableView fx:constant="CONSTRAINED_RESIZE_POLICY" /></columnResizePolicy>
+                                    <columns>
+                                        <TableColumn fx:id="colPosicao" maxWidth="60.0" minWidth="45.0" prefWidth="45.0" reorderable="false" sortable="false" text="#" />
+                                        <TableColumn fx:id="colJogoLocado" minWidth="60.0" prefWidth="300.0" reorderable="false" sortable="false" text="Jogo" />
+                                        <TableColumn fx:id="colGeneroLocado" minWidth="60.0" prefWidth="180.0" reorderable="false" sortable="false" text="Gênero" />
+                                        <TableColumn fx:id="colQuantidade" maxWidth="140.0" minWidth="60.0" prefWidth="110.0" reorderable="false" sortable="false" text="Locações" />
+                                    </columns>
+                                </TableView>
+                            </center>
+                        </BorderPane>
+                    </content>
+                </Tab>
+                <Tab text="Receita mensal">
+                    <content>
+                        <BorderPane>
+                            <center>
+                                <TableView fx:id="tabelaReceita">
+                                    <placeholder><Label text="Ainda não há receita registrada" /></placeholder>
+                                    <columnResizePolicy><TableView fx:constant="CONSTRAINED_RESIZE_POLICY" /></columnResizePolicy>
+                                    <columns>
+                                        <TableColumn fx:id="colMes" minWidth="60.0" prefWidth="140.0" reorderable="false" text="Mês" />
+                                        <TableColumn fx:id="colReceitaLocacoes" minWidth="60.0" prefWidth="160.0" reorderable="false" text="Locações" />
+                                        <TableColumn fx:id="colReceitaVendas" minWidth="60.0" prefWidth="160.0" reorderable="false" text="Vendas" />
+                                        <TableColumn fx:id="colReceitaTotal" minWidth="60.0" prefWidth="160.0" reorderable="false" text="Total" />
+                                    </columns>
+                                </TableView>
+                            </center>
+                        </BorderPane>
+                    </content>
+                </Tab>
+                <Tab text="Importados por gênero">
+                    <content>
+                        <BorderPane>
+                            <top>
+                                <HBox alignment="CENTER_LEFT" spacing="8.0">
+                                    <BorderPane.margin><Insets bottom="12.0" /></BorderPane.margin>
+                                    <children>
+                                        <Label styleClass="rotulo-campo" text="Gênero" />
+                                        <ComboBox fx:id="campoGenero" onAction="#aoFiltrarGenero" prefWidth="220.0" />
+                                    </children>
+                                </HBox>
+                            </top>
+                            <center>
+                                <TableView fx:id="tabelaImportados">
+                                    <placeholder><Label text="Nenhum jogo importado para este gênero" /></placeholder>
+                                    <columnResizePolicy><TableView fx:constant="CONSTRAINED_RESIZE_POLICY" /></columnResizePolicy>
+                                    <columns>
+                                        <TableColumn fx:id="colTitulo" minWidth="60.0" prefWidth="300.0" reorderable="false" text="Título" />
+                                        <TableColumn fx:id="colGenero" minWidth="60.0" prefWidth="160.0" reorderable="false" text="Gênero" />
+                                        <TableColumn fx:id="colDesenvolvedora" minWidth="60.0" prefWidth="220.0" reorderable="false" text="Desenvolvedora" />
+                                    </columns>
+                                </TableView>
+                            </center>
+                        </BorderPane>
+                    </content>
+                </Tab>
+            </tabs>
+        </TabPane>
+    </children>
+</VBox>

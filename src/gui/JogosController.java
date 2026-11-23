@@ -36,6 +36,7 @@ public class JogosController {
     @FXML private TableColumn<Jogo, Double> colPreco;
     @FXML private TableColumn<Jogo, Double> colLocacao;
     @FXML private TableColumn<Jogo, String> colPlataformas;
+    @FXML private TableColumn<Jogo, Number> colEstoque;
     @FXML private TextField campoTitulo;
     @FXML private TextField campoGenero;
     @FXML private TextField campoPreco;
@@ -47,6 +48,7 @@ public class JogosController {
     @FXML private TextField campoDesenvolvedora;
     @FXML private TextField campoPublicadora;
     @FXML private TextField campoLink;
+    @FXML private Button botaoImportar;
     private String urlThumbnail;
     private boolean importando; // só é mexido na thread da interface
 
@@ -62,9 +64,27 @@ public class JogosController {
         colGenero.setCellValueFactory(new PropertyValueFactory<>("genero"));
         colPreco.setCellValueFactory(new PropertyValueFactory<>("preco"));
         colLocacao.setCellValueFactory(new PropertyValueFactory<>("precoLocacaoDiaria"));
+        // mostra os valores como dinheiro (R$ 199,90) em vez de 199.9; o valor guardado continua Double
+        colPreco.setCellFactory(coluna -> new CelulaDinheiro());
+        colLocacao.setCellFactory(coluna -> new CelulaDinheiro());
         colPlataformas.setCellValueFactory(c -> new javafx.beans.property.SimpleStringProperty(
                 c.getValue().getPlataformas() == null ? "" : c.getValue().getPlataformas().stream()
                         .map(Plataforma::getNome).collect(java.util.stream.Collectors.joining(", "))));
+
+        // estoque total do jogo (soma de todas as plataformas), sem precisar abrir "Ajustar estoque"
+        colEstoque.setCellValueFactory(c -> new javafx.beans.property.SimpleLongProperty(
+                estoqueTotal(c.getValue())));
+
+        // Observer: sempre que o estoque mudar (venda, locação, devolução, ajuste), redesenha a tabela.
+        // Platform.runLater porque a mudança pode vir de outra thread (ex.: importação da API).
+        // Quando esta tela sai da janela (troca de menu), o ouvinte é removido para não acumular.
+        Runnable ouvinteEstoque = () -> javafx.application.Platform.runLater(tabelaJogos::refresh);
+        estoqueService.adicionarOuvinte(ouvinteEstoque);
+        tabelaJogos.sceneProperty().addListener((obs, antiga, nova) -> {
+            if (nova == null) {
+                estoqueService.removerOuvinte(ouvinteEstoque);
+            }
+        });
 
         comboClassificacao.getItems().setAll(ClassificacaoIndicativa.values());
         comboClassificacao.setPromptText("Selecione"); // sem valor padrão: a classificação é obrigatória
@@ -141,8 +161,8 @@ public class JogosController {
             limparCampos();
             atualizar();
             if (plataformas.isEmpty()) {
-                new Alert(Alert.AlertType.INFORMATION, "Jogo adicionado sem plataforma. Ele aparece na Loja, mas só pode ser "
-                        + "comprado ou alugado depois de ter plataforma e estoque.").showAndWait();
+                Alertas.informar("Jogo adicionado sem plataforma. Ele aparece na Loja, mas só pode ser "
+                        + "comprado ou alugado depois de ter plataforma e estoque.");
             }
         } catch (IllegalArgumentException | IllegalStateException e) {
             Alertas.avisar(e.getMessage());
@@ -153,17 +173,16 @@ public class JogosController {
     private void aoRemover() {
         Jogo selecionado = tabelaJogos.getSelectionModel().getSelectedItem();
         if (selecionado == null) {
-            new Alert(Alert.AlertType.WARNING, "Selecione um jogo para remover.").showAndWait();
+            Alertas.avisar("Selecione um jogo para remover.");
             return;
         }
-        Alert confirmacao = new Alert(Alert.AlertType.CONFIRMATION, "Remover o jogo \"" + selecionado.getTitulo() + "\"?");
-        if (confirmacao.showAndWait().orElse(ButtonType.CANCEL) != ButtonType.OK) {
+        if (!Alertas.confirmar("Remover jogo", "Remover o jogo \"" + selecionado.getTitulo() + "\"?")) {
             return;
         }
         try {
             boolean removido = jogoService.remover(selecionado.getId());
             if (!removido) {
-                new Alert(Alert.AlertType.WARNING, "O jogo nao foi encontrado.").showAndWait();
+                Alertas.avisar("O jogo não foi encontrado.");
             }
             atualizar();
         } catch (IllegalArgumentException | IllegalStateException e) {
@@ -175,7 +194,7 @@ public class JogosController {
     private void aoEditar() {
         Jogo selecionado = tabelaJogos.getSelectionModel().getSelectedItem();
         if (selecionado == null) {
-            new Alert(Alert.AlertType.WARNING, "Selecione um jogo para editar.").showAndWait();
+            Alertas.avisar("Selecione um jogo para editar.");
             return;
         }
         try {
@@ -191,9 +210,7 @@ public class JogosController {
             // 2. o service valida tudo (título, gênero, classificação, preço e locação maiores que zero)
 
             // 3. CONFIRMAR
-            Alert confirmacao = new Alert(Alert.AlertType.CONFIRMATION,
-                    "Salvar as alterações em \"" + selecionado.getTitulo() + "\"?");
-            if (confirmacao.showAndWait().orElse(ButtonType.CANCEL) != ButtonType.OK) {
+            if (!Alertas.confirmar("Salvar alterações", "Salvar as alterações em \"" + selecionado.getTitulo() + "\"?")) {
                 return;
             }
 
@@ -221,13 +238,13 @@ public class JogosController {
     private void aoAjustarEstoque() {
         Jogo selecionado = tabelaJogos.getSelectionModel().getSelectedItem();
         if (selecionado == null) {
-            new Alert(Alert.AlertType.WARNING, "Selecione um jogo para ajustar o estoque.").showAndWait();
+            Alertas.avisar("Selecione um jogo para ajustar o estoque.");
             return;
         }
         List<Plataforma> plataformas = selecionado.getPlataformas();
         if (plataformas == null || plataformas.isEmpty()) {
-            new Alert(Alert.AlertType.WARNING, "Este jogo não tem plataforma. Marque as plataformas e "
-                    + "clique em Salvar alterações primeiro.").showAndWait();
+            Alertas.avisar("Este jogo não tem plataforma. Marque as plataformas e "
+                    + "clique em Salvar alterações primeiro.");
             return;
         }
         try {
@@ -235,7 +252,7 @@ public class JogosController {
             Dialog<ButtonType> dialogo = new Dialog<>();
             dialogo.setTitle("Ajustar estoque");
             dialogo.setHeaderText("Estoque de \"" + selecionado.getTitulo() + "\" por plataforma");
-            dialogo.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
+            dialogo.getDialogPane().getButtonTypes().addAll(Alertas.CONFIRMAR, Alertas.CANCELAR);
 
             GridPane grade = new GridPane();
             grade.setHgap(10);
@@ -252,7 +269,8 @@ public class JogosController {
                 linha++;
             }
             dialogo.getDialogPane().setContent(grade);
-            if (dialogo.showAndWait().orElse(ButtonType.CANCEL) != ButtonType.OK) {
+            Alertas.aplicarTema(dialogo); // mesmo tema (claro/escuro) da janela
+            if (dialogo.showAndWait().orElse(Alertas.CANCELAR) != Alertas.CONFIRMAR) {
                 return;
             }
 
@@ -282,6 +300,15 @@ public class JogosController {
                 .collect(java.util.stream.Collectors.toList()));
     }
 
+    /** Estoque total para a célula da tabela: nunca lança (jogo recém-removido vira 0). */
+    private long estoqueTotal(Jogo jogo) {
+        try {
+            return estoqueService.quantidadeTotal(jogo);
+        } catch (RuntimeException e) {
+            return 0;
+        }
+    }
+
     private void limparCampos() {
         campoTitulo.clear();
         campoGenero.clear();
@@ -298,7 +325,8 @@ public class JogosController {
 
     /** Número para o campo de texto: sempre em notação simples (nunca 1.0E7), com duas casas. */
     private static String textoNumero(Double valor) {
-        return valor == null ? "" : String.format(java.util.Locale.ROOT, "%.2f", valor);
+        // com vírgula, igual ao exemplo do campo ("199,90"); lerValor aceita vírgula ou ponto
+        return valor == null ? "" : String.format(java.util.Locale.forLanguageTag("pt-BR"), "%.2f", valor);
     }
 
     /**
@@ -378,12 +406,16 @@ public class JogosController {
             return; // já tem uma importação em andamento
         }
         importando = true;
+        // a importação demora alguns segundos: mostra no botão que está trabalhando
+        botaoImportar.setDisable(true);
+        botaoImportar.setText("Importando...");
         Task<Integer> importacao = new Task<>() {
             // o service faz tudo ou nada e sob um único bloqueio (não duplica plataformas)
             @Override protected Integer call() { return jogoService.importarDaApi(freeToGameService.listarJogos()); }
         };
         importacao.setOnSucceeded(evento -> {
             importando = false;
+            restaurarBotaoImportar();
             listaPlataformas.setItems(FXCollections.observableArrayList(plataformaService.listar()));
             atualizar();
             Alertas.informar(importacao.getValue() + " jogos novos foram importados da FreeToGame.\n"
@@ -392,11 +424,17 @@ public class JogosController {
         });
         importacao.setOnFailed(evento -> {
             importando = false;
+            restaurarBotaoImportar();
             Alertas.avisar(importacao.getException().getMessage());
         });
         Thread thread = new Thread(importacao, "importacao-freetogame");
         thread.setDaemon(true);
         thread.start();
+    }
+
+    private void restaurarBotaoImportar() {
+        botaoImportar.setDisable(false);
+        botaoImportar.setText("Importar catálogo");
     }
 
     private void preencherDadosApi(FreeToGameService.DadosJogo dados) {
@@ -413,6 +451,16 @@ public class JogosController {
             if ((nome.contains("pc") && plataformasApi.contains("pc")) || (nome.contains("web") && plataformasApi.contains("web"))) {
                 listaPlataformas.getSelectionModel().select(plataforma);
             }
+        }
+    }
+
+    /** Célula de tabela que formata um Double como moeda brasileira. */
+    private static class CelulaDinheiro extends TableCell<Jogo, Double> {
+        @Override
+        protected void updateItem(Double valor, boolean vazio) {
+            super.updateItem(valor, vazio);
+            setText(vazio ? null : valor == null ? "—"
+                    : String.format(java.util.Locale.forLanguageTag("pt-BR"), "R$ %.2f", valor));
         }
     }
 }
