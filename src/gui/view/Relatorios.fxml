@@ -37,6 +37,7 @@
                                         <DatePicker fx:id="campoFim" prefWidth="140.0" />
                                         <Button mnemonicParsing="false" onAction="#aoGerarMaisLocados" styleClass="primario" text="Gerar" />
                                         <Button mnemonicParsing="false" onAction="#aoExportarCsv" text="Exportar CSV" />
+                                        <Button mnemonicParsing="false" onAction="#aoAbrirRankingHtml" text="Abrir ranking HTML" />
                                     </children>
                                 </HBox>
                             </top>
@@ -67,6 +68,25 @@
                                         <TableColumn fx:id="colReceitaLocacoes" minWidth="60.0" prefWidth="160.0" reorderable="false" text="Locações" />
                                         <TableColumn fx:id="colReceitaVendas" minWidth="60.0" prefWidth="160.0" reorderable="false" text="Vendas" />
                                         <TableColumn fx:id="colReceitaTotal" minWidth="60.0" prefWidth="160.0" reorderable="false" text="Total" />
+                                    </columns>
+                                </TableView>
+                            </center>
+                        </BorderPane>
+                    </content>
+                </Tab>
+                <Tab text="Vendas">
+                    <content>
+                        <BorderPane>
+                            <center>
+                                <TableView fx:id="tabelaVendas">
+                                    <placeholder><Label text="Ainda não há vendas registradas" /></placeholder>
+                                    <columnResizePolicy><TableView fx:constant="CONSTRAINED_RESIZE_POLICY" /></columnResizePolicy>
+                                    <columns>
+                                        <TableColumn fx:id="colVendaId" maxWidth="80.0" minWidth="55.0" prefWidth="70.0" reorderable="false" text="#" />
+                                        <TableColumn fx:id="colVendaData" minWidth="90.0" prefWidth="120.0" reorderable="false" text="Data" />
+                                        <TableColumn fx:id="colVendaCliente" minWidth="120.0" prefWidth="190.0" reorderable="false" text="Cliente" />
+                                        <TableColumn fx:id="colVendaItens" minWidth="180.0" prefWidth="360.0" reorderable="false" text="Itens vendidos" />
+                                        <TableColumn fx:id="colVendaTotal" minWidth="100.0" prefWidth="140.0" reorderable="false" text="Total" />
                                     </columns>
                                 </TableView>
                             </center>

@@ -135,6 +135,44 @@ public class RelatorioMaisLocadosService {
     }
   }
 
+  /** Gera uma página visual do ranking mensal, usando thumbnails da API quando disponíveis. */
+  public void exportarHtmlRankingMensal(LocalDate inicio, LocalDate fim, Path caminhoArquivo)
+      throws IOException {
+    if (caminhoArquivo == null) {
+      throw new IllegalArgumentException("O caminho do arquivo é obrigatório.");
+    }
+    List<Map.Entry<Jogo, Long>> ranking = jogosMaisLocadosPorPeriodo(inicio, fim);
+    StringBuilder html = new StringBuilder("<!doctype html><html lang=\"pt-BR\"><head><meta charset=\"UTF-8\">");
+    html.append("<meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"><title>GameVault · Ranking mensal</title>")
+        .append("<style>*{box-sizing:border-box}body{margin:0;min-height:100vh;font-family:Arial,sans-serif;color:#f8f7ff;background:radial-gradient(circle at 80% 0,#54208a,#10091d 70%)}main{max-width:1100px;margin:auto;padding:48px 24px 64px}.brand{color:#ff45c7;font-weight:700;letter-spacing:.08em;text-transform:uppercase}h1{font-size:clamp(2rem,5vw,4rem);margin:12px 0 8px}.subtitle{color:#c9bfdf;margin:0 0 34px}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:18px}.card{position:relative;overflow:hidden;border:1px solid #7141aa;border-radius:18px;background:rgba(35,18,61,.86);box-shadow:0 14px 34px #0005}.cover{width:100%;height:150px;object-fit:cover;background:linear-gradient(135deg,#6530a7,#f02fbd)}.body{padding:18px}.rank{position:absolute;top:12px;left:12px;width:38px;height:38px;border-radius:50%;display:grid;place-items:center;background:#7139ef;font-weight:700}h2{font-size:1.15rem;margin:0 0 8px}.meta{color:#c9bfdf;font-size:.9rem}.count{color:#ff65d2;font-size:1.4rem;font-weight:700;margin-top:16px}.empty{padding:32px;border:1px dashed #7141aa;border-radius:18px;color:#c9bfdf;text-align:center}footer{margin-top:36px;color:#9688b2;font-size:.82rem}</style></head><body><main>")
+        .append("<div class=\"brand\">GameVault</div><h1>Ranking do mês</h1><p class=\"subtitle\">Jogos mais locados de ")
+        .append(escapeHtml(inicio.toString())).append(" a ").append(escapeHtml(fim.toString())).append("</p>");
+    if (ranking.isEmpty()) {
+      html.append("<div class=\"empty\">Ainda não há locações no período selecionado.</div>");
+    } else {
+      html.append("<section class=\"grid\" aria-label=\"Jogos mais locados\">");
+      int posicao = 1;
+      for (Map.Entry<Jogo, Long> entrada : ranking) {
+        Jogo jogo = entrada.getKey();
+        html.append("<article class=\"card\"><div class=\"rank\">").append(posicao++).append("</div>");
+        if (jogo.getUrlThumbnail() != null && !jogo.getUrlThumbnail().isBlank()) {
+          html.append("<img class=\"cover\" loading=\"lazy\" src=\"").append(escapeHtml(jogo.getUrlThumbnail()))
+              .append("\" alt=\"Capa de ").append(escapeHtml(jogo.getTitulo())).append("\">");
+        } else {
+          html.append("<div class=\"cover\" role=\"img\" aria-label=\"Capa indisponível\"></div>");
+        }
+        html.append("<div class=\"body\"><h2>").append(escapeHtml(jogo.getTitulo())).append("</h2><div class=\"meta\">")
+            .append(escapeHtml(jogo.getGenero())).append("</div><div class=\"count\">").append(entrada.getValue())
+            .append(entrada.getValue() == 1 ? " locação" : " locações").append("</div></div></article>");
+      }
+      html.append("</section>");
+    }
+    html.append("<footer>Gerado pelo GameVault</footer></main></body></html>");
+    Path pai = caminhoArquivo.toAbsolutePath().getParent();
+    if (pai != null) Files.createDirectories(pai);
+    Files.writeString(caminhoArquivo, html.toString(), StandardCharsets.UTF_8);
+  }
+
   private static void validarPeriodo(LocalDate inicio, LocalDate fim) {
     if (inicio == null || fim == null) {
       throw new IllegalArgumentException("As datas de início e fim do período são obrigatórias.");
@@ -153,6 +191,12 @@ public class RelatorioMaisLocadosService {
       return "\"" + seguro.replace("\"", "\"\"") + "\"";
     }
     return seguro;
+  }
+
+  private static String escapeHtml(String valor) {
+    if (valor == null) return "";
+    return valor.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
+        .replace("\"", "&quot;").replace("'", "&#39;");
   }
 
   /** Evita que textos importados sejam executados como fórmulas ao abrir o CSV em planilhas. */
